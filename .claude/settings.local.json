@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-expo-app@latest . --template blank-typescript --yes)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npm ls:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(cat:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx eslint:*)",
+      "WebSearch",
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)",
+      "Bash(dir:*)"
+    ]
+  }
+}

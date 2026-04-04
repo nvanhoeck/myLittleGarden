@@ -1,0 +1,239 @@
+{
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "add": "Toevoegen",
+    "back": "Terug",
+    "next": "Volgende",
+    "confirm": "Bevestigen",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Gelukt",
+    "close": "Sluiten",
+    "ok": "OK"
+  },
+  "units": {
+    "meters": "meter",
+    "centimeters": "centimeter",
+    "metersAbbr": "m",
+    "centimetersAbbr": "cm",
+    "squareMeters": "vierkante meter",
+    "squareMetersAbbr": "m2",
+    "days": "dagen",
+    "weeks": "weken"
+  },
+  "screens": {
+    "splash": {
+      "title": "My Little Garden"
+    },
+    "environmentSetup": {
+      "title": "Stel je tuin in",
+      "subtitle": "Dit helpt ons je tuin te optimaliseren",
+      "placeholder": "Hier komt de configuratie van je tuin."
+    },
+    "home": {
+      "title": "Mijn Tuintje",
+      "emptyState": "Je tuin is leeg. Voeg componenten toe om te beginnen."
+    },
+    "settings": {
+      "title": "Instellingen",
+      "placeholder": "Instellingen komen binnenkort.",
+      "exportJson": "Exporteer naar JSON"
+    }
+  },
+  "environmentSetup": {
+    "title": "Stel je tuin in",
+    "next": "Volgende",
+    "complete": "Voltooien",
+    "step1": {
+      "title": "Vorstperiode",
+      "subtitle": "Dit helpt bij het bepalen van zaai- en planttijden",
+      "springFrost": "Laatste lentevorst",
+      "fallFrost": "Eerste herfstvorst",
+      "selectDate": "Selecteer een datum"
+    },
+    "errors": {
+      "invalidDates": "Ongeldige datums",
+      "springBeforeFall": "Laatste lentevorst moet voor eerste herfstvorst zijn",
+      "invalidDimensions": "Ongeldige afmetingen"
+    },
+    "validation": {
+      "selectBothDates": "Selecteer beide vorstdata",
+      "enterDimensions": "Voer geldige afmetingen in"
+    }
+  },
+  "compass": {
+    "north": "Noord",
+    "south": "Zuid",
+    "east": "Oost",
+    "west": "West",
+    "selected": "Geselecteerd"
+  },
+  "garden": {
+    "title": "Mijn Tuintje",
+    "size": "Tuingrootte",
+    "sunDirection": "Zonrichting",
+    "frostDates": "Vorstdata",
+    "area": "Oppervlakte",
+    "growingSeason": "Groeiseizoen"
+  },
+  "plants": {
+    "title": "Planten",
+    "spacing": "Afstand",
+    "companions": "Goede buren",
+    "combatives": "Slechte buren",
+    "categories": {
+      "vruchtgroenten": "Vruchtgroenten",
+      "bladgroenten": "Bladgroenten",
+      "wortelgroenten": "Wortelgroenten",
+      "koolgewassen": "Koolgewassen",
+      "peulvruchten": "Peulvruchten",
+      "kruiden": "Kruiden"
+    },
+    "benefits": {
+      "detersPests": "Weert ongedierte",
+      "attractsPollinators": "Trekt bestuivers aan",
+      "growthBoost": "Bevordert groei",
+      "improvesFlavor": "Verbetert smaak",
+      "fixesNitrogen": "Fixeert stikstof"
+    },
+    "harms": {
+      "inhibitsGrowth": "Remt groei",
+      "attractsPests": "Trekt ongedierte aan",
+      "depletesNutrients": "Onttrekt voedingsstoffen",
+      "diseaseRisk": "Verhoogt ziekterisico"
+    },
+    "sun": {
+      "full": "Volle zon",
+      "partial": "Halfschaduw",
+      "shade": "Schaduw"
+    },
+    "water": {
+      "low": "Weinig water",
+      "moderate": "Matig water",
+      "high": "Veel water"
+    },
+    "frost": {
+      "tender": "Vorstgevoelig",
+      "semi-hardy": "Licht vorstbestendig",
+      "hardy": "Vorstbestendig"
+    }
+  },
+  "components": {
+    "gardenBox": "Kweekbak",
+    "pot": "Pot",
+    "rectangularTower": "Rechthoekige toren",
+    "circularTower": "Ronde toren"
+  },
+  "componentCreation": {
+    "addComponent": "Component toevoegen",
+    "editComponent": "Component bewerken",
+    "selectType": "Kies type",
+    "selectTypeDescription": "Selecteer het type tuincomponent dat je wilt toevoegen.",
+    "details": "Details",
+    "gardenBoxDescription": "Rechthoekige kweekbak voor groenten en kruiden",
+    "potDescription": "Ronde pot voor individuele planten",
+    "rectangularTowerDescription": "Verticale toren met meerdere lagen",
+    "circularTowerDescription": "Ronde verticale toren met lagen",
+    "name": "Naam",
+    "namePlaceholder": "Bijv. Moestuin achtertuin",
+    "sunDirection": "Zonrichting",
+    "width": "Breedte",
+    "length": "Lengte",
+    "diameter": "Diameter",
+    "borderWidth": "Randbreedte",
+    "numberOfLayers": "Aantal lagen",
+    "errors": {
+      "nameRequired": "Naam is verplicht",
+      "invalidDimensions": "Ongeldige afmetingen",
+      "invalidLayers": "Aantal lagen moet tussen 1 en 10 zijn"
+    }
+  },
+  "componentInventory": {
+    "title": "Componenten",
+    "empty": "Geen componenten. Druk op + om er een toe te voegen.",
+    "layers": "lagen",
+    "tapToExpand": "Tik om uit te vouwen",
+    "tapToCollapse": "Tik om in te vouwen"
+  },
+  "gardenCanvas": {
+    "scaleIndicator": "Schaal",
+    "panHint": "Sleep om te navigeren"
+  },
+  "canvas": {
+    "placementMode": "Plaatsen: {{name}}",
+    "tapToPlace": "Tik op het canvas om te plaatsen"
+  },
+  "plantSelection": {
+    "title": "Plant kiezen",
+    "searchPlaceholder": "Zoek planten...",
+    "spacing": "Afstand",
+    "addToComponent": "Voeg {{count}} plant(en) toe"
+  },
+  "componentDetail": {
+    "notFound": "Component niet gevonden",
+    "noPlants": "Tik op + om planten toe te voegen",
+    "plants": "Planten",
+    "addPlant": "Plant toevoegen",
+    "emptyPlantsMessage": "Nog geen planten geplaatst. Voeg planten toe om je component te vullen.",
+    "unknownPlant": "Onbekende plant",
+    "outerSize": "Buitenmaat",
+    "innerSize": "Binnenmaat",
+    "sunDirection": "Zon",
+    "layers": "Lagen",
+    "layer": "Laag",
+    "layerOverview": "Laag overzicht",
+    "emptyLayer": "Geen planten op deze laag",
+    "topToBottom": "Boven naar onder",
+    "selectLayer": "Selecteer een laag"
+  },
+  "contextMenu": {
+    "viewDetails": "Bekijk details",
+    "viewDetailsDescription": "Bekijk en beheer planten in dit component",
+    "edit": "Bewerken",
+    "editDescription": "Wijzig naam, afmetingen of zonrichting",
+    "delete": "Verwijderen",
+    "deleteDescription": "Verwijder dit component permanent",
+    "deleteTitle": "Component verwijderen?",
+    "deleteMessage": "Weet je zeker dat je '{{name}}' wilt verwijderen?",
+    "returnToInventory": "Terug naar inventaris",
+    "returnToInventoryDescription": "Verplaats component terug naar inventaris"
+  },
+  "accessibility": {
+    "stepProgress": "Stap {{current}} van {{total}}",
+    "stepCompleted": "Stap {{step}} voltooid",
+    "currentStep": "Huidige stap {{step}}",
+    "compassSelector": "Selecteer zonrichting",
+    "dateInput": "Datum invoer",
+    "dimensionInput": "Afmeting invoer",
+    "gardenPreview": "Tuinvoorbeeld",
+    "componentSelected": "Component geselecteerd",
+    "componentNotSelected": "Component niet geselecteerd",
+    "tapToSelect": "Tik om te selecteren",
+    "longPressForOptions": "Houd ingedrukt voor opties"
+  },
+  "plantDetails": {
+    "notFound": "Plant niet gevonden",
+    "description": "Beschrijving",
+    "quickInfo": "Snelle Info",
+    "spacing": "Afstand",
+    "depth": "Diepte",
+    "sun": "Zon",
+    "water": "Water",
+    "frost": "Vorst",
+    "germination": "Kieming",
+    "harvest": "Tot oogst",
+    "growingCalendar": "Groei Kalender",
+    "noFrostDatesConfigured": "Stel vorstdata in om de groei kalender te zien.",
+    "noCalendarData": "Geen kalendergegevens beschikbaar voor deze plant.",
+    "startInside": "Start binnen",
+    "transplant": "Verplanten",
+    "sowOutside": "Zaai buiten",
+    "companionPlants": "Goede Buren",
+    "combativePlants": "Slechte Buren",
+    "noCompanions": "Geen bekende goede buren.",
+    "noCombatives": "Geen bekende slechte buren."
+  }
+}

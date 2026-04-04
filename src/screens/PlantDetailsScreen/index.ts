@@ -1,0 +1,1 @@
+export { PlantDetailsScreen } from './PlantDetailsScreen';

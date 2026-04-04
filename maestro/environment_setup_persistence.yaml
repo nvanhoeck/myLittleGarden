@@ -1,0 +1,113 @@
+appId: com.mylittlegarden.app
+name: Environment Setup - Persistence Test
+---
+# Test that completed environment setup persists across app restarts
+# Validates Zustand persistence and proper navigation on subsequent launches
+
+# Part 1: Complete the environment setup with clearState
+- launchApp:
+    clearState: true
+
+# Wait for environment setup to appear (first-time user flow)
+- extendedWaitUntil:
+    visible:
+      id: "environment-setup-screen"
+    timeout: 5000
+
+- assertVisible:
+    id: "date-card-spring"
+
+# Complete Step 1: Frost Dates
+
+- tapOn:
+    id: "date-card-spring"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "date-card-fall"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "button-next"
+
+- waitForAnimationToEnd
+
+# Complete Step 2: Garden Dimensions
+- assertVisible:
+    id: "dimension-input-width"
+
+- tapOn:
+    id: "dimension-input-width"
+- inputText: "7"
+- hideKeyboard
+
+- tapOn:
+    id: "dimension-input-height"
+- inputText: "9"
+- hideKeyboard
+
+- tapOn:
+    id: "button-complete"
+    label: "Complete environment setup"
+
+- waitForAnimationToEnd
+
+# Verify we reached home screen
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+
+- assertVisible:
+    id: "home-screen"
+
+# Part 2: Stop and relaunch app WITHOUT clearState
+- stopApp
+
+# Wait a moment before relaunching
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 1000
+    optional: true
+
+# Relaunch app with preserved state
+- launchApp:
+    clearState: false
+
+# Verify splash screen still appears
+- assertVisible:
+    id: "splash-screen"
+    optional: true
+
+# Critical assertion: Should navigate DIRECTLY to home screen
+# Should NOT show environment setup screen
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+
+- assertVisible:
+    id: "home-screen"
+
+# Verify environment setup screen does NOT appear
+- assertNotVisible:
+    id: "environment-setup-screen"
+
+# Additional verification: Environment setup should be skipped
+# The app should remember the configured settings
+# (Future tests could verify settings screen shows persisted values)

@@ -1,0 +1,121 @@
+appId: com.mylittlegarden.app
+name: Environment Setup - Happy Path
+---
+# Test the complete environment setup flow from app launch to home screen
+# This validates the primary user journey for first-time app setup
+
+- launchApp:
+    clearState: true
+
+# Step 0: Verify splash screen appears
+- assertVisible:
+    id: "splash-screen"
+- assertVisible:
+    id: "splash-logo"
+
+# Wait for splash screen to disappear and environment setup to appear
+- extendedWaitUntil:
+    visible:
+      id: "environment-setup-screen"
+    timeout: 5000
+
+# Verify we're on step 1 (Frost Dates)
+- assertVisible:
+    id: "step-progress"
+- assertVisible:
+    id: "date-card-spring"
+- assertVisible:
+    id: "date-card-fall"
+
+# Select spring frost date
+- tapOn:
+    id: "date-card-spring"
+    label: "Open spring frost date picker"
+
+# Wait for date picker to appear (Android native picker)
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+
+# Accept default date or select a date
+# Note: Native Android date picker interaction
+- tapOn:
+    text: "OK"
+    label: "Confirm spring frost date"
+
+- waitForAnimationToEnd
+
+# Select fall frost date
+- tapOn:
+    id: "date-card-fall"
+    label: "Open fall frost date picker"
+
+# Wait for date picker to appear
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+
+- tapOn:
+    text: "OK"
+    label: "Confirm fall frost date"
+
+- waitForAnimationToEnd
+
+# Proceed to step 2
+- assertVisible:
+    id: "button-next"
+- tapOn:
+    id: "button-next"
+    label: "Navigate to garden dimensions step"
+
+- waitForAnimationToEnd
+
+# Step 2: Verify garden dimensions screen
+- assertVisible:
+    id: "dimension-input-width"
+- assertVisible:
+    id: "dimension-input-height"
+- assertVisible:
+    id: "garden-preview"
+
+# Enter width
+- tapOn:
+    id: "dimension-input-width"
+    label: "Focus width input"
+- inputText: "5"
+
+# Hide keyboard to access height input
+- hideKeyboard
+
+# Enter height
+- tapOn:
+    id: "dimension-input-height"
+    label: "Focus height input"
+- inputText: "8"
+
+# Hide keyboard to access complete button
+- hideKeyboard
+
+# Verify preview updated
+- assertVisible:
+    id: "garden-preview"
+
+# Complete setup
+- assertVisible:
+    id: "button-complete"
+- tapOn:
+    id: "button-complete"
+    label: "Complete environment setup"
+
+- waitForAnimationToEnd
+
+# Verify navigation to home screen
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+
+- assertVisible:
+    id: "home-screen"

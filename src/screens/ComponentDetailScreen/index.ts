@@ -1,0 +1,1 @@
+export { ComponentDetailScreen } from './ComponentDetailScreen';

@@ -1,0 +1,1 @@
+export { CompanionList } from './CompanionList';

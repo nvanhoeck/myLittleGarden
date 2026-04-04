@@ -1,0 +1,115 @@
+appId: com.mylittlegarden.app
+name: Environment Setup - Navigation Flow
+---
+# Test navigation between wizard steps using Back and Next buttons
+# Validates step progress indicator and navigation constraints
+
+- launchApp:
+    clearState: true
+
+# Wait for environment setup screen
+- extendedWaitUntil:
+    visible:
+      id: "environment-setup-screen"
+    timeout: 5000
+
+# Step 1: Verify initial state (Frost Dates)
+- assertVisible:
+    id: "step-progress"
+- assertVisible:
+    id: "date-card-spring"
+- assertVisible:
+    id: "date-card-fall"
+- assertVisible:
+    id: "button-next"
+
+# Verify Back button is NOT visible on step 1 (or disabled)
+# Note: If back button exists but is disabled, this assertion should be adjusted
+- assertNotVisible:
+    id: "button-back"
+    optional: true
+
+# Select frost dates to enable Next
+- tapOn:
+    id: "date-card-spring"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "date-card-fall"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+
+- waitForAnimationToEnd
+
+# Navigate to step 2
+- tapOn:
+    id: "button-next"
+    label: "Go to step 2"
+
+- waitForAnimationToEnd
+
+# Step 2: Verify dimensions screen
+- assertVisible:
+    id: "dimension-input-width"
+- assertVisible:
+    id: "dimension-input-height"
+- assertVisible:
+    id: "button-back"
+- assertVisible:
+    id: "button-complete"
+
+# Navigate back to step 1
+- tapOn:
+    id: "button-back"
+    label: "Return to step 1"
+
+- waitForAnimationToEnd
+
+# Verify we're back on frost dates
+- assertVisible:
+    id: "date-card-spring"
+- assertVisible:
+    id: "date-card-fall"
+
+# Navigate forward to step 2 again
+- tapOn:
+    id: "button-next"
+    label: "Return to step 2"
+
+- waitForAnimationToEnd
+
+# Verify we're on step 2
+- assertVisible:
+    id: "dimension-input-width"
+- assertVisible:
+    id: "garden-preview"
+
+# Complete the setup to finish test
+- tapOn:
+    id: "dimension-input-width"
+- inputText: "10"
+- hideKeyboard
+
+- tapOn:
+    id: "dimension-input-height"
+- inputText: "10"
+- hideKeyboard
+
+- tapOn:
+    id: "button-complete"
+
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000

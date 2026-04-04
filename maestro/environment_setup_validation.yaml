@@ -1,0 +1,138 @@
+appId: com.mylittlegarden.app
+name: Environment Setup - Input Validation
+---
+# Test input validation and error handling for each setup step
+# Validates that invalid inputs are rejected with appropriate feedback
+
+- launchApp:
+    clearState: true
+
+# Wait for environment setup screen
+- extendedWaitUntil:
+    visible:
+      id: "environment-setup-screen"
+    timeout: 5000
+
+# Step 1: Frost date validation
+# Note: Native Android date picker handles its own validation
+# We'll verify the dates can be set and proceed
+- assertVisible:
+    id: "date-card-spring"
+- assertVisible:
+    id: "date-card-fall"
+
+- tapOn:
+    id: "date-card-spring"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "date-card-fall"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "button-next"
+
+- waitForAnimationToEnd
+
+# Step 2: Dimension validation
+- assertVisible:
+    id: "dimension-input-width"
+- assertVisible:
+    id: "dimension-input-height"
+
+# Test Case 1: Empty width
+- tapOn:
+    id: "dimension-input-width"
+- inputText: ""
+- hideKeyboard
+
+- tapOn:
+    id: "dimension-input-height"
+- inputText: "5"
+- hideKeyboard
+
+# Attempt to complete with empty width
+- tapOn:
+    id: "button-complete"
+    label: "Attempt completion with empty width"
+
+# Should show error or prevent completion
+# Verify we're still on the dimensions step
+- assertVisible:
+    id: "dimension-input-width"
+
+# Test Case 2: Zero width
+- tapOn:
+    id: "dimension-input-width"
+- inputText: "0"
+- hideKeyboard
+
+- tapOn:
+    id: "button-complete"
+    label: "Attempt completion with zero width"
+
+# Should show error or prevent completion
+- assertVisible:
+    id: "dimension-input-width"
+
+# Test Case 3: Extremely large dimension (over 100)
+- tapOn:
+    id: "dimension-input-width"
+- inputText: "150"
+- hideKeyboard
+
+- tapOn:
+    id: "dimension-input-height"
+- inputText: "200"
+- hideKeyboard
+
+- tapOn:
+    id: "button-complete"
+    label: "Attempt completion with oversized dimensions"
+
+# Should show error or prevent completion
+- assertVisible:
+    id: "dimension-input-width"
+
+# Test Case 4: Valid dimensions
+- tapOn:
+    id: "dimension-input-width"
+- inputText: "6"
+- hideKeyboard
+
+- tapOn:
+    id: "dimension-input-height"
+- inputText: "4"
+- hideKeyboard
+
+# Preview should update
+- assertVisible:
+    id: "garden-preview"
+
+# Complete button should now work
+- tapOn:
+    id: "button-complete"
+    label: "Complete with valid dimensions"
+
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+
+# Verify successful navigation
+- assertVisible:
+    id: "home-screen"
