@@ -151,17 +151,18 @@ function DraggablePlant({
                             showSpacingRadius,
                             showPlantName
                         }: DraggablePlantProps): React.JSX.Element {
+
+
+// spacingRadiusPx is still based on spacing rules
     const spacingRadiusPx = (plantData?.spacingRadiusCm ?? 15) * scale;
-    const plantSizePx = Math.max(24, spacingRadiusPx * 0.6);
 
-    // Container size depends on whether spacing radius is shown
-    // TEST: Force spacing always OFF to test if toggle is causing the issue
-    const containerSize = plantSizePx;
-    const positionOffset = plantSizePx / 2;
-    // const containerSize = showSpacingRadius ? spacingRadiusPx * 2 : plantSizePx;
-    // const positionOffset = showSpacingRadius ? spacingRadiusPx : plantSizePx / 2;
+// plant body size should NOT be derived from spacing radius (see fix #1b below)
+    const plantBodyRadiusPx = PLANT_INNER_RADIUS_CM * scale;
+    const plantSizePx = Math.max(24, plantBodyRadiusPx * 2);
 
-
+// ✅ Stable wrapper size -> anchor doesn't change when toggling
+    const containerSize = Math.max(plantSizePx, spacingRadiusPx * 2);
+    const positionOffset = containerSize / 2;
 
     const [isDragging, setIsDragging] = useState(false);
 
@@ -367,17 +368,19 @@ function DraggablePlant({
                             width: spacingRadiusPx * 2,
                             height: spacingRadiusPx * 2,
                             borderRadius: spacingRadiusPx,
+                            top: (containerSize - spacingRadiusPx * 2) / 2,
+                            left: (containerSize - spacingRadiusPx * 2) / 2,
                             borderColor: hasInnerCollision
-                                ? '#ef4444' // Red for inner collision
+                                ? '#ef4444'
                                 : hasSpacingOverlap
-                                    ? '#f59e0b' // Orange/amber for spacing overlap warning
+                                    ? '#f59e0b'
                                     : isSelected
                                         ? '#22c55e'
                                         : '#4ade80',
                             backgroundColor: hasInnerCollision
-                                ? 'rgba(239, 68, 68, 0.15)' // Red tint for inner collision
+                                ? 'rgba(239, 68, 68, 0.15)'
                                 : hasSpacingOverlap
-                                    ? 'rgba(245, 158, 11, 0.15)' // Orange tint for spacing warning
+                                    ? 'rgba(245, 158, 11, 0.15)'
                                     : isSelected
                                         ? 'rgba(34, 197, 94, 0.2)'
                                         : 'rgba(74, 222, 128, 0.1)',
@@ -403,11 +406,22 @@ function DraggablePlant({
             </View>
 
             {/* Plant name label when selected */}
+            {/* Plant name label anchored below the plant circle (not spacing circle) */}
             {(isSelected || showPlantName) && plantData && (
-                <View style={styles.plantLabel}>
-                    <Text style={styles.plantLabelText} numberOfLines={1}>
-                        {plantData.nameNl}
-                    </Text>
+                <View
+                    style={[
+                        styles.plantLabelWrapper,
+                        {
+                            top: containerSize / 2 + plantSizePx / 2 + 4, // 4px gap under plant circle
+                        },
+                    ]}
+                    pointerEvents="none"
+                >
+                    <View style={styles.plantLabel}>
+                        <Text style={styles.plantLabelText} numberOfLines={1}>
+                            {plantData.nameNl}
+                        </Text>
+                    </View>
                 </View>
             )}
         </Animated.View>
@@ -795,12 +809,16 @@ const styles = StyleSheet.create({
         borderRadius: PLANT_IMAGE_SIZE / 2,
     },
     plantLabel: {
-        position: 'absolute',
-        bottom: -20,
         backgroundColor: 'rgba(0,0,0,0.8)',
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 4,
+    },
+    plantLabelWrapper: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        alignItems: 'center', // centers the label under the plant
     },
     plantLabelText: {
         color: '#fff',
