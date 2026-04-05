@@ -152,26 +152,27 @@ function DraggablePlant({
                             showPlantName
                         }: DraggablePlantProps): React.JSX.Element {
 
-
-// spacingRadiusPx is still based on spacing rules
-    const spacingRadiusPx = (plantData?.spacingRadiusCm ?? 15) * scale;
-
-// plant body size should NOT be derived from spacing radius (see fix #1b below)
+    // Plant body size (NOT derived from spacing radius)
     const plantBodyRadiusPx = PLANT_INNER_RADIUS_CM * scale;
     const plantSizePx = Math.max(24, plantBodyRadiusPx * 2);
 
-// ✅ Stable wrapper size -> anchor doesn't change when toggling
-    const containerSize = Math.max(plantSizePx, spacingRadiusPx * 2);
+    // ✅ Wrapper size now based only on plant size (spacing circle removed)
+    const containerSize = plantSizePx;
     const positionOffset = containerSize / 2;
 
     const [isDragging, setIsDragging] = useState(false);
+
+    // ✅ Warning tooltip toggle (click icon -> show message)
+    const [showSpacingWarningText, setShowSpacingWarningText] = useState(false);
+
+    // Required spacing distance (cm) used in the warning text
+    const requiredSpacingCm = plantData?.spacingRadiusCm ?? 15;
 
     // Refs to track current values - prevents stale closure bugs in panResponder
     const plantRef = useRef(plant);
     const scaleRef = useRef(scale);
     const containerWidthRef = useRef(containerWidth);
     const containerHeightRef = useRef(containerHeight);
-    const spacingRadiusPxRef = useRef(spacingRadiusPx);
     const plantSizePxRef = useRef(plantSizePx);
     const positionOffsetRef = useRef(positionOffset);
     const onPositionChangeRef = useRef(onPositionChange);
@@ -184,13 +185,22 @@ function DraggablePlant({
         scaleRef.current = scale;
         containerWidthRef.current = containerWidth;
         containerHeightRef.current = containerHeight;
-        spacingRadiusPxRef.current = spacingRadiusPx;
         plantSizePxRef.current = plantSizePx;
         positionOffsetRef.current = positionOffset;
         onPositionChangeRef.current = onPositionChange;
         onLongPressRef.current = onLongPress;
         onSelectRef.current = onSelect;
-    }, [plant, scale, containerWidth, containerHeight, spacingRadiusPx, plantSizePx, positionOffset, onPositionChange, onLongPress, onSelect]);
+    }, [
+        plant,
+        scale,
+        containerWidth,
+        containerHeight,
+        plantSizePx,
+        positionOffset,
+        onPositionChange,
+        onLongPress,
+        onSelect
+    ]);
 
     // Animated values for position
     const pan = useRef(
@@ -226,6 +236,10 @@ function DraggablePlant({
                     isDragEnabled.current = true;
                     onSelectRef.current();
                     setIsDragging(true);
+
+                    // Optional: hide tooltip while dragging
+                    setShowSpacingWarningText(false);
+
                     Animated.spring(scaleAnim, {
                         toValue: 1.1,
                         useNativeDriver: true,
@@ -254,18 +268,24 @@ function DraggablePlant({
                 const currentPlantSizePx = plantSizePxRef.current;
                 const currentPositionOffset = positionOffsetRef.current;
 
-                // Calculate bounded position - only constrain by plant body, not spacing circle
+                // Calculate bounded position - constrain by plant body
                 const plantBodyRadius = currentPlantSizePx / 2;
                 const newX = Math.max(
                     plantBodyRadius,
-                    Math.min(currentContainerWidth - plantBodyRadius, currentPlant.positionX * currentScale + gestureState.dx)
+                    Math.min(
+                        currentContainerWidth - plantBodyRadius,
+                        currentPlant.positionX * currentScale + gestureState.dx
+                    )
                 );
                 const newY = Math.max(
                     plantBodyRadius,
-                    Math.min(currentContainerHeight - plantBodyRadius, currentPlant.positionY * currentScale + gestureState.dy)
+                    Math.min(
+                        currentContainerHeight - plantBodyRadius,
+                        currentPlant.positionY * currentScale + gestureState.dy
+                    )
                 );
 
-                currentPosition.current = {x: newX, y: newY};
+                currentPosition.current = { x: newX, y: newY };
                 pan.setValue({
                     x: newX - currentPositionOffset,
                     y: newY - currentPositionOffset,
@@ -320,27 +340,24 @@ function DraggablePlant({
         })
     ).current;
 
-    // Update position when plant data changes or spacing toggle changes
-    // Uses useLayoutEffect to update synchronously before visual render,
-    // ensuring containerSize and pan position change together
+    // Update position when plant data changes
+    // Uses useLayoutEffect to update synchronously before visual render
     useLayoutEffect(() => {
-        // Always calculate from stored position - this is the source of truth
-        // currentPosition.current is only different during active drag
         const storedX = plant.positionX * scale;
         const storedY = plant.positionY * scale;
 
-        // Only update currentPosition if not actively dragging
-        // During drag, currentPosition is updated by the pan responder
         if (!isDragging) {
-            currentPosition.current = {x: storedX, y: storedY};
+            currentPosition.current = { x: storedX, y: storedY };
         }
 
-        // Always update pan from currentPosition (handles both drag and non-drag cases)
         pan.setValue({
             x: currentPosition.current.x - positionOffset,
             y: currentPosition.current.y - positionOffset,
         });
     }, [plant.positionX, plant.positionY, scale, positionOffset, isDragging, pan]);
+
+    const showWarningIcon =
+        showSpacingRadius && hasSpacingOverlap && !hasInnerCollision;
 
     return (
         <Animated.View
@@ -349,9 +366,9 @@ function DraggablePlant({
                 styles.plantContainer,
                 {
                     transform: [
-                        {translateX: pan.x},
-                        {translateY: pan.y},
-                        {scale: scaleAnim},
+                        { translateX: pan.x },
+                        { translateY: pan.y },
+                        { scale: scaleAnim },
                     ],
                     width: containerSize,
                     height: containerSize,
@@ -359,37 +376,6 @@ function DraggablePlant({
                 },
             ]}
         >
-            {/* Spacing radius circle - shows warning (orange) for spacing overlap, error (red) for inner collision */}
-            {showSpacingRadius && (
-                <View
-                    style={[
-                        styles.spacingCircle,
-                        {
-                            width: spacingRadiusPx * 2,
-                            height: spacingRadiusPx * 2,
-                            borderRadius: spacingRadiusPx,
-                            top: (containerSize - spacingRadiusPx * 2) / 2,
-                            left: (containerSize - spacingRadiusPx * 2) / 2,
-                            borderColor: hasInnerCollision
-                                ? '#ef4444'
-                                : hasSpacingOverlap
-                                    ? '#f59e0b'
-                                    : isSelected
-                                        ? '#22c55e'
-                                        : '#4ade80',
-                            backgroundColor: hasInnerCollision
-                                ? 'rgba(239, 68, 68, 0.15)'
-                                : hasSpacingOverlap
-                                    ? 'rgba(245, 158, 11, 0.15)'
-                                    : isSelected
-                                        ? 'rgba(34, 197, 94, 0.2)'
-                                        : 'rgba(74, 222, 128, 0.1)',
-                            borderWidth: isSelected ? 2 : 1,
-                        },
-                    ]}
-                />
-            )}
-
             {/* Plant icon - only shows red for inner collision (plant bodies overlapping) */}
             <View
                 style={[
@@ -402,17 +388,65 @@ function DraggablePlant({
                     },
                 ]}
             >
-                <PlantIconInCanvas plantData={plantData}/>
+                <PlantIconInCanvas plantData={plantData} />
             </View>
 
+            {/* ✅ Warning icon when spacing distance is not ok (toggleable like before) */}
+            {showWarningIcon && (
+                <Pressable
+                    onPress={() => setShowSpacingWarningText(v => !v)}
+                    // Capture responder so parent PanResponder doesn't hijack this tap/press
+                    onStartShouldSetResponder={() => true}
+                    style={{
+                        position: 'absolute',
+                        right: -10,
+                        top: -10,
+                        width: 22,
+                        height: 22,
+                        borderRadius: 11,
+                        backgroundColor: '#f59e0b', // orange
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 1,
+                        borderColor: '#b45309',
+                        zIndex: 200,
+                    }}
+                >
+                    <Text style={{ color: 'white', fontSize: 14, fontWeight: '800' }}>
+                        !
+                    </Text>
+
+                    {/* Tooltip bubble */}
+                    {showSpacingWarningText && (
+                        <View
+                            pointerEvents="none"
+                            style={{
+                                position: 'absolute',
+                                top: 26,
+                                right: 0,
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                paddingHorizontal: 10,
+                                paddingVertical: 6,
+                                borderRadius: 8,
+                                maxWidth: 180,
+                                zIndex: 1000
+                            }}
+                        >
+                            <Text style={{ color: 'white', fontSize: 12 }}>
+                                {`Afstand moet ${requiredSpacingCm}cm zijn.`}
+                            </Text>
+                        </View>
+                    )}
+                </Pressable>
+            )}
+
             {/* Plant name label when selected */}
-            {/* Plant name label anchored below the plant circle (not spacing circle) */}
             {(isSelected || showPlantName) && plantData && (
                 <View
                     style={[
                         styles.plantLabelWrapper,
                         {
-                            top: containerSize / 2 + plantSizePx / 2 + 4, // 4px gap under plant circle
+                            top: containerSize / 2 + plantSizePx / 2 + 4,
                         },
                     ]}
                     pointerEvents="none"
@@ -450,9 +484,9 @@ export function PlantPlacementCanvas({
         useState<PlantRelationship | null>(null);
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1.0);
-    const [showSpacingRadius, setShowSpacingRadius] = useState(true);
+    const [showSpacingRadius, setShowSpacingRadius] = useState(false);
     const [showPlantNames, setShowPlantNames] = useState(false);
-    const [showRelationships, setShowRelationships] = useState(true);
+    const [showRelationships, setShowRelationships] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
     const getPlantById = usePlantStore((state) => state.getPlantById);
 
