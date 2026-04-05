@@ -4,7 +4,7 @@
  * Shows spacing radius circles, collision warnings, and companion plant indicators.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   Animated,
   PanResponder,
   Image,
+  ScrollView,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import type { ComponentData, PlacedPlantData, PlantData } from '@/types';
@@ -54,6 +55,7 @@ interface DraggablePlantProps {
   hasInnerCollision: boolean;
   isSelected: boolean;
   onSelect: () => void;
+  showSpacingRadius: boolean;
 }
 
 /**
@@ -162,9 +164,14 @@ function DraggablePlant({
   hasInnerCollision,
   isSelected,
   onSelect,
+  showSpacingRadius,
 }: DraggablePlantProps): React.JSX.Element {
   const spacingRadiusPx = (plantData?.spacingRadiusCm ?? 15) * scale;
   const plantSizePx = Math.max(24, spacingRadiusPx * 0.6);
+
+  // Container size depends on whether spacing radius is shown
+  const containerSize = showSpacingRadius ? spacingRadiusPx * 2 : plantSizePx;
+  const positionOffset = showSpacingRadius ? spacingRadiusPx : plantSizePx / 2;
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -175,6 +182,7 @@ function DraggablePlant({
   const containerHeightRef = useRef(containerHeight);
   const spacingRadiusPxRef = useRef(spacingRadiusPx);
   const plantSizePxRef = useRef(plantSizePx);
+  const positionOffsetRef = useRef(positionOffset);
   const onPositionChangeRef = useRef(onPositionChange);
   const onLongPressRef = useRef(onLongPress);
   const onSelectRef = useRef(onSelect);
@@ -187,16 +195,17 @@ function DraggablePlant({
     containerHeightRef.current = containerHeight;
     spacingRadiusPxRef.current = spacingRadiusPx;
     plantSizePxRef.current = plantSizePx;
+    positionOffsetRef.current = positionOffset;
     onPositionChangeRef.current = onPositionChange;
     onLongPressRef.current = onLongPress;
     onSelectRef.current = onSelect;
-  }, [plant, scale, containerWidth, containerHeight, spacingRadiusPx, plantSizePx, onPositionChange, onLongPress, onSelect]);
+  }, [plant, scale, containerWidth, containerHeight, spacingRadiusPx, plantSizePx, positionOffset, onPositionChange, onLongPress, onSelect]);
 
   // Animated values for position
   const pan = useRef(
     new Animated.ValueXY({
-      x: plant.positionX * scale - spacingRadiusPx,
-      y: plant.positionY * scale - spacingRadiusPx,
+      x: plant.positionX * scale - positionOffset,
+      y: plant.positionY * scale - positionOffset,
     })
   ).current;
 
@@ -251,8 +260,8 @@ function DraggablePlant({
         const currentScale = scaleRef.current;
         const currentContainerWidth = containerWidthRef.current;
         const currentContainerHeight = containerHeightRef.current;
-        const currentSpacingRadiusPx = spacingRadiusPxRef.current;
         const currentPlantSizePx = plantSizePxRef.current;
+        const currentPositionOffset = positionOffsetRef.current;
 
         // Calculate bounded position - only constrain by plant body, not spacing circle
         const plantBodyRadius = currentPlantSizePx / 2;
@@ -267,8 +276,8 @@ function DraggablePlant({
 
         currentPosition.current = { x: newX, y: newY };
         pan.setValue({
-          x: newX - currentSpacingRadiusPx,
-          y: newY - currentSpacingRadiusPx,
+          x: newX - currentPositionOffset,
+          y: newY - currentPositionOffset,
         });
       },
       onPanResponderRelease: () => {
@@ -320,17 +329,17 @@ function DraggablePlant({
     })
   ).current;
 
-  // Update position when plant data changes externally
+  // Update position when plant data changes externally or spacing toggle changes
   React.useEffect(() => {
     currentPosition.current = {
       x: plant.positionX * scale,
       y: plant.positionY * scale,
     };
     pan.setValue({
-      x: plant.positionX * scale - spacingRadiusPx,
-      y: plant.positionY * scale - spacingRadiusPx,
+      x: plant.positionX * scale - positionOffset,
+      y: plant.positionY * scale - positionOffset,
     });
-  }, [plant.positionX, plant.positionY, scale, spacingRadiusPx, pan]);
+  }, [plant.positionX, plant.positionY, scale, positionOffset, pan]);
 
   return (
     <Animated.View
@@ -343,38 +352,40 @@ function DraggablePlant({
             { translateY: pan.y },
             { scale: scaleAnim },
           ],
-          width: spacingRadiusPx * 2,
-          height: spacingRadiusPx * 2,
+          width: containerSize,
+          height: containerSize,
           zIndex: isDragging ? 100 : isSelected ? 50 : 1,
         },
       ]}
     >
       {/* Spacing radius circle - shows warning (orange) for spacing overlap, error (red) for inner collision */}
-      <View
-        style={[
-          styles.spacingCircle,
-          {
-            width: spacingRadiusPx * 2,
-            height: spacingRadiusPx * 2,
-            borderRadius: spacingRadiusPx,
-            borderColor: hasInnerCollision
-              ? '#ef4444' // Red for inner collision
-              : hasSpacingOverlap
-                ? '#f59e0b' // Orange/amber for spacing overlap warning
-                : isSelected
-                  ? '#22c55e'
-                  : '#4ade80',
-            backgroundColor: hasInnerCollision
-              ? 'rgba(239, 68, 68, 0.15)' // Red tint for inner collision
-              : hasSpacingOverlap
-                ? 'rgba(245, 158, 11, 0.15)' // Orange tint for spacing warning
-                : isSelected
-                  ? 'rgba(34, 197, 94, 0.2)'
-                  : 'rgba(74, 222, 128, 0.1)',
-            borderWidth: isSelected ? 2 : 1,
-          },
-        ]}
-      />
+      {showSpacingRadius && (
+        <View
+          style={[
+            styles.spacingCircle,
+            {
+              width: spacingRadiusPx * 2,
+              height: spacingRadiusPx * 2,
+              borderRadius: spacingRadiusPx,
+              borderColor: hasInnerCollision
+                ? '#ef4444' // Red for inner collision
+                : hasSpacingOverlap
+                  ? '#f59e0b' // Orange/amber for spacing overlap warning
+                  : isSelected
+                    ? '#22c55e'
+                    : '#4ade80',
+              backgroundColor: hasInnerCollision
+                ? 'rgba(239, 68, 68, 0.15)' // Red tint for inner collision
+                : hasSpacingOverlap
+                  ? 'rgba(245, 158, 11, 0.15)' // Orange tint for spacing warning
+                  : isSelected
+                    ? 'rgba(34, 197, 94, 0.2)'
+                    : 'rgba(74, 222, 128, 0.1)',
+              borderWidth: isSelected ? 2 : 1,
+            },
+          ]}
+        />
+      )}
 
       {/* Plant icon - only shows red for inner collision (plant bodies overlapping) */}
       <View
@@ -406,6 +417,11 @@ function DraggablePlant({
 /**
  * PlantPlacementCanvas - main canvas for plant arrangement
  */
+// Zoom constants
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3.0;
+const ZOOM_STEP = 0.25;
+
 export function PlantPlacementCanvas({
   component,
   plants: filteredPlants,
@@ -419,6 +435,9 @@ export function PlantPlacementCanvas({
   const [selectedRelationship, setSelectedRelationship] =
     useState<PlantRelationship | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [showSpacingRadius, setShowSpacingRadius] = useState(true);
+  const scrollViewRef = useRef<ScrollView>(null);
   const getPlantById = usePlantStore((state) => state.getPlantById);
 
   const componentInnerDimensions = useMemo(() => getInnerDimensions(component), [component]);
@@ -428,8 +447,8 @@ export function PlantPlacementCanvas({
   // Use filtered plants if provided, otherwise use all plants from component
   const plants = filteredPlants ?? (component.plants || []);
 
-  // Calculate scale to fit canvas in available space
-  const scale = useMemo(() => {
+  // Calculate base scale to fit canvas in available space
+  const baseScale = useMemo(() => {
     if (canvasSize.width === 0 || canvasSize.height === 0) return 1;
     // Leave some padding
     const availableWidth = canvasSize.width - 32;
@@ -439,8 +458,38 @@ export function PlantPlacementCanvas({
     return Math.min(scaleX, scaleY, 3); // Max scale of 3x
   }, [canvasSize, innerDimensions]);
 
+  // Apply zoom level to base scale
+  const scale = baseScale * zoomLevel;
+
+  // Zoom handlers
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel((prev) => Math.min(prev + ZOOM_STEP, MAX_ZOOM));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel((prev) => Math.max(prev - ZOOM_STEP, MIN_ZOOM));
+  }, []);
+
+  // Toggle spacing radius visibility
+  const handleToggleSpacingRadius = useCallback(() => {
+    setShowSpacingRadius((prev) => !prev);
+  }, []);
+
   const containerWidth = innerDimensions.width * scale;
   const containerHeight = innerDimensions.height * scale;
+
+  // Check if content is larger than viewport (scrolling needed)
+  const needsScrolling = containerWidth > canvasSize.width - 32 || containerHeight > canvasSize.height - 32;
+
+  // Center scroll position when zoom changes
+  useEffect(() => {
+    if (scrollViewRef.current && needsScrolling) {
+      // Calculate center offset
+      const scrollX = Math.max(0, (containerWidth - canvasSize.width + 32) / 2);
+      const scrollY = Math.max(0, (containerHeight - canvasSize.height + 32) / 2);
+      scrollViewRef.current.scrollTo({ x: scrollX, y: scrollY, animated: false });
+    }
+  }, [zoomLevel, containerWidth, containerHeight, canvasSize.width, canvasSize.height, needsScrolling]);
 
   // Calculate collisions between all plants (both spacing overlap and inner collision)
   const { spacingOverlaps, innerCollisions } = useMemo(() => {
@@ -507,69 +556,143 @@ export function PlantPlacementCanvas({
     setSelectedPlantId(null);
   }, []);
 
+  // Calculate content padding for centering when not scrolling
+  const contentPaddingX = needsScrolling ? 16 : Math.max(16, (canvasSize.width - containerWidth) / 2);
+  const contentPaddingY = needsScrolling ? 16 : Math.max(16, (canvasSize.height - containerHeight) / 2);
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <View style={styles.container} onLayout={handleLayout}>
         {canvasSize.width > 0 && (
-          <Pressable onPress={handleBackgroundPress} style={styles.canvasWrapper}>
-            {/* Component shape */}
-            <View
-              style={[
-                styles.componentShape,
+          <>
+            <ScrollView
+              ref={scrollViewRef}
+              style={styles.scrollView}
+              contentContainerStyle={[
+                styles.scrollContent,
                 {
-                  width: containerWidth,
-                  height: containerHeight,
-                  borderRadius: isCircular ? containerWidth / 2 : 8,
+                  paddingHorizontal: contentPaddingX,
+                  paddingVertical: contentPaddingY,
                 },
               ]}
+              horizontal={false}
+              showsVerticalScrollIndicator={needsScrolling}
+              showsHorizontalScrollIndicator={needsScrolling}
+              scrollEnabled={needsScrolling}
+              nestedScrollEnabled={true}
             >
-              {/* Relationship indicators layer (below plants) */}
-              {plantRelationships.map((relationship) => (
-                <RelationshipIndicator
-                  key={`${relationship.plant1Id}-${relationship.plant2Id}`}
-                  relationship={relationship}
-                  scale={scale}
-                  onPress={handleRelationshipPress}
-                />
-              ))}
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                scrollEnabled={needsScrolling}
+                nestedScrollEnabled={true}
+                contentContainerStyle={styles.horizontalScrollContent}
+              >
+                <Pressable onPress={handleBackgroundPress}>
+                  {/* Component shape */}
+                  <View
+                    style={[
+                      styles.componentShape,
+                      {
+                        width: containerWidth,
+                        height: containerHeight,
+                        borderRadius: isCircular ? containerWidth / 2 : 8,
+                      },
+                    ]}
+                  >
+                    {/* Relationship indicators layer (below plants) */}
+                    {plantRelationships.map((relationship) => (
+                      <RelationshipIndicator
+                        key={`${relationship.plant1Id}-${relationship.plant2Id}`}
+                        relationship={relationship}
+                        scale={scale}
+                        onPress={handleRelationshipPress}
+                      />
+                    ))}
 
-              {/* Plants layer */}
-              {plants.map((plant) => {
-                const plantData = getPlantById(plant.plantId);
-                return (
-                  <DraggablePlant
-                    key={plant.id}
-                    plant={plant}
-                    plantData={plantData}
-                    scale={scale}
-                    containerWidth={containerWidth}
-                    containerHeight={containerHeight}
-                    onPositionChange={onPlantPositionChange}
-                    onPress={onPlantPress ? () => onPlantPress(plant) : undefined}
-                    onLongPress={onPlantLongPress ? () => onPlantLongPress(plant) : undefined}
-                    hasSpacingOverlap={spacingOverlaps.get(plant.id) ?? false}
-                    hasInnerCollision={innerCollisions.get(plant.id) ?? false}
-                    isSelected={selectedPlantId === plant.id}
-                    onSelect={() => setSelectedPlantId(plant.id)}
-                  />
-                );
-              })}
+                    {/* Plants layer */}
+                    {plants.map((plant) => {
+                      const plantData = getPlantById(plant.plantId);
+                      return (
+                        <DraggablePlant
+                          key={plant.id}
+                          plant={plant}
+                          plantData={plantData}
+                          scale={scale}
+                          containerWidth={containerWidth}
+                          containerHeight={containerHeight}
+                          onPositionChange={onPlantPositionChange}
+                          onPress={onPlantPress ? () => onPlantPress(plant) : undefined}
+                          onLongPress={onPlantLongPress ? () => onPlantLongPress(plant) : undefined}
+                          hasSpacingOverlap={spacingOverlaps.get(plant.id) ?? false}
+                          hasInnerCollision={innerCollisions.get(plant.id) ?? false}
+                          isSelected={selectedPlantId === plant.id}
+                          onSelect={() => setSelectedPlantId(plant.id)}
+                          showSpacingRadius={showSpacingRadius}
+                        />
+                      );
+                    })}
 
-              {/* Empty state */}
-              {plants.length === 0 && (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyIcon}>🌱</Text>
-                  <Text style={styles.emptyText}>Voeg planten toe</Text>
-                </View>
-              )}
-            </View>
+                    {/* Empty state */}
+                    {plants.length === 0 && (
+                      <View style={styles.emptyState}>
+                        <Text style={styles.emptyIcon}>🌱</Text>
+                        <Text style={styles.emptyText}>Voeg planten toe</Text>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              </ScrollView>
+            </ScrollView>
 
-            {/* Scale indicator */}
+            {/* Spacing radius toggle */}
+            <Pressable
+              style={styles.spacingToggle}
+              onPress={handleToggleSpacingRadius}
+            >
+              <Text style={styles.spacingToggleIcon}>
+                {showSpacingRadius ? '◉' : '○'}
+              </Text>
+              <Text style={styles.spacingToggleText}>Afstand</Text>
+            </Pressable>
+
+            {/* Scale indicator - positioned absolutely over scroll content */}
             <View style={styles.scaleIndicator}>
               <View style={[styles.scaleLine, { width: 50 * scale }]} />
               <Text style={styles.scaleText}>50 cm</Text>
             </View>
-          </Pressable>
+
+            {/* Zoom controls - positioned absolutely over scroll content */}
+            <View style={styles.zoomControls}>
+              <Pressable
+                style={[
+                  styles.zoomButton,
+                  zoomLevel >= MAX_ZOOM && styles.zoomButtonDisabled,
+                ]}
+                onPress={handleZoomIn}
+                disabled={zoomLevel >= MAX_ZOOM}
+              >
+                <Text style={[
+                  styles.zoomButtonText,
+                  zoomLevel >= MAX_ZOOM && styles.zoomButtonTextDisabled,
+                ]}>+</Text>
+              </Pressable>
+              <Text style={styles.zoomLevelText}>{Math.round(zoomLevel * 100)}%</Text>
+              <Pressable
+                style={[
+                  styles.zoomButton,
+                  zoomLevel <= MIN_ZOOM && styles.zoomButtonDisabled,
+                ]}
+                onPress={handleZoomOut}
+                disabled={zoomLevel <= MIN_ZOOM}
+              >
+                <Text style={[
+                  styles.zoomButtonText,
+                  zoomLevel <= MIN_ZOOM && styles.zoomButtonTextDisabled,
+                ]}>−</Text>
+              </Pressable>
+            </View>
+          </>
         )}
 
         {/* Relationship tooltip */}
@@ -589,17 +712,20 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#1f2937',
     borderRadius: 12,
     overflow: 'hidden',
   },
-  canvasWrapper: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  horizontalScrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
   },
   componentShape: {
     backgroundColor: '#3d2914',
@@ -660,6 +786,27 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontSize: 14,
   },
+  spacingToggle: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  spacingToggleIcon: {
+    color: '#4ade80',
+    fontSize: 16,
+    marginRight: 6,
+  },
+  spacingToggleText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '500',
+  },
   scaleIndicator: {
     position: 'absolute',
     bottom: 16,
@@ -674,5 +821,39 @@ const styles = StyleSheet.create({
   scaleText: {
     color: '#9ca3af',
     fontSize: 10,
+  },
+  zoomControls: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    flexDirection: 'column',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 8,
+    padding: 4,
+  },
+  zoomButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#374151',
+    borderRadius: 6,
+  },
+  zoomButtonDisabled: {
+    backgroundColor: '#1f2937',
+  },
+  zoomButtonText: {
+    color: '#ffffff',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  zoomButtonTextDisabled: {
+    color: '#6b7280',
+  },
+  zoomLevelText: {
+    color: '#9ca3af',
+    fontSize: 10,
+    marginVertical: 4,
   },
 });

@@ -1,9 +1,10 @@
 import './global.css';
 import '@/i18n';
 
-import React, {Component, ErrorInfo, ReactNode} from 'react';
+import React, {Component, ErrorInfo, ReactNode, useEffect} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
 import {NavigationContainer} from '@react-navigation/native';
 import {RootNavigator} from '@/navigation';
 import {theme} from '@/styles/theme';
@@ -68,13 +69,20 @@ const styles = StyleSheet.create({
 /**
  * Root application component that wraps the entire app with
  * necessary providers for navigation and safe area handling.
+ * Uses immersive mode to hide system UI for a fullscreen experience.
  */
 export default function App(): React.JSX.Element {
+    useEffect(() => {
+        // Enable immersive mode: hide navigation bar, allow swipe to reveal
+        NavigationBar.setVisibilityAsync('hidden');
+        NavigationBar.setBehaviorAsync('overlay-swipe');
+    }, []);
+
     return (
         <ErrorBoundary>
             <SafeAreaProvider>
                 <NavigationContainer>
-                    <StatusBar style="light"/>
+                    <StatusBar hidden={true} />
                     <RootNavigator/>
                 </NavigationContainer>
             </SafeAreaProvider>
