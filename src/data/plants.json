@@ -886,8 +886,8 @@
       "id": "aardbei",
       "nameNl": "Aardbei",
       "scientificName": "Fragaria x ananassa",
-      "category": "vruchtgroenten",
-      "description": "Aardbei (Fragaria x ananassa) is een vruchtgroenten in deze dataset. Vruchtgroenten vormen hun oogst aan de plant na bloei en hebben doorgaans warmte en een voedzame, goed doorlatende bodem nodig.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: winterhard (kan goed tegen kou en lichte tot matige vorst).\n\nBinnen voorzaaien kan 10 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 4 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen.\n\nHoud bij het uitplanten of uitdunnen ongeveer 30 cm ruimte rondom elke plant. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 14–21 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 90–120 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nGoede buren: basilicum (kan helpen plagen te weren).\n\nMinder geschikt ernaast: broccoli (kan de groei remmen of concurrentie vergroten).\n\nKort samengevat: Zoete bessen. Veeljarig. Veel zon nodig.",
+      "category": "fruit",
+      "description": "Aardbei (Fragaria x ananassa) is een fruit in deze dataset. Fruit vormen hun oogst aan de plant na bloei en hebben doorgaans warmte en een voedzame, goed doorlatende bodem nodig.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: winterhard (kan goed tegen kou en lichte tot matige vorst).\n\nBinnen voorzaaien kan 10 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 4 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen.\n\nHoud bij het uitplanten of uitdunnen ongeveer 30 cm ruimte rondom elke plant. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 14–21 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 90–120 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nGoede buren: basilicum (kan helpen plagen te weren).\n\nMinder geschikt ernaast: broccoli (kan de groei remmen of concurrentie vergroten).\n\nKort samengevat: Zoete bessen. Veeljarig. Veel zon nodig.",
       "spacingRadiusCm": 30,
       "plantingDepthCm": 0.5,
       "sun": "full",
@@ -1994,8 +1994,8 @@
       "id": "fennel",
       "nameNl": "Venkel",
       "scientificName": "Foeniculum vulgare",
-      "category": "kruiden",
-      "description": "Venkel (Foeniculum vulgare) is een kruiden in deze dataset. Kruiden gebruik je vers of gedroogd. Veel soorten houden van zon en een goed drainerende bodem; sommige zijn juist dorstig en groeien graag in halfschaduw.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: redelijk vorsttolerant (kan wat kou hebben, bescherm bij harde vorst).\n\nUitplanten kan 2 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen. Direct zaaien buiten kan rond de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 25 cm ruimte rondom elke plant. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 10–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 60–90 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nMinder geschikt ernaast: dille (kan de groei remmen of concurrentie vergroten), cilantro (kan de groei remmen of concurrentie vergroten).\n\nKort samengevat: Zoet kruid. Knolvariant.",
+      "category": "groenten",
+      "description": "Venkel (Foeniculum vulgare) is een groente in deze dataset. Groeten gebruik je vers of gedroogd. Veel soorten houden van zon en een goed drainerende bodem; sommige zijn juist dorstig en groeien graag in halfschaduw.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: redelijk vorsttolerant (kan wat kou hebben, bescherm bij harde vorst).\n\nUitplanten kan 2 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen. Direct zaaien buiten kan rond de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 25 cm ruimte rondom elke plant. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 10–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 60–90 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nMinder geschikt ernaast: dille (kan de groei remmen of concurrentie vergroten), cilantro (kan de groei remmen of concurrentie vergroten).\n\nKort samengevat: Zoet kruid. Knolvariant.",
       "spacingRadiusCm": 25,
       "plantingDepthCm": 0.5,
       "sun": "full",
@@ -2640,7 +2640,7 @@
       "id": "amarant",
       "nameNl": "Amarant",
       "scientificName": "Amaranthus hypochondriacus",
-      "category": "bladgroenten",
+      "category": "graan",
       "description": "Amarant (Amaranthus hypochondriacus) is een bladgroenten in deze dataset. Bladgroenten oogst je vooral om het blad. Ze groeien vaak snel en waarderen een gelijkmatige vochtvoorziening om mals te blijven.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: vorstgevoelig (pas buiten na de laatste vorst).\n\nBinnen voorzaaien kan 6 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 2 week/weken na de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen. Direct zaaien buiten kan 1 week/weken na de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 20 cm ruimte rondom elke plant. Zaai/plant op circa 0.25 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 7–10 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 60–90 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nTeelttips: Bij koude nachten kun je tijdelijk afdekken (vliesdoek) of beschut plaatsen om groeistilstand te beperken.\n\nKort samengevat: Voedzaam zaad. Voor blad.",
       "spacingRadiusCm": 20,
       "plantingDepthCm": 0.25,
@@ -2665,7 +2665,7 @@
       "id": "quinoa",
       "nameNl": "Quinoa",
       "scientificName": "Chenopodium quinoa",
-      "category": "bladgroenten",
+      "category": "graan",
       "description": "Quinoa (Chenopodium quinoa) is een bladgroenten in deze dataset. Bladgroenten oogst je vooral om het blad. Ze groeien vaak snel en waarderen een gelijkmatige vochtvoorziening om mals te blijven.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: vorstgevoelig (pas buiten na de laatste vorst).\n\nBinnen voorzaaien kan 4 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 1 week/weken na de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen. Direct zaaien buiten kan 1 week/weken na de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 25 cm ruimte rondom elke plant. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 7–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 90–120 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nTeelttips: Bij koude nachten kun je tijdelijk afdekken (vliesdoek) of beschut plaatsen om groeistilstand te beperken.\n\nKort samengevat: Supergraan. Volle eiwitten.",
       "spacingRadiusCm": 25,
       "plantingDepthCm": 0.5,
@@ -2919,8 +2919,8 @@
       "id": "perzik",
       "nameNl": "Perzik",
       "scientificName": "Prunus persica",
-      "category": "vruchtgroenten",
-      "description": "Perzik (Prunus persica) is een vruchtgroenten in deze dataset. Vruchtgroenten vormen hun oogst aan de plant na bloei en hebben doorgaans warmte en een voedzame, goed doorlatende bodem nodig.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: redelijk vorsttolerant (kan wat kou hebben, bescherm bij harde vorst).\n\nHoud bij het uitplanten of uitdunnen ongeveer 200 cm ruimte rondom elke plant. Zaai/plant op circa 5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 30–60 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 365–730 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nKort samengevat: Perzikboom (fruitboom).",
+      "category": "fruit",
+      "description": "Perzik (Prunus persica) is een fruit in deze dataset. Fruit vormen hun oogst aan de plant na bloei en hebben doorgaans warmte en een voedzame, goed doorlatende bodem nodig.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: redelijk vorsttolerant (kan wat kou hebben, bescherm bij harde vorst).\n\nHoud bij het uitplanten of uitdunnen ongeveer 200 cm ruimte rondom elke plant. Zaai/plant op circa 5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 30–60 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 365–730 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nKort samengevat: Perzikboom (fruitboom).",
       "spacingRadiusCm": 200,
       "plantingDepthCm": 5,
       "sun": "full",
@@ -2937,31 +2937,6 @@
       "indoorStartWeeks": null,
       "transplantWeeks": null,
       "directSowWeeks": null,
-      "companions": [],
-      "combatives": []
-    },
-    {
-      "id": "rucola-sla",
-      "nameNl": "Rucolasla",
-      "scientificName": "Eruca vesicaria subsp. sativa",
-      "category": "bladgroenten",
-      "description": "Rucolasla (Eruca vesicaria subsp. sativa) is een bladgroenten in deze dataset. Bladgroenten oogst je vooral om het blad. Ze groeien vaak snel en waarderen een gelijkmatige vochtvoorziening om mals te blijven.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: redelijk vorsttolerant (kan wat kou hebben, bescherm bij harde vorst).\n\nUitplanten kan 6 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen. Direct zaaien buiten kan 4 week/weken vóór de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 20 cm ruimte rondom elke plant. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 5–10 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 30–50 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nKort samengevat: Wilde slasoort.",
-      "spacingRadiusCm": 20,
-      "plantingDepthCm": 0.5,
-      "sun": "full",
-      "water": "moderate",
-      "frostTolerance": "semi-hardy",
-      "germinationDays": {
-        "min": 5,
-        "max": 10
-      },
-      "daysToHarvest": {
-        "min": 30,
-        "max": 50
-      },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
       "companions": [],
       "combatives": []
     },
@@ -3502,31 +3477,6 @@
       "combatives": []
     },
     {
-      "id": "schorseneel-wit",
-      "nameNl": "Schorseneel Wit",
-      "scientificName": "Tragopogon porrifolius",
-      "category": "wortelgroenten",
-      "description": "Schorseneel Wit (Tragopogon porrifolius) is een wortelgroenten in deze dataset. Wortelgroenten ontwikkelen hun oogst ondergronds. Een luchtige, steenarme bodem helpt om rechte, gave wortels of knollen te vormen.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: winterhard (kan goed tegen kou en lichte tot matige vorst).\n\nDirect zaaien buiten kan 4 week/weken vóór de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 20 cm ruimte rondom elke plant. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 14–21 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 120–150 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nTeelttips: Zorg voor een fijne, steenarme bodem en dun op tijd uit; zo voorkom je vertakte of misvormde wortels.\n\nKort samengevat: Witte wortel. Voor stamppot.",
-      "spacingRadiusCm": 20,
-      "plantingDepthCm": 0.5,
-      "sun": "full",
-      "water": "moderate",
-      "frostTolerance": "hardy",
-      "germinationDays": {
-        "min": 14,
-        "max": 21
-      },
-      "daysToHarvest": {
-        "min": 120,
-        "max": 150
-      },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -4,
-      "companions": [],
-      "combatives": []
-    },
-    {
       "id": "oca",
       "nameNl": "Oca",
       "scientificName": "Oxalis tuberosa",
@@ -3919,6 +3869,1030 @@
       "daysToHarvest": {
         "min": 365,
         "max": 730
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "kers",
+      "nameNl": "Kers",
+      "scientificName": "Prunus avium",
+      "category": "fruit",
+      "description": "Kers (Prunus avium) is een fruitboom geschikt voor West-Europa. Standplaats: volle zon. Waterbehoefte: matig. Vorst: winterhard.",
+      "spacingRadiusCm": 400,
+      "plantingDepthCm": 5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 1095,
+        "max": 1825
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "blauwe-bes",
+      "nameNl": "Blauwe Bes",
+      "scientificName": "Vaccinium corymbosum",
+      "category": "fruit",
+      "description": "Blauwe bes (Vaccinium corymbosum) groeit goed in zure grond in West-Europa. Veel zon en vochtige, goed drainerende bodem.",
+      "spacingRadiusCm": 100,
+      "plantingDepthCm": 3,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 730,
+        "max": 1095
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "braam",
+      "nameNl": "Braam",
+      "scientificName": "Rubus fruticosus",
+      "category": "fruit",
+      "description": "Braam (Rubus fruticosus) is een sterk groeiende struik met eetbare bessen. Geschikt voor koele zomers.",
+      "spacingRadiusCm": 150,
+      "plantingDepthCm": 3,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 730
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "framboos",
+      "nameNl": "Framboos",
+      "scientificName": "Rubus idaeus",
+      "category": "fruit",
+      "description": "Framboos groeit goed in gematigd West-Europees klimaat. Geeft zoete zachte vruchten op volle zon.",
+      "spacingRadiusCm": 100,
+      "plantingDepthCm": 3,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 730
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "kruisbes",
+      "nameNl": "Kruisbes",
+      "scientificName": "Ribes uva-crispa",
+      "category": "fruit",
+      "description": "Kruisbes is een struik met zure vruchten. Verdraagt koude winters uitstekend.",
+      "spacingRadiusCm": 80,
+      "plantingDepthCm": 3,
+      "sun": "partial",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 730
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "aalbes",
+      "nameNl": "Aalbes",
+      "scientificName": "Ribes rubrum",
+      "category": "fruit",
+      "description": "Aalbes draagt overvloedige trossen rode bessen. Verdraagt koele zomers goed.",
+      "spacingRadiusCm": 80,
+      "plantingDepthCm": 3,
+      "sun": "partial",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 730
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "druif",
+      "nameNl": "Druif",
+      "scientificName": "Vitis vinifera",
+      "category": "fruit",
+      "description": "Druiven groeien goed tegen warme muren in West-Europa. Verdraagt milde winters.",
+      "spacingRadiusCm": 200,
+      "plantingDepthCm": 5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 1095,
+        "max": 1825
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "walnoot",
+      "nameNl": "Walnoot",
+      "scientificName": "Juglans regia",
+      "category": "fruit",
+      "description": "Walnoot is een winterharde boom met eetbare noten. Houdt van diepe grond.",
+      "spacingRadiusCm": 600,
+      "plantingDepthCm": 10,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 1825,
+        "max": 3650
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "hazelnoot",
+      "nameNl": "Hazelnoot",
+      "scientificName": "Corylus avellana",
+      "category": "fruit",
+      "description": "Hazelnootstruiken zijn uitstekend geschikt voor West-Europees klimaat.",
+      "spacingRadiusCm": 250,
+      "plantingDepthCm": 5,
+      "sun": "partial",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 16,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 1095,
+        "max": 1825
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "prei",
+      "nameNl": "Prei",
+      "scientificName": "Allium porrum",
+      "category": "bladgroenten",
+      "description": "Prei groeit goed in koele klimaten en verdraagt lichte vorst.",
+      "spacingRadiusCm": 20,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 10,
+        "max": 21
+      },
+      "daysToHarvest": {
+        "min": 120,
+        "max": 160
+      },
+      "indoorStartWeeks": -8,
+      "transplantWeeks": -2,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "aardappel",
+      "nameNl": "Aardappel",
+      "scientificName": "Solanum tuberosum",
+      "category": "wortelgroenten",
+      "description": "Aardappel is een van de belangrijkste knolgewassen voor West-Europa.",
+      "spacingRadiusCm": 40,
+      "plantingDepthCm": 10,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 70,
+        "max": 110
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": 2,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "artisjok",
+      "nameNl": "Artisjok",
+      "scientificName": "Cynara scolymus",
+      "category": "groenten",
+      "description": "Artisjok is een Mediterrane groente die ook in West-Europa goed groeit.",
+      "spacingRadiusCm": 100,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 21
+      },
+      "daysToHarvest": {
+        "min": 150,
+        "max": 200
+      },
+      "indoorStartWeeks": -6,
+      "transplantWeeks": 2,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "maïs",
+      "nameNl": "Maïs",
+      "scientificName": "Zea mays",
+      "category": "graan",
+      "description": "Maïs groeit goed in warme zomers en volle zon.",
+      "spacingRadiusCm": 40,
+      "plantingDepthCm": 3,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 7,
+        "max": 14
+      },
+      "daysToHarvest": {
+        "min": 70,
+        "max": 110
+      },
+      "indoorStartWeeks": -2,
+      "transplantWeeks": 1,
+      "directSowWeeks": 2,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "citroenmelisse",
+      "nameNl": "Citroenmelisse",
+      "scientificName": "Melissa officinalis",
+      "category": "kruiden",
+      "description": "Citroenmelisse is een aromatisch kruid dat goed gedijt in West-Europa.",
+      "spacingRadiusCm": 25,
+      "plantingDepthCm": 0.25,
+      "sun": "partial",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 10,
+        "max": 20
+      },
+      "daysToHarvest": {
+        "min": 45,
+        "max": 70
+      },
+      "indoorStartWeeks": -6,
+      "transplantWeeks": -2,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "bonenkruid",
+      "nameNl": "Bonenkruid",
+      "scientificName": "Satureja hortensis",
+      "category": "kruiden",
+      "description": "Bonenkruid draagt bij aan smaak en helpt bonenplanten tegen insecten.",
+      "spacingRadiusCm": 20,
+      "plantingDepthCm": 0.25,
+      "sun": "full",
+      "water": "low",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 7,
+        "max": 14
+      },
+      "daysToHarvest": {
+        "min": 45,
+        "max": 60
+      },
+      "indoorStartWeeks": -4,
+      "transplantWeeks": null,
+      "directSowWeeks": 1,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "karwij",
+      "nameNl": "Karwij",
+      "scientificName": "Carum carvi",
+      "category": "kruiden",
+      "description": "Karwij is een tweejarig kruid met aromatische zaden.",
+      "spacingRadiusCm": 20,
+      "plantingDepthCm": 0.5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 21
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 730
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": -2,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "komijn",
+      "nameNl": "Komijn",
+      "scientificName": "Cuminum cyminum",
+      "category": "kruiden",
+      "description": "Komijn is een warmteminnend kruid dat in warme zomers in West-Europa groeit.",
+      "spacingRadiusCm": 20,
+      "plantingDepthCm": 0.5,
+      "sun": "full",
+      "water": "low",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 10,
+        "max": 20
+      },
+      "daysToHarvest": {
+        "min": 120,
+        "max": 150
+      },
+      "indoorStartWeeks": -6,
+      "transplantWeeks": 2,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "laurier",
+      "nameNl": "Laurier",
+      "scientificName": "Laurus nobilis",
+      "category": "kruiden",
+      "description": "Laurierbladeren worden gebruikt in soepen en stoofschotels. Half-winterhard.",
+      "spacingRadiusCm": 150,
+      "plantingDepthCm": 5,
+      "sun": "partial",
+      "water": "moderate",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 30,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 730
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "pepermunt",
+      "nameNl": "Pepermunt",
+      "scientificName": "Mentha × piperita",
+      "category": "kruiden",
+      "description": "Pepermunt groeit goed in vochtige grond en halfschaduw.",
+      "spacingRadiusCm": 40,
+      "plantingDepthCm": 0.5,
+      "sun": "partial",
+      "water": "high",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 10,
+        "max": 20
+      },
+      "daysToHarvest": {
+        "min": 30,
+        "max": 60
+      },
+      "indoorStartWeeks": -6,
+      "transplantWeeks": -2,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "tarwe",
+      "nameNl": "Tarwe",
+      "scientificName": "Triticum aestivum",
+      "category": "graan",
+      "description": "Tarwe is een van de oudste graangewassen en groeit uitstekend in West-Europa. Het is winterhard, verdraagt regenachtige zomers en wordt zowel als winter- als zomertarwe geteeld.",
+      "spacingRadiusCm": 5,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 7,
+        "max": 14
+      },
+      "daysToHarvest": {
+        "min": 90,
+        "max": 120
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": -20,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "gerst",
+      "nameNl": "Gerst",
+      "scientificName": "Hordeum vulgare",
+      "category": "graan",
+      "description": "Gerst is een snelgroeiend graangewas dat goed bestand is tegen koelere klimaten. Veel gebruikt voor veevoer, bierbrouwen en als oud graangewas.",
+      "spacingRadiusCm": 5,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 6,
+        "max": 12
+      },
+      "daysToHarvest": {
+        "min": 80,
+        "max": 110
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": -18,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "rogge",
+      "nameNl": "Rogge",
+      "scientificName": "Secale cereale",
+      "category": "graan",
+      "description": "Rogge is een zeer winterhard graangewas dat ook op arme gronden goed presteert. Veel gebruikt in broden en als groenbemester.",
+      "spacingRadiusCm": 5,
+      "plantingDepthCm": 3,
+      "sun": "full",
+      "water": "low",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 7,
+        "max": 15
+      },
+      "daysToHarvest": {
+        "min": 100,
+        "max": 140
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": -22,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "haver",
+      "nameNl": "Haver",
+      "scientificName": "Avena sativa",
+      "category": "graan",
+      "description": "Haver is een vochtminnend graan dat goed gedijt in koele, natte West-Europese klimaten. Wordt gebruikt voor ontbijtgraan, veevoer en havermeel.",
+      "spacingRadiusCm": 5,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 7,
+        "max": 14
+      },
+      "daysToHarvest": {
+        "min": 90,
+        "max": 120
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": -16,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "spelt",
+      "nameNl": "Spelt",
+      "scientificName": "Triticum spelta",
+      "category": "graan",
+      "description": "Spelt is een oer-graan verwant aan tarwe. Het is sterk, winterhard en tolerant voor lagere bodemkwaliteit.",
+      "spacingRadiusCm": 5,
+      "plantingDepthCm": 3,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 8,
+        "max": 16
+      },
+      "daysToHarvest": {
+        "min": 100,
+        "max": 140
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": -20,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "triticale",
+      "nameNl": "Triticale",
+      "scientificName": "× Triticosecale",
+      "category": "graan",
+      "description": "Triticale is een kruising tussen tarwe en rogge. Het groeit goed op arme bodems en presteert sterk in koelere klimaten.",
+      "spacingRadiusCm": 5,
+      "plantingDepthCm": 3,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 7,
+        "max": 14
+      },
+      "daysToHarvest": {
+        "min": 90,
+        "max": 130
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": -20,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "boekweit",
+      "nameNl": "Boekweit",
+      "scientificName": "Fagopyrum esculentum",
+      "category": "graan",
+      "description": "Boekweit is een pseudo-graan dat geen grasfamilielid is. Het groeit snel, is bijvriendelijk en gedijt goed op arme zandgronden.",
+      "spacingRadiusCm": 10,
+      "plantingDepthCm": 1,
+      "sun": "full",
+      "water": "low",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 4,
+        "max": 8
+      },
+      "daysToHarvest": {
+        "min": 70,
+        "max": 90
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": 2,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "cherry-tomaat",
+      "nameNl": "Cherry Tomaat",
+      "scientificName": "Solanum lycopersicum var. cerasiforme",
+      "category": "vruchtgroenten",
+      "description": "Cherry tomaten zijn compacte tomatenplanten die overvloedig kleine, zoete vruchten produceren. Ze groeien het best warm en zonnig, en profiteren van steun en regelmatige dievenverwijdering.",
+      "spacingRadiusCm": 40,
+      "plantingDepthCm": 1,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 5,
+        "max": 10
+      },
+      "daysToHarvest": {
+        "min": 55,
+        "max": 80
+      },
+      "indoorStartWeeks": -8,
+      "transplantWeeks": 2,
+      "directSowWeeks": null,
+      "companions": [
+        {
+          "plantId": "basilicum",
+          "benefit": "detersPests"
+        },
+        {
+          "plantId": "bieslook",
+          "benefit": "detersPests"
+        }
+      ],
+      "combatives": [
+        {
+          "plantId": "aubergine",
+          "harm": "diseaseRisk"
+        }
+      ]
+    },
+    {
+      "id": "limoen",
+      "nameNl": "Limoen",
+      "scientificName": "Citrus aurantiifolia",
+      "category": "fruit",
+      "description": "Limoenbomen zijn warmteminnende citrusplanten die aromatische groene vruchten dragen. Ze doen het goed in grote potten of een kas en vragen veel zon, voeding en regelmatige watergift.",
+      "spacingRadiusCm": 200,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 14,
+        "max": 30
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 1095
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "citroen",
+      "nameNl": "Citroen",
+      "scientificName": "Citrus limon",
+      "category": "fruit",
+      "description": "Citroenbomen zijn citrusplanten die bekendstaan om hun frisse, zure vruchten. Ze groeien sterk in pot of kas, houden van veel zonlicht en vragen beschermde omstandigheden tegen vorst.",
+      "spacingRadiusCm": 200,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 14,
+        "max": 30
+      },
+      "daysToHarvest": {
+        "min": 365,
+        "max": 1095
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "saffraan",
+      "nameNl": "Saffraan",
+      "scientificName": "Crocus sativus",
+      "category": "kruiden",
+      "description": "Saffraan wordt verkregen uit de stampers van de Crocus sativus. De knollen bloeien in de herfst en vergen droge zomers, volle zon en goed drainerende grond om optimaal te presteren.",
+      "spacingRadiusCm": 10,
+      "plantingDepthCm": 10,
+      "sun": "full",
+      "water": "low",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 14,
+        "max": 28
+      },
+      "daysToHarvest": {
+        "min": 45,
+        "max": 60
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "struikboon",
+      "nameNl": "Struikboon",
+      "scientificName": "Phaseolus vulgaris",
+      "category": "peulvruchten",
+      "description": "Struikbonen zijn compacte bonenplanten die zonder klimhulp groeien. Ze produceren snel en rijk, verrijken de bodem met stikstof en passen perfect in moestuinen met beperkte ruimte.",
+      "spacingRadiusCm": 20,
+      "plantingDepthCm": 2.5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 7,
+        "max": 14
+      },
+      "daysToHarvest": {
+        "min": 50,
+        "max": 65
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": 2,
+      "companions": [
+        {
+          "plantId": "wortel",
+          "benefit": "fixesNitrogen"
+        }
+      ],
+      "combatives": [
+        {
+          "plantId": "knoflook",
+          "harm": "inhibitsGrowth"
+        }
+      ]
+    },
+    {
+      "id": "pruimen",
+      "nameNl": "Pruimen",
+      "scientificName": "Prunus domestica",
+      "category": "fruit",
+      "description": "Pruimenbomen leveren zoete en sappige vruchten en groeien goed in een zonnige, luchtige standplaats. Ze vragen jaarlijkse snoei om een open kroon en een gezonde vruchtproductie te behouden.",
+      "spacingRadiusCm": 350,
+      "plantingDepthCm": 5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 30,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 730,
+        "max": 1460
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "krieken",
+      "nameNl": "Krieken",
+      "scientificName": "Prunus cerasus",
+      "category": "fruit",
+      "description": "Kriekenbomen zijn zuurkersensoorten die aromatische, friszure vruchten produceren. Ze zijn winterhard, bloeien vroeg en trekken veel bestuivers aan in het voorjaar.",
+      "spacingRadiusCm": 300,
+      "plantingDepthCm": 5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 30,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 730,
+        "max": 1460
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": null,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "koriander",
+      "nameNl": "Koriander",
+      "scientificName": "Coriandrum sativum",
+      "category": "kruiden",
+      "description": "Koriander is een aromatisch kruid waarvan zowel het blad als zaad wordt gebruikt. Het houdt van koele omstandigheden, zaait zichzelf makkelijk uit en bloeit snel in warm weer.",
+      "spacingRadiusCm": 20,
+      "plantingDepthCm": 0.5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "semi-hardy",
+      "germinationDays": {
+        "min": 10,
+        "max": 21
+      },
+      "daysToHarvest": {
+        "min": 30,
+        "max": 45
+      },
+      "indoorStartWeeks": null,
+      "transplantWeeks": -4,
+      "directSowWeeks": -2,
+      "companions": [
+        {
+          "plantId": "tomaat",
+          "benefit": "attractsPollinators"
+        }
+      ],
+      "combatives": [
+        {
+          "plantId": "dille",
+          "harm": "inhibitsGrowth"
+        }
+      ]
+    },
+    {
+      "id": "zonnebloem",
+      "nameNl": "Zonnebloem",
+      "scientificName": "Helianthus annuus",
+      "category": "groenten",
+      "description": "Zonnebloemen zijn hoge, sterke planten die opvallende bloemhoofden vormen. Ze trekken bestuivers aan, leveren eetbare zaden en bieden beschutting in de moestuin.",
+      "spacingRadiusCm": 45,
+      "plantingDepthCm": 2.5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 7,
+        "max": 10
+      },
+      "daysToHarvest": {
+        "min": 80,
+        "max": 110
+      },
+      "indoorStartWeeks": -3,
+      "transplantWeeks": 1,
+      "directSowWeeks": 1,
+      "companions": [
+        {
+          "plantId": "dille",
+          "benefit": "attractsPollinators"
+        }
+      ],
+      "combatives": []
+    },
+    {
+      "id": "augurk",
+      "nameNl": "Augurk",
+      "scientificName": "Cucumis sativus",
+      "category": "vruchtgroenten",
+      "description": "Augurkplanten zijn snelgroeiende klimmers die kleine, stevige vruchten produceren, ideaal om in te maken. Ze houden van warmte, veel water en voldoende ruimte om te ranken.",
+      "spacingRadiusCm": 40,
+      "plantingDepthCm": 1,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 5,
+        "max": 10
+      },
+      "daysToHarvest": {
+        "min": 45,
+        "max": 60
+      },
+      "indoorStartWeeks": -4,
+      "transplantWeeks": 1,
+      "directSowWeeks": 1,
+      "companions": [
+        {
+          "plantId": "dille",
+          "benefit": "attractsPollinators"
+        }
+      ],
+      "combatives": []
+    },
+    {
+      "id": "rijst",
+      "nameNl": "Rijst",
+      "scientificName": "Oryza sativa",
+      "category": "graan",
+      "description": "Rijst is een warmteminnende grassoort die het liefst groeit in natte, voedselrijke omstandigheden. In gematigde klimaten wordt hij vaak in bakken of verhoogde bedden gekweekt.",
+      "spacingRadiusCm": 20,
+      "plantingDepthCm": 2,
+      "sun": "full",
+      "water": "high",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 7,
+        "max": 14
+      },
+      "daysToHarvest": {
+        "min": 120,
+        "max": 180
+      },
+      "indoorStartWeeks": -6,
+      "transplantWeeks": 3,
+      "directSowWeeks": null,
+      "companions": [],
+      "combatives": []
+    },
+    {
+      "id": "chilipeper",
+      "nameNl": "Chilipeper",
+      "scientificName": "Capsicum annuum",
+      "category": "vruchtgroenten",
+      "description": "Chilipepers zijn compacte planten die pittige vruchten produceren in diverse kleuren en vormen. Ze houden van warmte, veel licht en gedoseerde watergift voor intense smaakontwikkeling.",
+      "spacingRadiusCm": 45,
+      "plantingDepthCm": 0.5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "tender",
+      "germinationDays": {
+        "min": 10,
+        "max": 21
+      },
+      "daysToHarvest": {
+        "min": 70,
+        "max": 110
+      },
+      "indoorStartWeeks": -10,
+      "transplantWeeks": 3,
+      "directSowWeeks": null,
+      "companions": [
+        {
+          "plantId": "basilicum",
+          "benefit": "detersPests"
+        }
+      ],
+      "combatives": []
+    },
+    {
+      "id": "kastanje",
+      "nameNl": "Kastanje",
+      "scientificName": "Castanea sativa",
+      "category": "fruit",
+      "description": "Kastanjebomen zijn grote, indrukwekkende bomen die eetbare noten produceren. Ze zijn zeer winterhard, groeien traag maar gestaag en hebben veel ruimte nodig om volledig tot hun recht te komen.",
+      "spacingRadiusCm": 600,
+      "plantingDepthCm": 5,
+      "sun": "full",
+      "water": "moderate",
+      "frostTolerance": "hardy",
+      "germinationDays": {
+        "min": 20,
+        "max": 60
+      },
+      "daysToHarvest": {
+        "min": 1825,
+        "max": 3650
       },
       "indoorStartWeeks": null,
       "transplantWeeks": null,

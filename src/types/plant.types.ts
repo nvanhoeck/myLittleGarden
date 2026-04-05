@@ -26,118 +26,124 @@ export type FrostTolerance = 'tender' | 'semi-hardy' | 'hardy';
  * Plant categories in Dutch
  */
 export type PlantCategory =
-  | 'vruchtgroenten'
-  | 'bladgroenten'
-  | 'wortelgroenten'
-  | 'koolgewassen'
-  | 'peulvruchten'
-  | 'kruiden';
+    | 'vruchtgroenten'
+    | 'bladgroenten'
+    | 'wortelgroenten'
+    | 'koolgewassen'
+    | 'peulvruchten'
+    | 'kruiden'
+    | 'groenten'
+    | 'graan'
+    | 'fruit';
 
 /**
  * Types of benefits from companion planting
  */
 export type CompanionBenefit =
-  | 'detersPests'
-  | 'attractsPollinators'
-  | 'growthBoost'
-  | 'improvesFlavor'
-  | 'fixesNitrogen';
+    | 'detersPests'
+    | 'attractsPollinators'
+    | 'growthBoost'
+    | 'improvesFlavor'
+    | 'fixesNitrogen';
 
 /**
  * Types of harm from combative planting
  */
 export type CombativeHarm =
-  | 'inhibitsGrowth'
-  | 'attractsPests'
-  | 'depletesNutrients'
-  | 'diseaseRisk';
+    | 'inhibitsGrowth'
+    | 'attractsPests'
+    | 'depletesNutrients'
+    | 'diseaseRisk';
 
 /**
  * Range of days for germination or harvest
  */
 export interface DayRange {
-  readonly min: number;
-  readonly max: number;
+    readonly min: number;
+    readonly max: number;
 }
 
 /**
  * Companion plant relationship
  */
 export interface CompanionRelationship {
-  readonly plantId: string;
-  readonly benefit: CompanionBenefit;
+    readonly plantId: string;
+    readonly benefit: CompanionBenefit;
 }
 
 /**
  * Combative plant relationship
  */
 export interface CombativeRelationship {
-  readonly plantId: string;
-  readonly harm: CombativeHarm;
+    readonly plantId: string;
+    readonly harm: CombativeHarm;
 }
 
 /**
  * Complete plant data structure
  */
 export interface PlantData {
-  readonly id: string;
-  readonly nameNl: string;
-  readonly scientificName: string;
-  readonly category: PlantCategory;
-  readonly description: string;
-  readonly spacingRadiusCm: number;
-  readonly plantingDepthCm: number;
-  readonly sun: SunRequirement;
-  readonly water: WaterRequirement;
-  readonly frostTolerance: FrostTolerance;
-  readonly germinationDays: DayRange;
-  readonly daysToHarvest: DayRange;
-  // Growing calendar - weeks relative to last spring frost
-  // Negative = before frost date, Positive = after frost date
-  readonly indoorStartWeeks: number | null;
-  readonly transplantWeeks: number | null;
-  readonly directSowWeeks: number | null;
-  readonly companions: readonly CompanionRelationship[];
-  readonly combatives: readonly CombativeRelationship[];
+    readonly id: string;
+    readonly nameNl: string;
+    readonly scientificName: string;
+    readonly category: PlantCategory;
+    readonly description: string;
+    readonly spacingRadiusCm: number;
+    readonly plantingDepthCm: number;
+    readonly sun: SunRequirement;
+    readonly water: WaterRequirement;
+    readonly frostTolerance: FrostTolerance;
+    readonly germinationDays: DayRange;
+    readonly daysToHarvest: DayRange;
+    // Growing calendar - weeks relative to last spring frost
+    // Negative = before frost date, Positive = after frost date
+    readonly indoorStartWeeks: number | null;
+    readonly transplantWeeks: number | null;
+    readonly directSowWeeks: number | null;
+    readonly companions: readonly CompanionRelationship[];
+    readonly combatives: readonly CombativeRelationship[];
 }
 
 /**
  * Plant database structure for JSON file
  */
 export interface PlantDatabase {
-  readonly version: string;
-  readonly plants: readonly PlantData[];
+    readonly version: string;
+    readonly plants: readonly PlantData[];
 }
 
 /**
  * Placed plant instance in a garden component
  */
 export interface PlacedPlantData {
-  readonly id: string;
-  readonly plantId: string;
-  readonly positionX: number; // Position within component in cm
-  readonly positionY: number; // Position within component in cm
-  readonly placedAt: string; // ISO date string
-  readonly layerIndex?: number; // Layer index for towers (0 = bottom layer), undefined for non-towers
+    readonly id: string;
+    readonly plantId: string;
+    readonly positionX: number; // Position within component in cm
+    readonly positionY: number; // Position within component in cm
+    readonly placedAt: string; // ISO date string
+    readonly layerIndex?: number; // Layer index for towers (0 = bottom layer), undefined for non-towers
 }
 
 /**
  * Category display information for UI
  */
 export interface PlantCategoryInfo {
-  readonly key: PlantCategory;
-  readonly labelNl: string;
-  readonly icon: string;
+    readonly key: PlantCategory;
+    readonly labelNl: string;
+    readonly icon: string;
 }
 
 /**
  * All plant categories with display information
  */
 export const PLANT_CATEGORIES: readonly PlantCategoryInfo[] = [
-  { key: 'vruchtgroenten', labelNl: 'Vruchtgroenten', icon: '🍅' },
-  { key: 'bladgroenten', labelNl: 'Bladgroenten', icon: '🥬' },
-  { key: 'wortelgroenten', labelNl: 'Wortelgroenten', icon: '🥕' },
-  { key: 'koolgewassen', labelNl: 'Koolgewassen', icon: '🥦' },
-  { key: 'peulvruchten', labelNl: 'Peulvruchten', icon: '🫘' },
-  { key: 'kruiden', labelNl: 'Kruiden', icon: '🌿' },
+    {key: 'vruchtgroenten', labelNl: 'Vruchtgroenten', icon: '🍅'},
+    {key: 'bladgroenten', labelNl: 'Bladgroenten', icon: '🥬'},
+    {key: 'wortelgroenten', labelNl: 'Wortelgroenten', icon: '🥕'},
+    {key: 'koolgewassen', labelNl: 'Koolgewassen', icon: '🥦'},
+    {key: 'peulvruchten', labelNl: 'Peulvruchten', icon: '🫘'},
+    {key: 'kruiden', labelNl: 'Kruiden', icon: '🌿'},
+    {key: 'groenten', labelNl: 'Groenten', icon: '🥦'},
+    {key: 'fruit', labelNl: 'Fruit', icon: '🍎'},
+    {key: 'graan', labelNl: 'Graan', icon: '🌾'},
 ] as const;

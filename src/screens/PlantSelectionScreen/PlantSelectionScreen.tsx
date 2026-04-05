@@ -157,7 +157,7 @@ export function PlantSelectionScreen({
   const [quantity, setQuantity] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<PlantCategory>>(
-    new Set(['vruchtgroenten', 'kruiden'])
+    new Set(['fruit', 'kruiden'])
   );
 
   // Filter plants by search query
