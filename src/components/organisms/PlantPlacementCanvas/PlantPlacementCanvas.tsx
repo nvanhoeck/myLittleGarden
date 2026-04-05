@@ -4,7 +4,7 @@
  * Shows spacing radius circles, collision warnings, and companion plant indicators.
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -170,8 +170,10 @@ function DraggablePlant({
   const plantSizePx = Math.max(24, spacingRadiusPx * 0.6);
 
   // Container size depends on whether spacing radius is shown
-  const containerSize = showSpacingRadius ? spacingRadiusPx * 2 : plantSizePx;
-  const positionOffset = showSpacingRadius ? spacingRadiusPx : plantSizePx / 2;
+  // TEST: Force spacing always OFF to test if toggle is causing the issue
+  const containerSize = plantSizePx;
+  const positionOffset = plantSizePx / 2;
+
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -329,17 +331,27 @@ function DraggablePlant({
     })
   ).current;
 
-  // Update position when plant data changes externally or spacing toggle changes
-  React.useEffect(() => {
-    currentPosition.current = {
-      x: plant.positionX * scale,
-      y: plant.positionY * scale,
-    };
+  // Update position when plant data changes or spacing toggle changes
+  // Uses useLayoutEffect to update synchronously before visual render,
+  // ensuring containerSize and pan position change together
+  useLayoutEffect(() => {
+    // Always calculate from stored position - this is the source of truth
+    // currentPosition.current is only different during active drag
+    const storedX = plant.positionX * scale;
+    const storedY = plant.positionY * scale;
+
+    // Only update currentPosition if not actively dragging
+    // During drag, currentPosition is updated by the pan responder
+    if (!isDragging) {
+      currentPosition.current = { x: storedX, y: storedY };
+    }
+
+    // Always update pan from currentPosition (handles both drag and non-drag cases)
     pan.setValue({
-      x: plant.positionX * scale - positionOffset,
-      y: plant.positionY * scale - positionOffset,
+      x: currentPosition.current.x - positionOffset,
+      y: currentPosition.current.y - positionOffset,
     });
-  }, [plant.positionX, plant.positionY, scale, positionOffset, pan]);
+  }, [plant.positionX, plant.positionY, scale, positionOffset, isDragging, pan]);
 
   return (
     <Animated.View
