@@ -158,6 +158,9 @@ function DraggablePlant({
     // TEST: Force spacing always OFF to test if toggle is causing the issue
     const containerSize = plantSizePx;
     const positionOffset = plantSizePx / 2;
+    // const containerSize = showSpacingRadius ? spacingRadiusPx * 2 : plantSizePx;
+    // const positionOffset = showSpacingRadius ? spacingRadiusPx : plantSizePx / 2;
+
 
 
     const [isDragging, setIsDragging] = useState(false);
