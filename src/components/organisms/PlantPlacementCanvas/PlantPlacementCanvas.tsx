@@ -738,10 +738,30 @@ export function PlantPlacementCanvas({
                             </Pressable>
                         </View>
 
-                        {/* Scale indicator - positioned absolutely over scroll content */}
+                        {/* Scale indicator - fixed visual width, dynamic distance label */}
                         <View style={styles.scaleIndicator}>
-                            <View style={[styles.scaleLine, {width: 50 * scale}]}/>
-                            <Text style={styles.scaleText}>50 cm</Text>
+                            {(() => {
+                                // Fixed visual line width in pixels
+                                const targetLineWidth = 60;
+                                // Calculate what distance this represents in cm
+                                const rawDistanceCm = targetLineWidth / scale;
+                                // Round to a "nice" number for readability
+                                const niceNumbers = [5, 10, 15, 20, 25, 50, 75, 100, 150, 200, 250, 500];
+                                const niceDistance = niceNumbers.reduce((prev, curr) =>
+                                    Math.abs(curr - rawDistanceCm) < Math.abs(prev - rawDistanceCm) ? curr : prev
+                                );
+                                // Adjust line width to match the nice distance exactly
+                                const adjustedLineWidth = niceDistance * scale;
+                                const displayText = niceDistance >= 100
+                                    ? `${niceDistance / 100} m`
+                                    : `${niceDistance} cm`;
+                                return (
+                                    <>
+                                        <View style={[styles.scaleLine, {width: adjustedLineWidth}]}/>
+                                        <Text style={styles.scaleText}>{displayText}</Text>
+                                    </>
+                                );
+                            })()}
                         </View>
 
                         {/* Zoom controls - positioned absolutely over scroll content */}

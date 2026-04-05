@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text } from 'react-native';
-import type { ComponentData } from '@/types';
+import type { ComponentData, PlacedPlantData } from '@/types';
 import {
   isGardenBox,
   isPot,
@@ -49,6 +49,25 @@ function getComponentDimensions(
 }
 
 /**
+ * Get inner dimensions (excluding border) for a component in cm
+ */
+function getInnerDimensionsCm(component: ComponentData): { width: number; height: number } {
+  const border = component.borderWidthInCm * 2;
+
+  if (isGardenBox(component) || isRectangularTower(component)) {
+    return {
+      width: Math.max(0, component.widthInCm - border),
+      height: Math.max(0, component.lengthInCm - border),
+    };
+  }
+  if (isPot(component) || isCircularTower(component)) {
+    const size = Math.max(0, component.diameterInCm - border);
+    return { width: size, height: size };
+  }
+  return { width: 100, height: 100 };
+}
+
+/**
  * Get component color based on type
  */
 function getComponentColor(component: ComponentData): string {
@@ -84,6 +103,61 @@ function getComponentIcon(component: ComponentData): string {
   }
 }
 
+// Size of plant dots on the component canvas (in pixels)
+const PLANT_DOT_SIZE = 6;
+
+/**
+ * Renders small green dots for each plant placed in the component
+ */
+function PlantDots({
+  plants,
+  componentWidth,
+  componentHeight,
+  innerDimensions,
+  borderWidthPx,
+}: {
+  plants: readonly PlacedPlantData[];
+  componentWidth: number;
+  componentHeight: number;
+  innerDimensions: { width: number; height: number };
+  borderWidthPx: number;
+}): React.JSX.Element | null {
+  if (plants.length === 0) return null;
+
+  // Scale from cm to pixels (within inner area)
+  const innerWidthPx = componentWidth - borderWidthPx * 2;
+  const innerHeightPx = componentHeight - borderWidthPx * 2;
+  const scaleX = innerWidthPx / innerDimensions.width;
+  const scaleY = innerHeightPx / innerDimensions.height;
+
+  return (
+    <>
+      {plants.map((plant) => {
+        // Convert plant position (cm) to pixels, offset by border
+        const x = borderWidthPx + plant.positionX * scaleX - PLANT_DOT_SIZE / 2;
+        const y = borderWidthPx + plant.positionY * scaleY - PLANT_DOT_SIZE / 2;
+
+        return (
+          <View
+            key={plant.id}
+            style={{
+              position: 'absolute',
+              left: x,
+              top: y,
+              width: PLANT_DOT_SIZE,
+              height: PLANT_DOT_SIZE,
+              borderRadius: PLANT_DOT_SIZE / 2,
+              backgroundColor: '#22c55e', // Green
+              borderWidth: 1,
+              borderColor: '#15803d', // Darker green border
+            }}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 /**
  * Renders a single component on the garden canvas
  */
@@ -97,6 +171,9 @@ export function ComponentRenderer({
   const color = getComponentColor(component);
   const icon = getComponentIcon(component);
   const isCircular = isPot(component) || isCircularTower(component);
+  const innerDimensions = getInnerDimensionsCm(component);
+  const borderWidthPx = (component.borderWidthInCm / 100) * pixelsPerMeter;
+  const plants = component.plants || [];
 
   // Tower layer indicator
   const layerCount = isRectangularTower(component) || isCircularTower(component)
@@ -133,13 +210,24 @@ export function ComponentRenderer({
       }}
       testID={`component-${component.id}`}
     >
-      {/* Component icon */}
-      <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>
-        {icon}
-      </Text>
+      {/* Plant dots - show where plants are placed */}
+      <PlantDots
+        plants={plants}
+        componentWidth={width}
+        componentHeight={height}
+        innerDimensions={innerDimensions}
+        borderWidthPx={borderWidthPx}
+      />
 
-      {/* Name label (if space permits) */}
-      {width > 40 && height > 40 && (
+      {/* Component icon (only show if no plants) */}
+      {plants.length === 0 && (
+        <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>
+          {icon}
+        </Text>
+      )}
+
+      {/* Name label (if space permits and no plants) */}
+      {width > 40 && height > 40 && plants.length === 0 && (
         <Text
           style={{
             color: 'white',
