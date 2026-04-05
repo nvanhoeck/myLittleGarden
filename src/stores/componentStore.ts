@@ -9,6 +9,8 @@ import type {
   PotData,
   RectangularTowerData,
   CircularTowerData,
+  RectangularLayerDimensions,
+  CircularLayerDimensions,
   SunDirection,
 } from '@/types';
 import {
@@ -52,6 +54,7 @@ interface ComponentState {
     lengthInCm: number;
     borderWidthInCm: number;
     numberOfLayers: number;
+    customLayers?: readonly RectangularLayerDimensions[];
   }) => string;
   addCircularTower: (params: {
     name: string;
@@ -59,6 +62,7 @@ interface ComponentState {
     diameterInCm: number;
     borderWidthInCm: number;
     numberOfLayers: number;
+    customLayers?: readonly CircularLayerDimensions[];
   }) => string;
   updateComponent: (id: string, data: Partial<ComponentData>) => void;
   removeComponent: (id: string) => void;
@@ -127,6 +131,7 @@ export const useComponentStore = create<ComponentState>()(
           lengthInCm: params.lengthInCm,
           borderWidthInCm: params.borderWidthInCm,
           numberOfLayers: params.numberOfLayers,
+          customLayers: params.customLayers,
         });
         set((state) => ({
           components: [...state.components, tower.toData()],
@@ -144,6 +149,7 @@ export const useComponentStore = create<ComponentState>()(
           diameterInCm: params.diameterInCm,
           borderWidthInCm: params.borderWidthInCm,
           numberOfLayers: params.numberOfLayers,
+          customLayers: params.customLayers,
         });
         set((state) => ({
           components: [...state.components, tower.toData()],

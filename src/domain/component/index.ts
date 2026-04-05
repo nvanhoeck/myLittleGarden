@@ -23,5 +23,14 @@ export {
   CircularTowerLayer,
   createRectangularTowerLayers,
   createCircularTowerLayers,
+  createRectangularTowerLayersFromCustom,
+  createCircularTowerLayersFromCustom,
+  calculateRectangularAutoFillLayers,
+  calculateCircularAutoFillLayers,
 } from './TowerLayer';
-export type { RectangularLayerData, CircularLayerData } from './TowerLayer';
+export type {
+  RectangularLayerData,
+  CircularLayerData,
+  RectangularCustomLayerDimensions,
+  CircularCustomLayerDimensions,
+} from './TowerLayer';

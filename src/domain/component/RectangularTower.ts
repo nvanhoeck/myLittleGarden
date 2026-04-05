@@ -3,9 +3,14 @@
  * Represents a rectangular tower with multiple layers for vertical gardening
  */
 
-import type { RectangularTowerData, SunDirection } from '@/types';
+import type { RectangularTowerData, RectangularLayerDimensions, SunDirection } from '@/types';
 import { ComponentPosition } from './ComponentPosition';
-import { RectangularTowerLayer, createRectangularTowerLayers } from './TowerLayer';
+import {
+  RectangularTowerLayer,
+  RectangularCustomLayerDimensions,
+  createRectangularTowerLayers,
+  createRectangularTowerLayersFromCustom,
+} from './TowerLayer';
 
 /**
  * Creation parameters for a new RectangularTower
@@ -18,6 +23,8 @@ export interface CreateRectangularTowerParams {
   readonly lengthInCm: number;
   readonly borderWidthInCm: number;
   readonly numberOfLayers: number;
+  /** Custom layer dimensions. If not provided, layers are auto-calculated with 0.85 reduction factor */
+  readonly customLayers?: readonly RectangularCustomLayerDimensions[];
 }
 
 /**
@@ -26,6 +33,7 @@ export interface CreateRectangularTowerParams {
  */
 export class RectangularTower {
   private readonly _layers: readonly RectangularTowerLayer[];
+  private readonly _customLayers: readonly RectangularLayerDimensions[] | undefined;
 
   private constructor(
     private readonly _id: string,
@@ -36,14 +44,20 @@ export class RectangularTower {
     private readonly _lengthInCm: number,
     private readonly _borderWidthInCm: number,
     private readonly _numberOfLayers: number,
-    private readonly _position: ComponentPosition
+    private readonly _position: ComponentPosition,
+    customLayers?: readonly RectangularLayerDimensions[]
   ) {
-    // Calculate layers based on base dimensions
-    this._layers = createRectangularTowerLayers(
-      _numberOfLayers,
-      _widthInCm,
-      _lengthInCm
-    );
+    this._customLayers = customLayers;
+    // Use custom layers if provided, otherwise auto-calculate with 0.85 reduction factor
+    if (customLayers && customLayers.length === _numberOfLayers) {
+      this._layers = createRectangularTowerLayersFromCustom(customLayers);
+    } else {
+      this._layers = createRectangularTowerLayers(
+        _numberOfLayers,
+        _widthInCm,
+        _lengthInCm
+      );
+    }
   }
 
   /**
@@ -59,7 +73,8 @@ export class RectangularTower {
       params.lengthInCm,
       params.borderWidthInCm,
       params.numberOfLayers,
-      ComponentPosition.atOrigin()
+      ComponentPosition.atOrigin(),
+      params.customLayers
     );
   }
 
@@ -80,7 +95,8 @@ export class RectangularTower {
         positionX: data.positionX,
         positionY: data.positionY,
         rotation: data.rotation,
-      })
+      }),
+      data.customLayers
     );
   }
 
@@ -124,6 +140,20 @@ export class RectangularTower {
 
   get layers(): readonly RectangularTowerLayer[] {
     return this._layers;
+  }
+
+  /**
+   * Custom layer dimensions if using custom sizing (undefined means auto-calculated)
+   */
+  get customLayers(): readonly RectangularLayerDimensions[] | undefined {
+    return this._customLayers;
+  }
+
+  /**
+   * Check if tower uses custom layer dimensions
+   */
+  get hasCustomLayers(): boolean {
+    return this._customLayers !== undefined;
   }
 
   /**
@@ -183,7 +213,8 @@ export class RectangularTower {
       this._lengthInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position.moveTo(x, y)
+      this._position.moveTo(x, y),
+      this._customLayers
     );
   }
 
@@ -200,7 +231,8 @@ export class RectangularTower {
       this._lengthInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position.rotateTo(degrees)
+      this._position.rotateTo(degrees),
+      this._customLayers
     );
   }
 
@@ -217,7 +249,8 @@ export class RectangularTower {
       this._lengthInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position
+      this._position,
+      this._customLayers
     );
   }
 
@@ -226,9 +259,9 @@ export class RectangularTower {
    */
   toData(): RectangularTowerData {
     const positionData = this._position.toData();
-    return {
+    const baseData = {
       id: this._id,
-      type: 'rectangularTower',
+      type: 'rectangularTower' as const,
       name: this._name,
       sunDirection: this._sunDirection,
       createdAt: this._createdAt.toISOString(),
@@ -239,7 +272,12 @@ export class RectangularTower {
       positionX: positionData.positionX,
       positionY: positionData.positionY,
       rotation: positionData.rotation,
-      plants: [],
+      plants: [] as const,
     };
+    // Only include customLayers if they exist
+    if (this._customLayers) {
+      return { ...baseData, customLayers: this._customLayers };
+    }
+    return baseData;
   }
 }

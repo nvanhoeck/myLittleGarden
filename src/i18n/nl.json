@@ -148,6 +148,12 @@
     "diameter": "Diameter",
     "borderWidth": "Randbreedte",
     "numberOfLayers": "Aantal lagen",
+    "autoCalculateLayers": "Automatisch berekenen",
+    "layerDimensions": "Laag afmetingen",
+    "layer": "Laag",
+    "bottom": "onderste",
+    "top": "bovenste",
+    "autoFill": "Vul automatisch in",
     "errors": {
       "nameRequired": "Naam is verplicht",
       "invalidDimensions": "Ongeldige afmetingen",

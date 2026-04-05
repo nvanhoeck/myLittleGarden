@@ -9,7 +9,13 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, Modal, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import type { ComponentType, SunDirection, ComponentData } from '@/types';
+import type {
+  ComponentType,
+  SunDirection,
+  ComponentData,
+  RectangularLayerDimensions,
+  CircularLayerDimensions,
+} from '@/types';
 import { useComponentActions, useComponentStore } from '@/stores';
 import { ComponentTypeSelector } from './ComponentTypeSelector';
 import { ComponentForm } from './ComponentForm';
@@ -99,10 +105,30 @@ export function ComponentCreationModal({
       diameterCm: string;
       borderWidthCm: string;
       numberOfLayers: string;
+      autoCalculateLayers: boolean;
+      rectangularLayers: Array<{ widthCm: string; lengthCm: string }>;
+      circularLayers: Array<{ diameterCm: string }>;
     }) => {
       if (!selectedType || !data.sunDirection) return;
 
       const borderWidth = parseFloat(data.borderWidthCm) || 2;
+
+      // Parse custom layers for rectangular tower
+      const parseRectangularCustomLayers = (): RectangularLayerDimensions[] | undefined => {
+        if (data.autoCalculateLayers) return undefined;
+        return data.rectangularLayers.map((layer) => ({
+          widthCm: parseFloat(layer.widthCm) || 0,
+          lengthCm: parseFloat(layer.lengthCm) || 0,
+        }));
+      };
+
+      // Parse custom layers for circular tower
+      const parseCircularCustomLayers = (): CircularLayerDimensions[] | undefined => {
+        if (data.autoCalculateLayers) return undefined;
+        return data.circularLayers.map((layer) => ({
+          diameterCm: parseFloat(layer.diameterCm) || 0,
+        }));
+      };
 
       // If editing, update the existing component
       if (isEditMode && editingComponent) {
@@ -120,8 +146,13 @@ export function ComponentCreationModal({
         if (selectedType === 'pot' || selectedType === 'circularTower') {
           (updateData as any).diameterInCm = parseFloat(data.diameterCm) || 40;
         }
-        if (selectedType === 'rectangularTower' || selectedType === 'circularTower') {
+        if (selectedType === 'rectangularTower') {
           (updateData as any).numberOfLayers = parseInt(data.numberOfLayers, 10) || 3;
+          (updateData as any).customLayers = parseRectangularCustomLayers();
+        }
+        if (selectedType === 'circularTower') {
+          (updateData as any).numberOfLayers = parseInt(data.numberOfLayers, 10) || 3;
+          (updateData as any).customLayers = parseCircularCustomLayers();
         }
 
         updateComponent(editingComponent.id, updateData);
@@ -161,6 +192,7 @@ export function ComponentCreationModal({
             lengthInCm: parseFloat(data.lengthCm) || 60,
             borderWidthInCm: borderWidth,
             numberOfLayers: parseInt(data.numberOfLayers, 10) || 3,
+            customLayers: parseRectangularCustomLayers(),
           });
           break;
 
@@ -171,6 +203,7 @@ export function ComponentCreationModal({
             diameterInCm: parseFloat(data.diameterCm) || 50,
             borderWidthInCm: borderWidth,
             numberOfLayers: parseInt(data.numberOfLayers, 10) || 3,
+            customLayers: parseCircularCustomLayers(),
           });
           break;
 

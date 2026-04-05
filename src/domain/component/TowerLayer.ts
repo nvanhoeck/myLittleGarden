@@ -169,7 +169,15 @@ export class CircularTowerLayer {
 }
 
 /**
- * Generate all layers for a rectangular tower
+ * Custom layer dimensions for rectangular tower
+ */
+export interface RectangularCustomLayerDimensions {
+  readonly widthCm: number;
+  readonly lengthCm: number;
+}
+
+/**
+ * Generate all layers for a rectangular tower using auto-calculation (0.85 reduction factor)
  */
 export function createRectangularTowerLayers(
   numberOfLayers: number,
@@ -184,7 +192,48 @@ export function createRectangularTowerLayers(
 }
 
 /**
- * Generate all layers for a circular tower
+ * Generate rectangular tower layers from custom dimensions
+ */
+export function createRectangularTowerLayersFromCustom(
+  customLayers: readonly RectangularCustomLayerDimensions[]
+): RectangularTowerLayer[] {
+  return customLayers.map((layer, index) =>
+    RectangularTowerLayer.fromData({
+      layerIndex: index,
+      widthCm: layer.widthCm,
+      lengthCm: layer.lengthCm,
+    })
+  );
+}
+
+/**
+ * Calculate auto-fill values for rectangular tower layers using 0.85 reduction factor
+ */
+export function calculateRectangularAutoFillLayers(
+  numberOfLayers: number,
+  baseWidthCm: number,
+  baseLengthCm: number
+): RectangularCustomLayerDimensions[] {
+  const layers: RectangularCustomLayerDimensions[] = [];
+  for (let i = 0; i < numberOfLayers; i++) {
+    const reductionFactor = Math.pow(LAYER_REDUCTION_FACTOR, i);
+    layers.push({
+      widthCm: Math.round(baseWidthCm * reductionFactor * 100) / 100,
+      lengthCm: Math.round(baseLengthCm * reductionFactor * 100) / 100,
+    });
+  }
+  return layers;
+}
+
+/**
+ * Custom layer dimensions for circular tower
+ */
+export interface CircularCustomLayerDimensions {
+  readonly diameterCm: number;
+}
+
+/**
+ * Generate all layers for a circular tower using auto-calculation (0.85 reduction factor)
  */
 export function createCircularTowerLayers(
   numberOfLayers: number,
@@ -193,6 +242,37 @@ export function createCircularTowerLayers(
   const layers: CircularTowerLayer[] = [];
   for (let i = 0; i < numberOfLayers; i++) {
     layers.push(CircularTowerLayer.create(i, baseDiameterCm));
+  }
+  return layers;
+}
+
+/**
+ * Generate circular tower layers from custom dimensions
+ */
+export function createCircularTowerLayersFromCustom(
+  customLayers: readonly CircularCustomLayerDimensions[]
+): CircularTowerLayer[] {
+  return customLayers.map((layer, index) =>
+    CircularTowerLayer.fromData({
+      layerIndex: index,
+      diameterCm: layer.diameterCm,
+    })
+  );
+}
+
+/**
+ * Calculate auto-fill values for circular tower layers using 0.85 reduction factor
+ */
+export function calculateCircularAutoFillLayers(
+  numberOfLayers: number,
+  baseDiameterCm: number
+): CircularCustomLayerDimensions[] {
+  const layers: CircularCustomLayerDimensions[] = [];
+  for (let i = 0; i < numberOfLayers; i++) {
+    const reductionFactor = Math.pow(LAYER_REDUCTION_FACTOR, i);
+    layers.push({
+      diameterCm: Math.round(baseDiameterCm * reductionFactor * 100) / 100,
+    });
   }
   return layers;
 }

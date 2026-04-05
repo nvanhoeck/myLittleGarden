@@ -46,6 +46,14 @@ export interface PotData extends BaseComponentData {
 }
 
 /**
+ * Custom layer dimensions for rectangular tower
+ */
+export interface RectangularLayerDimensions {
+  readonly widthCm: number;
+  readonly lengthCm: number;
+}
+
+/**
  * Rectangular tower component - vertical growing structure with layers
  */
 export interface RectangularTowerData extends BaseComponentData {
@@ -53,6 +61,15 @@ export interface RectangularTowerData extends BaseComponentData {
   readonly widthInCm: number;
   readonly lengthInCm: number;
   readonly numberOfLayers: number;
+  /** Custom layer dimensions (optional). If not provided, layers are auto-calculated with 0.85 reduction factor */
+  readonly customLayers?: readonly RectangularLayerDimensions[];
+}
+
+/**
+ * Custom layer dimensions for circular tower
+ */
+export interface CircularLayerDimensions {
+  readonly diameterCm: number;
 }
 
 /**
@@ -62,6 +79,8 @@ export interface CircularTowerData extends BaseComponentData {
   readonly type: 'circularTower';
   readonly diameterInCm: number;
   readonly numberOfLayers: number;
+  /** Custom layer dimensions (optional). If not provided, layers are auto-calculated with 0.85 reduction factor */
+  readonly customLayers?: readonly CircularLayerDimensions[];
 }
 
 /**

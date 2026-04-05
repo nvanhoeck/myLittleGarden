@@ -3,9 +3,14 @@
  * Represents a circular tower with multiple layers for vertical gardening
  */
 
-import type { CircularTowerData, SunDirection } from '@/types';
+import type { CircularTowerData, CircularLayerDimensions, SunDirection } from '@/types';
 import { ComponentPosition } from './ComponentPosition';
-import { CircularTowerLayer, createCircularTowerLayers } from './TowerLayer';
+import {
+  CircularTowerLayer,
+  CircularCustomLayerDimensions,
+  createCircularTowerLayers,
+  createCircularTowerLayersFromCustom,
+} from './TowerLayer';
 
 /**
  * Creation parameters for a new CircularTower
@@ -17,6 +22,8 @@ export interface CreateCircularTowerParams {
   readonly diameterInCm: number;
   readonly borderWidthInCm: number;
   readonly numberOfLayers: number;
+  /** Custom layer dimensions. If not provided, layers are auto-calculated with 0.85 reduction factor */
+  readonly customLayers?: readonly CircularCustomLayerDimensions[];
 }
 
 /**
@@ -25,6 +32,7 @@ export interface CreateCircularTowerParams {
  */
 export class CircularTower {
   private readonly _layers: readonly CircularTowerLayer[];
+  private readonly _customLayers: readonly CircularLayerDimensions[] | undefined;
 
   private constructor(
     private readonly _id: string,
@@ -34,10 +42,16 @@ export class CircularTower {
     private readonly _diameterInCm: number,
     private readonly _borderWidthInCm: number,
     private readonly _numberOfLayers: number,
-    private readonly _position: ComponentPosition
+    private readonly _position: ComponentPosition,
+    customLayers?: readonly CircularLayerDimensions[]
   ) {
-    // Calculate layers based on base diameter
-    this._layers = createCircularTowerLayers(_numberOfLayers, _diameterInCm);
+    this._customLayers = customLayers;
+    // Use custom layers if provided, otherwise auto-calculate with 0.85 reduction factor
+    if (customLayers && customLayers.length === _numberOfLayers) {
+      this._layers = createCircularTowerLayersFromCustom(customLayers);
+    } else {
+      this._layers = createCircularTowerLayers(_numberOfLayers, _diameterInCm);
+    }
   }
 
   /**
@@ -52,7 +66,8 @@ export class CircularTower {
       params.diameterInCm,
       params.borderWidthInCm,
       params.numberOfLayers,
-      ComponentPosition.atOrigin()
+      ComponentPosition.atOrigin(),
+      params.customLayers
     );
   }
 
@@ -72,7 +87,8 @@ export class CircularTower {
         positionX: data.positionX,
         positionY: data.positionY,
         rotation: data.rotation,
-      })
+      }),
+      data.customLayers
     );
   }
 
@@ -112,6 +128,20 @@ export class CircularTower {
 
   get layers(): readonly CircularTowerLayer[] {
     return this._layers;
+  }
+
+  /**
+   * Custom layer dimensions if using custom sizing (undefined means auto-calculated)
+   */
+  get customLayers(): readonly CircularLayerDimensions[] | undefined {
+    return this._customLayers;
+  }
+
+  /**
+   * Check if tower uses custom layer dimensions
+   */
+  get hasCustomLayers(): boolean {
+    return this._customLayers !== undefined;
   }
 
   /**
@@ -170,7 +200,8 @@ export class CircularTower {
       this._diameterInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position.moveTo(x, y)
+      this._position.moveTo(x, y),
+      this._customLayers
     );
   }
 
@@ -186,7 +217,8 @@ export class CircularTower {
       this._diameterInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position.rotateTo(degrees)
+      this._position.rotateTo(degrees),
+      this._customLayers
     );
   }
 
@@ -202,7 +234,8 @@ export class CircularTower {
       this._diameterInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position
+      this._position,
+      this._customLayers
     );
   }
 
@@ -211,9 +244,9 @@ export class CircularTower {
    */
   toData(): CircularTowerData {
     const positionData = this._position.toData();
-    return {
+    const baseData = {
       id: this._id,
-      type: 'circularTower',
+      type: 'circularTower' as const,
       name: this._name,
       sunDirection: this._sunDirection,
       createdAt: this._createdAt.toISOString(),
@@ -223,7 +256,12 @@ export class CircularTower {
       positionX: positionData.positionX,
       positionY: positionData.positionY,
       rotation: positionData.rotation,
-      plants: [],
+      plants: [] as const,
     };
+    // Only include customLayers if they exist
+    if (this._customLayers) {
+      return { ...baseData, customLayers: this._customLayers };
+    }
+    return baseData;
   }
 }
