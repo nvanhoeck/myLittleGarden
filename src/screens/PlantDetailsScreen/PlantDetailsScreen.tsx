@@ -118,6 +118,8 @@ export function PlantDetailsScreen({
   const { t } = useTranslation();
   const { plantId } = route.params;
   const plant = usePlantStore((state) => state.getPlantById(plantId));
+  const effectiveCompanions = usePlantStore((state) => state.getEffectiveCompanionsFor(plantId));
+  const effectiveCombatives = usePlantStore((state) => state.getEffectiveCombativesFor(plantId));
   const frostDates = useFrostDates();
 
   const handleBack = useCallback(() => {
@@ -207,8 +209,8 @@ export function PlantDetailsScreen({
 
         {/* Companion and Combative Plants */}
         <CompanionList
-          companions={plant.companions}
-          combatives={plant.combatives}
+          companions={effectiveCompanions}
+          combatives={effectiveCombatives}
           onPlantPress={handlePlantPress}
         />
       </ScrollView>

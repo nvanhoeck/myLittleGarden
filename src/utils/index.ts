@@ -11,8 +11,8 @@ export {
   getRelationshipsForPlant,
   countRelationships,
   areWithinRange,
-  getCompanionBenefit,
-  getCombativeHarm,
+  getCompanionBenefits,
+  getCombativeHarms,
   type PlantRelationship,
   type RelationshipType,
 } from './companionRelationships';

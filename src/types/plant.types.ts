@@ -94,7 +94,7 @@ export interface DayRange {
  */
 export interface CompanionRelationship {
     readonly plantId: string;
-    readonly benefit: CompanionBenefit;
+    readonly benefits: readonly CompanionBenefit[];
 }
 
 /**
@@ -102,7 +102,7 @@ export interface CompanionRelationship {
  */
 export interface CombativeRelationship {
     readonly plantId: string;
-    readonly harm: CombativeHarm;
+    readonly harms: readonly CombativeHarm[];
 }
 
 /**

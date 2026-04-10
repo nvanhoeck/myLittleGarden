@@ -99,7 +99,7 @@ export type DayRangeType = z.infer<typeof dayRangeSchema>;
  */
 export const companionRelationshipSchema = z.object({
     plantId: z.string().min(1),
-    benefit: companionBenefitSchema,
+    benefits: z.array(companionBenefitSchema).min(1),
 });
 export type CompanionRelationshipType = z.infer<typeof companionRelationshipSchema>;
 
@@ -108,7 +108,7 @@ export type CompanionRelationshipType = z.infer<typeof companionRelationshipSche
  */
 export const combativeRelationshipSchema = z.object({
     plantId: z.string().min(1),
-    harm: combativeHarmSchema,
+    harms: z.array(combativeHarmSchema).min(1),
 });
 export type CombativeRelationshipType = z.infer<typeof combativeRelationshipSchema>;
 

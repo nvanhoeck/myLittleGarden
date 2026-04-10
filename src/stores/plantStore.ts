@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
-import type { PlantData, PlantCategory } from '@/types/plant.types';
+import type { PlantData, PlantCategory, CompanionRelationship, CombativeRelationship, CompanionBenefit, CombativeHarm } from '@/types/plant.types';
 import { validatePlantDatabase } from '@/schemas/plantSchema';
 import plantsJson from '@/data/plants.json';
 
@@ -18,8 +18,18 @@ interface PlantState {
   // Selectors
   getPlantById: (id: string) => PlantData | undefined;
   getPlantsByCategory: (category: PlantCategory) => readonly PlantData[];
-  getCompanionsFor: (plantId: string) => readonly PlantData[];
-  getCombativesFor: (plantId: string) => readonly PlantData[];
+  /**
+   * Returns companions considering both directions:
+   * plants this plant lists as companions + plants that list this plant as companion.
+   * Benefits from both directions are merged per plant pair.
+   */
+  getEffectiveCompanionsFor: (plantId: string) => readonly CompanionRelationship[];
+  /**
+   * Returns combatives considering both directions:
+   * plants this plant lists as combative + plants that list this plant as combative.
+   * Harms from both directions are merged per plant pair.
+   */
+  getEffectiveCombativesFor: (plantId: string) => readonly CombativeRelationship[];
   searchPlants: (query: string) => readonly PlantData[];
 }
 
@@ -30,7 +40,7 @@ function loadPlantData(): { plants: PlantData[]; version: string; error: string 
   try {
     const validated = validatePlantDatabase(plantsJson);
     return {
-      plants: validated.plants as PlantData[],
+      plants: validated.plants as unknown as PlantData[],
       version: validated.version,
       error: null,
     };
@@ -68,22 +78,61 @@ export const usePlantStore = create<PlantState>()((set, get) => ({
     return get().plants.filter((plant) => plant.category === category);
   },
 
-  // Get companion plants for a given plant
-  getCompanionsFor: (plantId: string): readonly PlantData[] => {
-    const plant = get().getPlantById(plantId);
-    if (!plant) return [];
+  // Get effective companion relationships considering both directions
+  getEffectiveCompanionsFor: (plantId: string): readonly CompanionRelationship[] => {
+    const plants = get().plants;
+    const plant = plants.find((p) => p.id === plantId);
 
-    const companionIds = plant.companions.map((c) => c.plantId);
-    return get().plants.filter((p) => companionIds.includes(p.id));
+    // Map from partnerId → merged Set of benefits
+    const benefitsMap = new Map<string, Set<CompanionBenefit>>();
+
+    const addBenefits = (partnerId: string, benefits: readonly CompanionBenefit[]) => {
+      if (!benefitsMap.has(partnerId)) benefitsMap.set(partnerId, new Set());
+      benefits.forEach((b) => benefitsMap.get(partnerId)!.add(b));
+    };
+
+    // Forward: this plant lists others as companions
+    plant?.companions.forEach((c) => addBenefits(c.plantId, c.benefits));
+
+    // Reverse: other plants list this plant as companion
+    plants.forEach((p) => {
+      if (p.id === plantId) return;
+      p.companions.forEach((c) => {
+        if (c.plantId === plantId) addBenefits(p.id, c.benefits);
+      });
+    });
+
+    return Array.from(benefitsMap.entries()).map(([id, benefits]) => ({
+      plantId: id,
+      benefits: Array.from(benefits),
+    }));
   },
 
-  // Get combative plants for a given plant
-  getCombativesFor: (plantId: string): readonly PlantData[] => {
-    const plant = get().getPlantById(plantId);
-    if (!plant) return [];
+  // Get effective combative relationships considering both directions
+  getEffectiveCombativesFor: (plantId: string): readonly CombativeRelationship[] => {
+    const plants = get().plants;
+    const plant = plants.find((p) => p.id === plantId);
 
-    const combativeIds = plant.combatives.map((c) => c.plantId);
-    return get().plants.filter((p) => combativeIds.includes(p.id));
+    const harmsMap = new Map<string, Set<CombativeHarm>>();
+
+    const addHarms = (partnerId: string, harms: readonly CombativeHarm[]) => {
+      if (!harmsMap.has(partnerId)) harmsMap.set(partnerId, new Set());
+      harms.forEach((h) => harmsMap.get(partnerId)!.add(h));
+    };
+
+    plant?.combatives.forEach((c) => addHarms(c.plantId, c.harms));
+
+    plants.forEach((p) => {
+      if (p.id === plantId) return;
+      p.combatives.forEach((c) => {
+        if (c.plantId === plantId) addHarms(p.id, c.harms);
+      });
+    });
+
+    return Array.from(harmsMap.entries()).map(([id, harms]) => ({
+      plantId: id,
+      harms: Array.from(harms),
+    }));
   },
 
   // Search plants by name or description

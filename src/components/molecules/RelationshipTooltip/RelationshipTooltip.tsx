@@ -1,12 +1,13 @@
 /**
  * RelationshipTooltip
- * Modal tooltip showing details about a companion or combative plant relationship.
+ * Modal tooltip showing all benefits/harms of a companion or combative plant relationship.
  */
 
 import React from 'react';
 import { View, Text, Pressable, Modal, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { PlantRelationship } from '@/utils/companionRelationships';
+import type { CompanionBenefit, CombativeHarm } from '@/types/plant.types';
 
 interface RelationshipTooltipProps {
   relationship: PlantRelationship | null;
@@ -14,84 +15,74 @@ interface RelationshipTooltipProps {
   onClose: () => void;
 }
 
-export function RelationshipTooltip({
-  relationship,
-  visible,
-  onClose,
-}: RelationshipTooltipProps): React.JSX.Element {
+function getBenefitIcon(benefit: CompanionBenefit): string {
+  switch (benefit) {
+    case 'detersPests': return '🛡️';
+    case 'attractsPollinators': return '🐝';
+    case 'growthBoost': return '⬆️';
+    case 'improvesFlavor': return '✨';
+    case 'fixesNitrogen': return '💧';
+    default: return '❤️';
+  }
+}
+
+function getHarmIcon(harm: CombativeHarm): string {
+  switch (harm) {
+    case 'inhibitsGrowth': return '⬇️';
+    case 'attractsPests': return '🐛';
+    case 'depletesNutrients': return '⚠️';
+    case 'diseaseRisk': return '🦠';
+    default: return '⛔';
+  }
+}
+
+export function RelationshipTooltip({ relationship, visible, onClose }: RelationshipTooltipProps): React.JSX.Element {
   const { t } = useTranslation();
 
-  if (!relationship) {
-    return <></>;
-  }
+  if (!relationship) return <></>;
 
   const isCompanion = relationship.type === 'companion';
   const titleColor = isCompanion ? '#22c55e' : '#ef4444';
   const icon = isCompanion ? '❤️' : '⛔';
-  const title = isCompanion
-    ? t('plants.companions')
-    : t('plants.combatives');
+  const title = isCompanion ? t('plants.companions') : t('plants.combatives');
+  const tagBg = isCompanion ? '#dcfce7' : '#fee2e2';
+  const tagTextColor = isCompanion ? '#166534' : '#991b1b';
 
-  // Get the translated benefit or harm description
-  const description = isCompanion
-    ? relationship.benefit
-      ? t(`plants.benefits.${relationship.benefit}`)
-      : ''
-    : relationship.harm
-      ? t(`plants.harms.${relationship.harm}`)
-      : '';
+  const items = isCompanion
+    ? (relationship.benefits ?? []).map((b) => ({ icon: getBenefitIcon(b), label: t(`plants.benefits.${b}`) }))
+    : (relationship.harms ?? []).map((h) => ({ icon: getHarmIcon(h), label: t(`plants.harms.${h}`) }));
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
         <View style={styles.tooltipContainer}>
           <Pressable style={styles.tooltip} onPress={(e) => e.stopPropagation()}>
-            {/* Header */}
             <View style={styles.header}>
               <Text style={styles.headerIcon}>{icon}</Text>
-              <Text style={[styles.headerTitle, { color: titleColor }]}>
-                {title}
-              </Text>
+              <Text style={[styles.headerTitle, { color: titleColor }]}>{title}</Text>
             </View>
 
-            {/* Plant names */}
             <View style={styles.plantsRow}>
               <View style={styles.plantBadge}>
                 <Text style={styles.plantEmoji}>🌿</Text>
                 <Text style={styles.plantName}>{relationship.plant1Name}</Text>
               </View>
-              <Text style={styles.relationArrow}>
-                {isCompanion ? '↔️' : '⚡'}
-              </Text>
+              <Text style={styles.relationArrow}>{isCompanion ? '↔️' : '⚡'}</Text>
               <View style={styles.plantBadge}>
                 <Text style={styles.plantEmoji}>🌿</Text>
                 <Text style={styles.plantName}>{relationship.plant2Name}</Text>
               </View>
             </View>
 
-            {/* Benefit/Harm description */}
-            <View
-              style={[
-                styles.descriptionContainer,
-                { backgroundColor: isCompanion ? '#dcfce7' : '#fee2e2' },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.descriptionText,
-                  { color: isCompanion ? '#166534' : '#991b1b' },
-                ]}
-              >
-                {description}
-              </Text>
+            <View style={styles.tagsContainer}>
+              {items.map((item) => (
+                <View key={item.label} style={[styles.tag, { backgroundColor: tagBg }]}>
+                  <Text style={styles.tagIcon}>{item.icon}</Text>
+                  <Text style={[styles.tagLabel, { color: tagTextColor }]}>{item.label}</Text>
+                </View>
+              ))}
             </View>
 
-            {/* Close button */}
             <Pressable style={styles.closeButton} onPress={onClose}>
               <Text style={styles.closeButtonText}>{t('common.close')}</Text>
             </Pressable>
@@ -129,14 +120,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
   },
-  headerIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
+  headerIcon: { fontSize: 20, marginRight: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '700' },
   plantsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -153,28 +138,22 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
-  plantEmoji: {
-    fontSize: 14,
-  },
-  plantName: {
-    color: '#f3f4f6',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  relationArrow: {
-    fontSize: 18,
-    color: '#9ca3af',
-  },
-  descriptionContainer: {
-    padding: 12,
-    borderRadius: 8,
+  plantEmoji: { fontSize: 14 },
+  plantName: { color: '#f3f4f6', fontSize: 13, fontWeight: '500' },
+  relationArrow: { fontSize: 18, color: '#9ca3af' },
+  tagsContainer: {
+    gap: 8,
     marginBottom: 16,
   },
-  descriptionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 8,
+    gap: 8,
   },
+  tagIcon: { fontSize: 16 },
+  tagLabel: { fontSize: 14, fontWeight: '600', flex: 1 },
   closeButton: {
     backgroundColor: '#374151',
     paddingVertical: 10,
@@ -182,9 +161,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  closeButtonText: {
-    color: '#f3f4f6',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  closeButtonText: { color: '#f3f4f6', fontSize: 14, fontWeight: '600' },
 });

@@ -1,7 +1,6 @@
 /**
  * CompanionList
  * Displays companion and combative plant relationships
- * Shows benefit/harm indicators with icons
  */
 
 import React from 'react';
@@ -26,91 +25,52 @@ interface CompanionListProps {
 
 interface RelationshipItemProps {
   readonly plantId: string;
-  readonly icon: string;
-  readonly label: string;
+  readonly tags: readonly { icon: string; label: string }[];
   readonly isNegative?: boolean;
   readonly onPress?: () => void;
 }
 
-/**
- * Get benefit icon
- */
 function getBenefitIcon(benefit: CompanionBenefit): string {
   switch (benefit) {
-    case 'detersPests':
-      return '🚫'; // No entry / deters
-    case 'attractsPollinators':
-      return '🐝'; // Bee
-    case 'growthBoost':
-      return '💪'; // Flexed bicep
-    case 'improvesFlavor':
-      return '✨'; // Sparkles
-    case 'fixesNitrogen':
-      return '🌿'; // Herb / nitrogen
-    default:
-      return '✅'; // Check mark
+    case 'detersPests': return '🚫';
+    case 'attractsPollinators': return '🐝';
+    case 'growthBoost': return '💪';
+    case 'improvesFlavor': return '✨';
+    case 'fixesNitrogen': return '🌿';
+    default: return '✅';
   }
 }
 
-/**
- * Get harm icon
- */
 function getHarmIcon(harm: CombativeHarm): string {
   switch (harm) {
-    case 'inhibitsGrowth':
-      return '🛑'; // Stop sign
-    case 'attractsPests':
-      return '🐛'; // Bug
-    case 'depletesNutrients':
-      return '📉'; // Chart decreasing
-    case 'diseaseRisk':
-      return '⚠️'; // Warning
-    default:
-      return '❌'; // Cross mark
+    case 'inhibitsGrowth': return '🛑';
+    case 'attractsPests': return '🐛';
+    case 'depletesNutrients': return '📉';
+    case 'diseaseRisk': return '⚠️';
+    default: return '❌';
   }
 }
 
-/**
- * Get the category icon emoji for a plant (fallback)
- */
 function getCategoryIconEmoji(plantData: PlantData | undefined): string {
   if (!plantData) return '🌱';
   const categoryInfo = PLANT_CATEGORIES.find((cat) => cat.key === plantData.category);
   return categoryInfo?.icon ?? '🌱';
 }
 
-/**
- * Plant icon display component - shows image or emoji fallback
- */
 function PlantIconDisplay({ plantId, plantData }: { plantId: string; plantData: PlantData | undefined }): React.JSX.Element {
   const plantIcon = getPlantIcon(plantId);
   const hasIcon = hasPlantIcon(plantId);
-
   if (hasIcon && plantIcon) {
-    return (
-      <Image
-        source={plantIcon}
-        style={{ width: 28, height: 28 }}
-        resizeMode="contain"
-      />
-    );
+    return <Image source={plantIcon} style={{ width: 28, height: 28 }} resizeMode="contain" />;
   }
-
   return <Text className="text-lg">{getCategoryIconEmoji(plantData)}</Text>;
 }
 
-/**
- * Individual relationship item
- */
-function RelationshipItem({
-  plantId,
-  icon,
-  label,
-  isNegative = false,
-  onPress,
-}: RelationshipItemProps): React.JSX.Element {
+function RelationshipItem({ plantId, tags, isNegative = false, onPress }: RelationshipItemProps): React.JSX.Element {
   const plant = usePlantStore((state) => state.getPlantById(plantId));
   const plantName = plant?.nameNl ?? plantId;
+  const tagBg = isNegative ? 'bg-red-900/50' : 'bg-green-900/50';
+  const tagText = isNegative ? 'text-red-400' : 'text-green-400';
 
   return (
     <Pressable
@@ -120,21 +80,18 @@ function RelationshipItem({
       android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
     >
       <View className="flex-row items-center">
-        {/* Plant icon */}
         <View className="w-10 h-10 rounded-full bg-gray-700 items-center justify-center mr-3">
           <PlantIconDisplay plantId={plantId} plantData={plant} />
         </View>
-
         <View className="flex-1 flex-shrink">
           <Text className="text-white font-medium" numberOfLines={1}>{plantName}</Text>
-          <View className="flex-row items-center mt-1">
-            <Text className="mr-1">{icon}</Text>
-            <Text
-              className={`text-xs ${isNegative ? 'text-red-400' : 'text-green-400'}`}
-              numberOfLines={1}
-            >
-              {label}
-            </Text>
+          <View className="flex-row flex-wrap mt-1" style={{ gap: 4 }}>
+            {tags.map((tag) => (
+              <View key={tag.label} className={`flex-row items-center px-2 py-0.5 rounded-full ${tagBg}`}>
+                <Text className="mr-1" style={{ fontSize: 11 }}>{tag.icon}</Text>
+                <Text className={`text-xs ${tagText}`}>{tag.label}</Text>
+              </View>
+            ))}
           </View>
         </View>
       </View>
@@ -142,18 +99,7 @@ function RelationshipItem({
   );
 }
 
-/**
- * Section header with icon
- */
-function SectionHeader({
-  title,
-  icon,
-  count,
-}: {
-  title: string;
-  icon: string;
-  count: number;
-}): React.JSX.Element {
+function SectionHeader({ title, icon, count }: { title: string; icon: string; count: number }): React.JSX.Element {
   return (
     <View className="flex-row items-center mb-3">
       <Text className="text-xl mr-2">{icon}</Text>
@@ -165,9 +111,6 @@ function SectionHeader({
   );
 }
 
-/**
- * Empty state component
- */
 function EmptyState({ message }: { message: string }): React.JSX.Element {
   return (
     <View className="bg-gray-800/40 rounded-xl p-4 items-center">
@@ -176,33 +119,20 @@ function EmptyState({ message }: { message: string }): React.JSX.Element {
   );
 }
 
-/**
- * CompanionList - Shows companion and combative plant relationships
- */
-export function CompanionList({
-  companions,
-  combatives,
-  onPlantPress,
-}: CompanionListProps): React.JSX.Element {
+export function CompanionList({ companions, combatives, onPlantPress }: CompanionListProps): React.JSX.Element {
   const { t } = useTranslation();
 
   return (
     <View className="px-4">
-      {/* Companion Plants Section */}
       <View className="mb-6">
-        <SectionHeader
-          title={t('plantDetails.companionPlants')}
-          icon="🤝"
-          count={companions.length}
-        />
+        <SectionHeader title={t('plantDetails.companionPlants')} icon="🤝" count={companions.length} />
         {companions.length > 0 ? (
           <View>
             {companions.map((companion) => (
               <RelationshipItem
                 key={companion.plantId}
                 plantId={companion.plantId}
-                icon={getBenefitIcon(companion.benefit)}
-                label={t(`plants.benefits.${companion.benefit}`)}
+                tags={companion.benefits.map((b) => ({ icon: getBenefitIcon(b), label: t(`plants.benefits.${b}`) }))}
                 onPress={() => onPlantPress?.(companion.plantId)}
               />
             ))}
@@ -212,21 +142,15 @@ export function CompanionList({
         )}
       </View>
 
-      {/* Combative Plants Section */}
       <View className="mb-6">
-        <SectionHeader
-          title={t('plantDetails.combativePlants')}
-          icon="⚠️"
-          count={combatives.length}
-        />
+        <SectionHeader title={t('plantDetails.combativePlants')} icon="⚠️" count={combatives.length} />
         {combatives.length > 0 ? (
           <View>
             {combatives.map((combative) => (
               <RelationshipItem
                 key={combative.plantId}
                 plantId={combative.plantId}
-                icon={getHarmIcon(combative.harm)}
-                label={t(`plants.harms.${combative.harm}`)}
+                tags={combative.harms.map((h) => ({ icon: getHarmIcon(h), label: t(`plants.harms.${h}`) }))}
                 isNegative
                 onPress={() => onPlantPress?.(combative.plantId)}
               />

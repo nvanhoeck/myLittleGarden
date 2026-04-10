@@ -16,7 +16,8 @@ import type {
 export type RelationshipType = 'companion' | 'combative' | 'neutral';
 
 /**
- * A relationship between two placed plants
+ * A relationship between two placed plants.
+ * benefits/harms are aggregated from both directions (A→B and B→A).
  */
 export interface PlantRelationship {
   readonly plant1Id: string;
@@ -24,8 +25,8 @@ export interface PlantRelationship {
   readonly plant1Position: { x: number; y: number };
   readonly plant2Position: { x: number; y: number };
   readonly type: RelationshipType;
-  readonly benefit?: CompanionBenefit;
-  readonly harm?: CombativeHarm;
+  readonly benefits?: readonly CompanionBenefit[];
+  readonly harms?: readonly CombativeHarm[];
   readonly plant1Name: string;
   readonly plant2Name: string;
 }
@@ -50,35 +51,44 @@ export function areWithinRange(
 }
 
 /**
- * Get companion relationship from plant1 to plant2
- * Returns the benefit if plant1 lists plant2 as a companion
+ * Get companion benefits from plant1 toward plant2
+ * Returns all benefits if plant1 lists plant2 as a companion
  */
-export function getCompanionBenefit(
+export function getCompanionBenefits(
   plant1Data: PlantData,
   plant2Id: string
-): CompanionBenefit | undefined {
+): readonly CompanionBenefit[] {
   const relationship = plant1Data.companions.find(
     (c) => c.plantId === plant2Id
   );
-  return relationship?.benefit;
+  return relationship?.benefits ?? [];
 }
 
 /**
- * Get combative relationship from plant1 to plant2
- * Returns the harm if plant1 lists plant2 as combative
+ * Get combative harms from plant1 toward plant2
+ * Returns all harms if plant1 lists plant2 as combative
  */
-export function getCombativeHarm(
+export function getCombativeHarms(
   plant1Data: PlantData,
   plant2Id: string
-): CombativeHarm | undefined {
+): readonly CombativeHarm[] {
   const relationship = plant1Data.combatives.find(
     (c) => c.plantId === plant2Id
   );
-  return relationship?.harm;
+  return relationship?.harms ?? [];
 }
 
 /**
- * Calculate all relationships between plants in a component
+ * Merge two arrays of unique values
+ */
+function mergeUnique<T>(a: readonly T[], b: readonly T[]): readonly T[] {
+  return Array.from(new Set([...a, ...b]));
+}
+
+/**
+ * Calculate all relationships between plants in a component.
+ * Benefits and harms are aggregated from both directions.
+ * Combative takes precedence over companion when both exist.
  */
 export function calculatePlantRelationships(
   plants: readonly PlacedPlantData[],
@@ -114,34 +124,36 @@ export function calculatePlantRelationships(
         return;
       }
 
-      // Check for companion relationship (either direction)
-      const benefit1to2 = getCompanionBenefit(plant1Data, plant2.plantId);
-      const benefit2to1 = getCompanionBenefit(plant2Data, plant1.plantId);
+      // Aggregate benefits and harms from both directions
+      const benefits = mergeUnique(
+        getCompanionBenefits(plant1Data, plant2.plantId),
+        getCompanionBenefits(plant2Data, plant1.plantId)
+      );
+      const harms = mergeUnique(
+        getCombativeHarms(plant1Data, plant2.plantId),
+        getCombativeHarms(plant2Data, plant1.plantId)
+      );
 
-      // Check for combative relationship (either direction)
-      const harm1to2 = getCombativeHarm(plant1Data, plant2.plantId);
-      const harm2to1 = getCombativeHarm(plant2Data, plant1.plantId);
-
-      // Determine relationship type - combative takes precedence
-      if (harm1to2 || harm2to1) {
+      // Combative takes precedence
+      if (harms.length > 0) {
         relationships.push({
           plant1Id: plant1.id,
           plant2Id: plant2.id,
           plant1Position: { x: plant1.positionX, y: plant1.positionY },
           plant2Position: { x: plant2.positionX, y: plant2.positionY },
           type: 'combative',
-          harm: harm1to2 || harm2to1,
+          harms,
           plant1Name: plant1Data.nameNl,
           plant2Name: plant2Data.nameNl,
         });
-      } else if (benefit1to2 || benefit2to1) {
+      } else if (benefits.length > 0) {
         relationships.push({
           plant1Id: plant1.id,
           plant2Id: plant2.id,
           plant1Position: { x: plant1.positionX, y: plant1.positionY },
           plant2Position: { x: plant2.positionX, y: plant2.positionY },
           type: 'companion',
-          benefit: benefit1to2 || benefit2to1,
+          benefits,
           plant1Name: plant1Data.nameNl,
           plant2Name: plant2Data.nameNl,
         });
