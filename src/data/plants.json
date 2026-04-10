@@ -46,7 +46,10 @@
           "plantId": "aubergine",
           "harm": "diseaseRisk"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "paprika",
@@ -84,7 +87,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "komkommer",
@@ -122,7 +128,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "courgette",
@@ -156,7 +165,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "sla",
@@ -194,7 +206,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "spinazie",
@@ -228,7 +243,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "wortel",
@@ -266,7 +284,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "biet",
@@ -300,7 +321,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "radijs",
@@ -338,7 +362,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "broccoli",
@@ -376,7 +403,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "tuinboon",
@@ -406,7 +436,10 @@
           "benefit": "fixesNitrogen"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "snijboon",
@@ -441,7 +474,10 @@
           "plantId": "knoflook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "basilicum",
@@ -479,7 +515,10 @@
           "benefit": "improvesFlavor"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "peterselie",
@@ -517,7 +556,10 @@
           "benefit": "improvesFlavor"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "bieslook",
@@ -555,7 +597,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "dille",
@@ -593,7 +638,10 @@
           "benefit": "improvesFlavor"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "knoflook",
@@ -640,7 +688,10 @@
           "plantId": "snijboon",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "aubergine",
@@ -683,7 +734,10 @@
           "plantId": "tomaat",
           "harm": "diseaseRisk"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "ui",
@@ -730,7 +784,10 @@
           "plantId": "snijboon",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "rucola",
@@ -764,7 +821,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "boerenkool",
@@ -802,7 +862,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "doperwt",
@@ -841,7 +904,10 @@
           "plantId": "ui",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "sugarsnap",
@@ -880,7 +946,10 @@
           "plantId": "ui",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "aardbei",
@@ -915,7 +984,10 @@
           "plantId": "broccoli",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": true,
+      "plantType": "vegetable"
     },
     {
       "id": "bloemkool",
@@ -953,7 +1025,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "spruitjes",
@@ -991,7 +1066,10 @@
           "benefit": "improvesFlavor"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "savooiekool",
@@ -1025,7 +1103,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "groene-kool",
@@ -1059,7 +1140,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "rode-kool",
@@ -1093,7 +1177,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "andijvie",
@@ -1127,7 +1214,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "snijsla",
@@ -1161,7 +1251,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "ijsberg-sla",
@@ -1195,7 +1288,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "romaine-sla",
@@ -1229,7 +1325,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "snijbiet",
@@ -1259,7 +1358,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "chinese-kool",
@@ -1293,7 +1395,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "paksoi",
@@ -1323,7 +1428,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "mizuna",
@@ -1353,7 +1461,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "veldsla",
@@ -1383,7 +1494,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "rauwkost",
@@ -1417,7 +1531,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "mangold",
@@ -1447,7 +1564,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "snijkool",
@@ -1477,7 +1597,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "pommer",
@@ -1511,7 +1634,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "meloen",
@@ -1541,7 +1667,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "watermeloen",
@@ -1571,7 +1700,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "witte-boon",
@@ -1606,7 +1738,10 @@
           "plantId": "knoflook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "kapucijner",
@@ -1641,7 +1776,10 @@
           "plantId": "ui",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "linzen",
@@ -1671,7 +1809,10 @@
           "benefit": "fixesNitrogen"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "munt",
@@ -1706,7 +1847,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": true,
+      "plantType": "herb"
     },
     {
       "id": "tijm",
@@ -1745,7 +1889,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "oregano",
@@ -1780,7 +1927,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "rozemarijn",
@@ -1815,7 +1965,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "shrub"
     },
     {
       "id": "salie",
@@ -1854,7 +2007,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "majoraan",
@@ -1889,7 +2045,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "lavendel",
@@ -1919,7 +2078,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "cilantro",
@@ -1958,7 +2120,10 @@
           "plantId": "dille",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "koriander-zaad",
@@ -1988,7 +2153,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "fennel",
@@ -2022,7 +2190,10 @@
           "plantId": "cilantro",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "dragon",
@@ -2052,7 +2223,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "kervel",
@@ -2082,7 +2256,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "bezemkruid",
@@ -2116,7 +2293,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "sleutelbloem",
@@ -2141,7 +2321,10 @@
       "transplantWeeks": -4,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "paardebloem",
@@ -2166,7 +2349,10 @@
       "transplantWeeks": -6,
       "directSowWeeks": -4,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "bladselderij",
@@ -2196,7 +2382,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "knolselderij",
@@ -2226,7 +2415,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "pastinaak",
@@ -2256,7 +2448,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "schorseneer",
@@ -2286,7 +2481,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "koolrabi",
@@ -2320,7 +2518,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "raap",
@@ -2350,7 +2551,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "rammenas",
@@ -2380,7 +2584,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "retichie",
@@ -2410,7 +2617,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "sugarloaf",
@@ -2440,7 +2650,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "rode-chichorei",
@@ -2470,7 +2683,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "witlof",
@@ -2495,7 +2711,10 @@
       "transplantWeeks": -8,
       "directSowWeeks": -8,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "radicchio",
@@ -2525,7 +2744,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "zuring",
@@ -2550,7 +2772,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "kruidplant",
@@ -2575,7 +2800,10 @@
       "transplantWeeks": 2,
       "directSowWeeks": 2,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "goudsbloemkruid",
@@ -2609,7 +2837,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "chia",
@@ -2634,7 +2865,10 @@
       "transplantWeeks": 2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "amarant",
@@ -2659,7 +2893,10 @@
       "transplantWeeks": 2,
       "directSowWeeks": 1,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "quinoa",
@@ -2684,7 +2921,10 @@
       "transplantWeeks": 1,
       "directSowWeeks": 1,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "erwtensoep",
@@ -2719,7 +2959,10 @@
           "plantId": "ui",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "acker-boon",
@@ -2749,7 +2992,10 @@
           "benefit": "fixesNitrogen"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "dubbelboon",
@@ -2784,7 +3030,10 @@
           "plantId": "knoflook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "pronkboon",
@@ -2814,7 +3063,10 @@
           "benefit": "fixesNitrogen"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "limaboon",
@@ -2844,7 +3096,10 @@
           "benefit": "fixesNitrogen"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "schuimboon",
@@ -2874,7 +3129,10 @@
           "benefit": "fixesNitrogen"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "asperge",
@@ -2913,7 +3171,10 @@
           "plantId": "ui",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "perzik",
@@ -2938,7 +3199,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "kapuzijner-kers",
@@ -2972,7 +3236,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "eetbare-bloem",
@@ -2997,7 +3264,10 @@
       "transplantWeeks": -4,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "maggiekruid",
@@ -3027,7 +3297,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "bonekruid",
@@ -3057,7 +3330,10 @@
           "benefit": "improvesFlavor"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "bergmunt",
@@ -3092,7 +3368,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": true,
+      "plantType": "herb"
     },
     {
       "id": "anijs",
@@ -3122,7 +3401,10 @@
           "plantId": "dille",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "selderij",
@@ -3152,7 +3434,10 @@
           "benefit": "growthBoost"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "mandarijnkruid",
@@ -3187,7 +3472,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": true,
+      "plantType": "herb"
     },
     {
       "id": "appelmunt",
@@ -3222,7 +3510,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": true,
+      "plantType": "herb"
     },
     {
       "id": "tuinmint",
@@ -3257,7 +3548,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": true,
+      "plantType": "herb"
     },
     {
       "id": "kamille",
@@ -3291,7 +3585,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "reigersbek",
@@ -3316,7 +3613,10 @@
       "transplantWeeks": -6,
       "directSowWeeks": -4,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "salie-rood",
@@ -3355,7 +3655,10 @@
           "plantId": "bieslook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "citroensalie",
@@ -3385,7 +3688,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "borage",
@@ -3419,7 +3725,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "sleutelbloem-thee",
@@ -3444,7 +3753,10 @@
       "transplantWeeks": -6,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "roodlover",
@@ -3474,7 +3786,10 @@
           "benefit": "fixesNitrogen"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "oca",
@@ -3499,7 +3814,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "kaasstelen",
@@ -3524,7 +3842,10 @@
       "transplantWeeks": -4,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "skraelkool",
@@ -3549,7 +3870,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "stengelbiet",
@@ -3574,7 +3898,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": -2,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "zuringelambique",
@@ -3599,7 +3926,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "vogelvoet",
@@ -3624,7 +3954,10 @@
       "transplantWeeks": 1,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "studentenkruid",
@@ -3649,7 +3982,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "steentijm",
@@ -3674,7 +4010,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "spaanse-peper",
@@ -3699,7 +4038,10 @@
       "transplantWeeks": 2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "cherimoya",
@@ -3724,7 +4066,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "kleine-radijs",
@@ -3749,7 +4094,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -6,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "waterkers",
@@ -3774,7 +4122,10 @@
       "transplantWeeks": -4,
       "directSowWeeks": -2,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "platte-peterselie",
@@ -3799,7 +4150,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "pronkerwt",
@@ -3824,7 +4178,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -8,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "akkerwinde",
@@ -3849,7 +4206,10 @@
       "transplantWeeks": -4,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "vlierbes",
@@ -3874,7 +4234,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "kers",
@@ -3899,7 +4262,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "blauwe-bes",
@@ -3924,7 +4290,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "shrub"
     },
     {
       "id": "braam",
@@ -3949,7 +4318,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "shrub"
     },
     {
       "id": "framboos",
@@ -3974,7 +4346,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "shrub"
     },
     {
       "id": "kruisbes",
@@ -3999,7 +4374,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "shrub"
     },
     {
       "id": "aalbes",
@@ -4024,7 +4402,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "shrub"
     },
     {
       "id": "druif",
@@ -4049,7 +4430,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "shrub"
     },
     {
       "id": "walnoot",
@@ -4074,7 +4458,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "hazelnoot",
@@ -4099,7 +4486,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "prei",
@@ -4124,7 +4514,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "aardappel",
@@ -4149,7 +4542,11 @@
       "transplantWeeks": null,
       "directSowWeeks": 2,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable",
+      "rootSpacingRadiusCm": 40
     },
     {
       "id": "artisjok",
@@ -4174,7 +4571,10 @@
       "transplantWeeks": 2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "maïs",
@@ -4199,7 +4599,10 @@
       "transplantWeeks": 1,
       "directSowWeeks": 2,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "citroenmelisse",
@@ -4224,7 +4627,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "bonenkruid",
@@ -4249,7 +4655,10 @@
       "transplantWeeks": null,
       "directSowWeeks": 1,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "karwij",
@@ -4274,7 +4683,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -2,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "komijn",
@@ -4299,7 +4711,10 @@
       "transplantWeeks": 2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "laurier",
@@ -4324,7 +4739,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "pepermunt",
@@ -4349,7 +4767,10 @@
       "transplantWeeks": -2,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "spreading",
+      "spreadsViaRunners": true,
+      "plantType": "herb"
     },
     {
       "id": "tarwe",
@@ -4374,7 +4795,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -20,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "gerst",
@@ -4399,7 +4823,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -18,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "rogge",
@@ -4424,7 +4851,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -22,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "haver",
@@ -4449,7 +4879,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -16,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "spelt",
@@ -4474,7 +4907,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -20,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "triticale",
@@ -4499,7 +4935,10 @@
       "transplantWeeks": null,
       "directSowWeeks": -20,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "boekweit",
@@ -4524,7 +4963,10 @@
       "transplantWeeks": null,
       "directSowWeeks": 2,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "cherry-tomaat",
@@ -4563,7 +5005,10 @@
           "plantId": "aubergine",
           "harm": "diseaseRisk"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "limoen",
@@ -4588,7 +5033,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "citroen",
@@ -4613,7 +5061,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "saffraan",
@@ -4638,7 +5089,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "struikboon",
@@ -4673,7 +5127,10 @@
           "plantId": "knoflook",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "bush",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "pruimen",
@@ -4698,7 +5155,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "krieken",
@@ -4723,7 +5183,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     },
     {
       "id": "koriander",
@@ -4758,7 +5221,10 @@
           "plantId": "dille",
           "harm": "inhibitsGrowth"
         }
-      ]
+      ],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "herb"
     },
     {
       "id": "zonnebloem",
@@ -4788,7 +5254,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "augurk",
@@ -4818,7 +5287,10 @@
           "benefit": "attractsPollinators"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "climbing",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "rijst",
@@ -4843,7 +5315,10 @@
       "transplantWeeks": 3,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "chilipeper",
@@ -4873,7 +5348,10 @@
           "benefit": "detersPests"
         }
       ],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "vegetable"
     },
     {
       "id": "kastanje",
@@ -4898,7 +5376,10 @@
       "transplantWeeks": null,
       "directSowWeeks": null,
       "companions": [],
-      "combatives": []
+      "combatives": [],
+      "growthHabit": "upright",
+      "spreadsViaRunners": false,
+      "plantType": "tree"
     }
   ]
 }

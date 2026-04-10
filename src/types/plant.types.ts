@@ -5,6 +5,24 @@
  */
 
 /**
+ * Growth habit of the plant
+ * - upright: grows vertically, compact footprint (most vegetables)
+ * - climbing: needs support, can be placed closer together (beans, cucumbers, grapes)
+ * - spreading: sprawls horizontally via vines or stolons (pumpkin, melon, mint)
+ * - bush: compact self-supporting mound (bush beans, shrub fruits)
+ */
+export type GrowthHabit = 'upright' | 'climbing' | 'spreading' | 'bush';
+
+/**
+ * Physical scale of the plant, affects canvas rendering and warnings
+ * - vegetable: annual crops, most garden plants
+ * - herb: culinary/aromatic herbs
+ * - shrub: multi-year woody shrubs (berry bushes)
+ * - tree: large permanent woody plants
+ */
+export type PlantType = 'vegetable' | 'herb' | 'shrub' | 'tree';
+
+/**
  * Sun exposure requirements
  */
 export type SunRequirement = 'full' | 'partial' | 'shade';
@@ -89,6 +107,10 @@ export interface PlantData {
     readonly category: PlantCategory;
     readonly description: string;
     readonly spacingRadiusCm: number;
+    readonly rootSpacingRadiusCm?: number; // Optional: underground spread when different from canopy spacing
+    readonly growthHabit: GrowthHabit;
+    readonly plantType: PlantType;
+    readonly spreadsViaRunners: boolean;
     readonly plantingDepthCm: number;
     readonly sun: SunRequirement;
     readonly water: WaterRequirement;

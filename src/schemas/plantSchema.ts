@@ -23,6 +23,19 @@ export type WaterRequirementType = z.infer<typeof waterRequirementSchema>;
 export const frostToleranceSchema = z.enum(['tender', 'semi-hardy', 'hardy']);
 export type FrostToleranceType = z.infer<typeof frostToleranceSchema>;
 
+
+/**
+ * Growth habit schema
+ */
+export const growthHabitSchema = z.enum(['upright', 'climbing', 'spreading', 'bush']);
+export type GrowthHabitType = z.infer<typeof growthHabitSchema>;
+
+/**
+ * Plant type schema
+ */
+export const plantTypeSchema = z.enum(['vegetable', 'herb', 'shrub', 'tree']);
+export type PlantTypeType = z.infer<typeof plantTypeSchema>;
+
 /**
  * Plant category schema
  */
@@ -103,6 +116,10 @@ export const plantDataSchema = z.object({
     category: plantCategorySchema,
     description: z.string(),
     spacingRadiusCm: z.number().positive(),
+    rootSpacingRadiusCm: z.number().positive().optional(),
+    growthHabit: growthHabitSchema,
+    plantType: plantTypeSchema,
+    spreadsViaRunners: z.boolean(),
     plantingDepthCm: z.number().nonnegative(),
     sun: sunRequirementSchema,
     water: waterRequirementSchema,
