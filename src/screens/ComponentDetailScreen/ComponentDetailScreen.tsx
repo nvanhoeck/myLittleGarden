@@ -127,6 +127,7 @@ function PlacedPlantItem({
 }): React.JSX.Element {
   const plantName = plantData?.nameNl ?? 'Onbekende plant';
   const spacingRadius = plantData?.spacingRadiusCm ?? 15;
+  const isPatch = plantData?.plantingStyle === 'patch';
 
   return (
     <View className="flex-row items-center bg-green-900/40 rounded-lg mb-2 overflow-hidden">
@@ -135,13 +136,16 @@ function PlacedPlantItem({
         className="flex-row items-center flex-1 p-3"
         android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
       >
-        <View className="w-10 h-10 rounded-full bg-green-700 items-center justify-center mr-3">
+        <View className={`w-10 h-10 ${isPatch ? 'rounded-md bg-amber-900' : 'rounded-full bg-green-700'} items-center justify-center mr-3`}>
           <PlantIconDisplay plantData={plantData} />
         </View>
         <View className="flex-1">
           <Text className="text-white font-medium">{plantName}</Text>
-          <Text className="text-green-400 text-xs">
-            {plant.positionX.toFixed(0)}cm, {plant.positionY.toFixed(0)}cm • {spacingRadius}cm afstand
+          <Text className={`text-xs ${isPatch ? 'text-amber-400' : 'text-green-400'}`}>
+            {isPatch
+              ? `${plant.positionX.toFixed(0)}cm, ${plant.positionY.toFixed(0)}cm • zaaidichtheid ${spacingRadius}cm`
+              : `${plant.positionX.toFixed(0)}cm, ${plant.positionY.toFixed(0)}cm • ${spacingRadius}cm afstand`
+            }
           </Text>
         </View>
       </Pressable>
@@ -171,6 +175,8 @@ export function ComponentDetailScreen({
   const [viewMode, setViewMode] = useState<'canvas' | 'list'>('canvas');
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showLayerOverview, setShowLayerOverview] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(0);
 
   // Check if component is a tower
   const isTower = component
@@ -186,6 +192,14 @@ export function ComponentDetailScreen({
   const handleBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
+
+  const handleToggleEditMode = useCallback(() => {
+    if (isEditMode) {
+      // Exiting edit mode (save) - remount canvas to flush stale animated values
+      setCanvasKey((k) => k + 1);
+    }
+    setIsEditMode((prev) => !prev);
+  }, [isEditMode]);
 
   const handleAddPlant = useCallback(() => {
     // For towers, pass the selected layer index
@@ -382,16 +396,21 @@ export function ComponentDetailScreen({
       {viewMode === 'canvas' ? (
         <View className="flex-1 p-4">
           <PlantPlacementCanvas
+            key={canvasKey}
             component={component}
             plants={visiblePlants}
             layerDimensions={isTower ? layerDimensions : undefined}
             onPlantPositionChange={handlePlantPositionChange}
             onPlantPress={(plant) => handlePlantPress(plant.plantId)}
             onPlantLongPress={handleCanvasPlantLongPress}
+            isEditMode={isEditMode}
+            onToggleEditMode={handleToggleEditMode}
           />
           {visiblePlants.length > 0 && (
             <Text className="text-gray-500 text-xs text-center mt-2">
-              Sleep planten om te verplaatsen • Lang drukken om te verwijderen
+              {isEditMode
+                ? 'Sleep planten om te verplaatsen • Tik om te verwijderen'
+                : 'Druk op ✏️ Bewerken om planten te verplaatsen'}
             </Text>
           )}
         </View>

@@ -23,6 +23,14 @@ export type GrowthHabit = 'upright' | 'climbing' | 'spreading' | 'bush';
 export type PlantType = 'vegetable' | 'herb' | 'shrub' | 'tree';
 
 /**
+ * How the plant is placed in the garden
+ * - individual: placed as single plants with spacing between them (most plants)
+ * - patch: broadcast-sown densely in an area (grains, some groundcovers)
+ *   spacingRadiusCm represents sowing density within the patch, not plant-to-plant distance
+ */
+export type PlantingStyle = 'individual' | 'patch';
+
+/**
  * Sun exposure requirements
  */
 export type SunRequirement = 'full' | 'partial' | 'shade';
@@ -111,6 +119,7 @@ export interface PlantData {
     readonly growthHabit: GrowthHabit;
     readonly plantType: PlantType;
     readonly spreadsViaRunners: boolean;
+    readonly plantingStyle: PlantingStyle;
     readonly plantingDepthCm: number;
     readonly sun: SunRequirement;
     readonly water: WaterRequirement;

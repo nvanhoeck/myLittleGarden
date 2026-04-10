@@ -37,6 +37,12 @@ export const plantTypeSchema = z.enum(['vegetable', 'herb', 'shrub', 'tree']);
 export type PlantTypeType = z.infer<typeof plantTypeSchema>;
 
 /**
+ * Planting style schema
+ */
+export const plantingStyleSchema = z.enum(['individual', 'patch']);
+export type PlantingStyleType = z.infer<typeof plantingStyleSchema>;
+
+/**
  * Plant category schema
  */
 export const plantCategorySchema = z.enum([
@@ -120,6 +126,7 @@ export const plantDataSchema = z.object({
     growthHabit: growthHabitSchema,
     plantType: plantTypeSchema,
     spreadsViaRunners: z.boolean(),
+    plantingStyle: plantingStyleSchema,
     plantingDepthCm: z.number().nonnegative(),
     sun: sunRequirementSchema,
     water: waterRequirementSchema,

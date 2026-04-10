@@ -23,6 +23,8 @@ interface PlantPlacementCanvasProps {
     onPlantPositionChange: (plantId: string, x: number, y: number) => void;
     onPlantPress?: (plant: PlacedPlantData) => void;
     onPlantLongPress?: (plant: PlacedPlantData) => void;
+    isEditMode?: boolean;
+    onToggleEditMode?: () => void;
 }
 
 interface DraggablePlantProps {
@@ -40,6 +42,8 @@ interface DraggablePlantProps {
     onSelect: () => void;
     showSpacingRadius: boolean;
     showPlantName: boolean;
+    isPatch: boolean;
+    draggingEnabled: boolean;
 }
 
 /**
@@ -102,13 +106,17 @@ function PlantIconInCanvas({plantData}: { plantData: PlantData | undefined }): R
 
 /**
  * Check if two plants' spacing circles overlap (indicative warning only)
+ * Returns false if either plant is patch-sown (no individual spacing enforced)
  */
 function checkSpacingOverlap(
     plant1: PlacedPlantData,
     plant1Spacing: number,
+    plant1IsPatch: boolean,
     plant2: PlacedPlantData,
-    plant2Spacing: number
+    plant2Spacing: number,
+    plant2IsPatch: boolean,
 ): boolean {
+    if (plant1IsPatch || plant2IsPatch) return false;
     const dx = plant1.positionX - plant2.positionX;
     const dy = plant1.positionY - plant2.positionY;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -119,11 +127,15 @@ function checkSpacingOverlap(
 /**
  * Check if two plants' inner circles (actual plant bodies) overlap
  * This is a hard collision that should block placement
+ * Returns false if either plant is patch-sown (dense planting is intentional)
  */
 function checkInnerCollision(
     plant1: PlacedPlantData,
-    plant2: PlacedPlantData
+    plant1IsPatch: boolean,
+    plant2: PlacedPlantData,
+    plant2IsPatch: boolean,
 ): boolean {
+    if (plant1IsPatch || plant2IsPatch) return false;
     const dx = plant1.positionX - plant2.positionX;
     const dy = plant1.positionY - plant2.positionY;
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -149,7 +161,9 @@ function DraggablePlant({
                             isSelected,
                             onSelect,
                             showSpacingRadius,
-                            showPlantName
+                            showPlantName,
+                            isPatch,
+                            draggingEnabled,
                         }: DraggablePlantProps): React.JSX.Element {
 
     // Plant body size (NOT derived from spacing radius)
@@ -178,6 +192,7 @@ function DraggablePlant({
     const onPositionChangeRef = useRef(onPositionChange);
     const onLongPressRef = useRef(onLongPress);
     const onSelectRef = useRef(onSelect);
+    const draggingEnabledRef = useRef(draggingEnabled);
 
     // Update refs when props/values change
     React.useEffect(() => {
@@ -190,6 +205,7 @@ function DraggablePlant({
         onPositionChangeRef.current = onPositionChange;
         onLongPressRef.current = onLongPress;
         onSelectRef.current = onSelect;
+        draggingEnabledRef.current = draggingEnabled;
     }, [
         plant,
         scale,
@@ -199,7 +215,8 @@ function DraggablePlant({
         positionOffset,
         onPositionChange,
         onLongPress,
-        onSelect
+        onSelect,
+        draggingEnabled,
     ]);
 
     // Animated values for position
@@ -225,8 +242,8 @@ function DraggablePlant({
 
     const panResponder = useRef(
         PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onMoveShouldSetPanResponder: () => true,
+            onStartShouldSetPanResponder: () => draggingEnabledRef.current,
+            onMoveShouldSetPanResponder: () => draggingEnabledRef.current,
             onPanResponderGrant: () => {
                 isDragEnabled.current = false;
                 hasMoved.current = false;
@@ -376,15 +393,22 @@ function DraggablePlant({
                 },
             ]}
         >
-            {/* Plant icon - only shows red for inner collision (plant bodies overlapping) */}
+            {/* Plant icon - patch plants show amber square, individual plants show green circle */}
             <View
                 style={[
                     styles.plantIcon,
                     {
                         width: plantSizePx,
                         height: plantSizePx,
-                        borderRadius: plantSizePx / 2,
-                        backgroundColor: hasInnerCollision ? '#dc2626' : '#16a34a',
+                        borderRadius: isPatch ? 4 : plantSizePx / 2,
+                        backgroundColor: hasInnerCollision
+                            ? '#dc2626'
+                            : isPatch
+                            ? '#92400e'
+                            : '#16a34a',
+                        borderWidth: isPatch ? 2 : 0,
+                        borderStyle: isPatch ? 'dashed' : 'solid',
+                        borderColor: isPatch ? '#d97706' : 'transparent',
                     },
                 ]}
             >
@@ -477,6 +501,8 @@ export function PlantPlacementCanvas({
                                          onPlantPositionChange,
                                          onPlantPress,
                                          onPlantLongPress,
+                                         isEditMode = false,
+                                         onToggleEditMode,
                                      }: PlantPlacementCanvasProps): React.JSX.Element {
     const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
     const [canvasSize, setCanvasSize] = useState({width: 0, height: 0});
@@ -559,21 +585,23 @@ export function PlantPlacementCanvas({
         plants.forEach((plant1) => {
             const plant1Data = getPlantById(plant1.plantId);
             const plant1Spacing = plant1Data?.spacingRadiusCm ?? 15;
+            const plant1IsPatch = plant1Data?.plantingStyle === 'patch';
 
             plants.forEach((plant2) => {
                 if (plant1.id === plant2.id) return;
 
                 const plant2Data = getPlantById(plant2.plantId);
                 const plant2Spacing = plant2Data?.spacingRadiusCm ?? 15;
+                const plant2IsPatch = plant2Data?.plantingStyle === 'patch';
 
-                // Check spacing overlap (indicative warning)
-                if (checkSpacingOverlap(plant1, plant1Spacing, plant2, plant2Spacing)) {
+                // Check spacing overlap (indicative warning, skipped for patch plants)
+                if (checkSpacingOverlap(plant1, plant1Spacing, plant1IsPatch, plant2, plant2Spacing, plant2IsPatch)) {
                     spacingOverlaps.set(plant1.id, true);
                     spacingOverlaps.set(plant2.id, true);
                 }
 
-                // Check inner collision (hard error - plant bodies overlapping)
-                if (checkInnerCollision(plant1, plant2)) {
+                // Check inner collision (hard error, skipped for patch plants)
+                if (checkInnerCollision(plant1, plant1IsPatch, plant2, plant2IsPatch)) {
                     innerCollisions.set(plant1.id, true);
                     innerCollisions.set(plant2.id, true);
                 }
@@ -673,6 +701,7 @@ export function PlantPlacementCanvas({
                                         {/* Plants layer */}
                                         {plants.map((plant) => {
                                             const plantData = getPlantById(plant.plantId);
+                                            const isPatch = plantData?.plantingStyle === 'patch';
                                             return (
                                                 <DraggablePlant
                                                     key={plant.id}
@@ -690,6 +719,8 @@ export function PlantPlacementCanvas({
                                                     onSelect={() => setSelectedPlantId(plant.id)}
                                                     showSpacingRadius={showSpacingRadius}
                                                     showPlantName={showPlantNames}
+                                                    isPatch={isPatch}
+                                                    draggingEnabled={isEditMode}
                                                 />
                                             );
                                         })}
@@ -708,33 +739,46 @@ export function PlantPlacementCanvas({
 
                         {/* Spacing radius toggle */}
                         <View style={styles.toggleContainer}>
+                            <View style={styles.toggleRow}>
+                                <Pressable
+                                    style={styles.toggleButton}
+                                    onPress={handleToggleSpacingRadius}
+                                >
+                                    <Text style={styles.spacingToggleIcon}>
+                                        {showSpacingRadius ? '◉' : '○'}
+                                    </Text>
+                                    <Text style={styles.spacingToggleText}>Afstand</Text>
+                                </Pressable>
+                                {/*Plant name toggle*/}
+                                <Pressable
+                                    style={styles.toggleButton}
+                                    onPress={handleTogglePlantNames}
+                                >
+                                    <Text style={styles.spacingToggleIcon}>
+                                        {showPlantNames ? '◉' : '○'}
+                                    </Text>
+                                    <Text style={styles.spacingToggleText}>Namen</Text>
+                                </Pressable>
+                                <Pressable
+                                    style={styles.toggleButton}
+                                    onPress={handleToggleRelationships}
+                                >
+                                    <Text style={styles.spacingToggleIcon}>
+                                        {showRelationships ? '◉' : '○'}
+                                    </Text>
+                                    <Text style={styles.spacingToggleText}>Companionships</Text>
+                                </Pressable>
+                            </View>
                             <Pressable
-                                style={styles.toggleButton}
-                                onPress={handleToggleSpacingRadius}
+                                style={[styles.editModeButton, isEditMode && styles.editModeActiveButton]}
+                                onPress={onToggleEditMode}
                             >
-                                <Text style={styles.spacingToggleIcon}>
-                                    {showSpacingRadius ? '◉' : '○'}
+                                <Text style={[styles.spacingToggleIcon, isEditMode && styles.editModeActiveIcon]}>
+                                    {isEditMode ? '💾' : '✏️'}
                                 </Text>
-                                <Text style={styles.spacingToggleText}>Afstand</Text>
-                            </Pressable>
-                            {/*Plant name toggle*/}
-                            <Pressable
-                                style={styles.toggleButton}
-                                onPress={handleTogglePlantNames}
-                            >
-                                <Text style={styles.spacingToggleIcon}>
-                                    {showPlantNames ? '◉' : '○'}
+                                <Text style={[styles.spacingToggleText, isEditMode && styles.editModeActiveText]}>
+                                    {isEditMode ? 'Opslaan' : 'Bewerken'}
                                 </Text>
-                                <Text style={styles.spacingToggleText}>Namen</Text>
-                            </Pressable>
-                            <Pressable
-                                style={styles.toggleButton}
-                                onPress={handleToggleRelationships}
-                            >
-                                <Text style={styles.spacingToggleIcon}>
-                                    {showRelationships ? '◉' : '○'}
-                                </Text>
-                                <Text style={styles.spacingToggleText}>Companionships</Text>
                             </Pressable>
                         </View>
 
@@ -764,36 +808,38 @@ export function PlantPlacementCanvas({
                             })()}
                         </View>
 
-                        {/* Zoom controls - positioned absolutely over scroll content */}
-                        <View style={styles.zoomControls}>
-                            <Pressable
-                                style={[
-                                    styles.zoomButton,
-                                    zoomLevel >= MAX_ZOOM && styles.zoomButtonDisabled,
-                                ]}
-                                onPress={handleZoomIn}
-                                disabled={zoomLevel >= MAX_ZOOM}
-                            >
-                                <Text style={[
-                                    styles.zoomButtonText,
-                                    zoomLevel >= MAX_ZOOM && styles.zoomButtonTextDisabled,
-                                ]}>+</Text>
-                            </Pressable>
-                            <Text style={styles.zoomLevelText}>{Math.round(zoomLevel * 100)}%</Text>
-                            <Pressable
-                                style={[
-                                    styles.zoomButton,
-                                    zoomLevel <= MIN_ZOOM && styles.zoomButtonDisabled,
-                                ]}
-                                onPress={handleZoomOut}
-                                disabled={zoomLevel <= MIN_ZOOM}
-                            >
-                                <Text style={[
-                                    styles.zoomButtonText,
-                                    zoomLevel <= MIN_ZOOM && styles.zoomButtonTextDisabled,
-                                ]}>−</Text>
-                            </Pressable>
-                        </View>
+                        {/* Zoom controls - only visible in view mode */}
+                        {!isEditMode && (
+                            <View style={styles.zoomControls}>
+                                <Pressable
+                                    style={[
+                                        styles.zoomButton,
+                                        zoomLevel >= MAX_ZOOM && styles.zoomButtonDisabled,
+                                    ]}
+                                    onPress={handleZoomIn}
+                                    disabled={zoomLevel >= MAX_ZOOM}
+                                >
+                                    <Text style={[
+                                        styles.zoomButtonText,
+                                        zoomLevel >= MAX_ZOOM && styles.zoomButtonTextDisabled,
+                                    ]}>+</Text>
+                                </Pressable>
+                                <Text style={styles.zoomLevelText}>{Math.round(zoomLevel * 100)}%</Text>
+                                <Pressable
+                                    style={[
+                                        styles.zoomButton,
+                                        zoomLevel <= MIN_ZOOM && styles.zoomButtonDisabled,
+                                    ]}
+                                    onPress={handleZoomOut}
+                                    disabled={zoomLevel <= MIN_ZOOM}
+                                >
+                                    <Text style={[
+                                        styles.zoomButtonText,
+                                        zoomLevel <= MIN_ZOOM && styles.zoomButtonTextDisabled,
+                                    ]}>−</Text>
+                                </Pressable>
+                            </View>
+                        )}
                     </>
                 )}
 
@@ -896,12 +942,25 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 16,
         left: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
         borderRadius: 8,
         paddingVertical: 6,
         paddingHorizontal: 10,
+        gap: 4,
+    },
+    toggleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    editModeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'stretch',
+        justifyContent: 'center',
+        paddingVertical: 4,
+        borderRadius: 6,
     },
 
     toggleButton: {
@@ -971,5 +1030,17 @@ const styles = StyleSheet.create({
         color: '#9ca3af',
         fontSize: 10,
         marginVertical: 4,
+    },
+    editModeActiveButton: {
+        backgroundColor: 'rgba(22, 163, 74, 0.4)',
+        borderWidth: 1,
+        borderColor: '#16a34a',
+    },
+    editModeActiveIcon: {
+        color: '#4ade80',
+    },
+    editModeActiveText: {
+        color: '#4ade80',
+        fontWeight: '700',
     },
 });
