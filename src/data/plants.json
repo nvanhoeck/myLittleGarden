@@ -26,25 +26,68 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests",
+            "improvesFlavor"
+          ]
         },
         {
           "plantId": "peterselie",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost",
+            "detersPests"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "knoflook",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "goudsbloemkruid",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "aubergine",
-          "harms": ["diseaseRisk"]
+          "harms": [
+            "diseaseRisk"
+          ]
+        },
+        {
+          "plantId": "koolrabi",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -77,18 +120,37 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "peterselie",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -119,18 +181,68 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators",
+            "detersPests"
+          ]
         },
         {
           "plantId": "radijs",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "struikboon",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "pronkboon",
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "aardappel",
+          "harms": [
+            "diseaseRisk"
+          ]
+        },
+        {
+          "plantId": "salie",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "climbing",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -161,14 +273,50 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "dille",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "radijs",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "goudsbloemkruid",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "aardappel",
+          "harms": [
+            "diseaseRisk"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -199,18 +347,63 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "detersPests",
+            "growthBoost"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "tomaat",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "dille",
+          "benefits": [
+            "attractsPollinators",
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "knoflook",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -241,14 +434,37 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "aardbei",
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -279,18 +495,61 @@
       "companions": [
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "peterselie",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         },
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "prei",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "tomaat",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "rozemarijn",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "dille",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -321,11 +580,15 @@
       "companions": [
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -359,15 +622,40 @@
       "companions": [
         {
           "plantId": "sla",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests",
+            "growthBoost"
+          ]
         },
         {
           "plantId": "spinazie",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "komkommer",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "wortel",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "courgette",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "pommer",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -401,18 +689,62 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "salie",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "rozemarijn",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "goudsbloemkruid",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "aardappel",
+          "harms": [
+            "depletesNutrients"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -443,7 +775,9 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [],
@@ -477,13 +811,17 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "knoflook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "climbing",
@@ -516,18 +854,44 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests",
+            "improvesFlavor"
+          ]
         },
         {
           "plantId": "peterselie",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
         },
         {
           "plantId": "cilantro",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
+        },
+        {
+          "plantId": "paprika",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "salie",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "herb",
@@ -558,18 +922,44 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "growthBoost",
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "basilicum",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
+        },
+        {
+          "plantId": "asperge",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "sla",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "herb",
@@ -600,15 +990,21 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "sla",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -642,18 +1038,51 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "komkommer",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators",
+            "detersPests"
+          ]
         },
         {
           "plantId": "basilicum",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "attractsPollinators",
+            "growthBoost"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "wortel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "herb",
@@ -684,25 +1113,59 @@
       "companions": [
         {
           "plantId": "biet",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "paprika",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "aardbei",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "snijboon",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "struikboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "pronkboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -735,21 +1198,35 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "spinazie",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "tomaat",
-          "harms": ["diseaseRisk"]
+          "harms": [
+            "diseaseRisk"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -782,25 +1259,83 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "biet",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "paprika",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "tomaat",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "peterselie",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "rozemarijn",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "tuinboon",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         },
         {
           "plantId": "snijboon",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "struikboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "pronkboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -833,11 +1368,15 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -871,15 +1410,21 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -913,17 +1458,23 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         },
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "ui",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -956,17 +1507,23 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         },
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "ui",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "climbing",
@@ -999,13 +1556,47 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "spinazie",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "knoflook",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "broccoli",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "groene-kool",
+          "harms": [
+            "depletesNutrients"
+          ]
         }
       ],
       "growthHabit": "spreading",
@@ -1038,18 +1629,49 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "salie",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "aardappel",
+          "harms": [
+            "depletesNutrients"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -1080,15 +1702,21 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "spinazie",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
         }
       ],
       "combatives": [],
@@ -1122,11 +1750,15 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1160,14 +1792,63 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "salie",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "rozemarijn",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "goudsbloemkruid",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "aardbei",
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "aardappel",
+          "harms": [
+            "diseaseRisk",
+            "depletesNutrients"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -1198,11 +1879,15 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1236,11 +1921,15 @@
       "companions": [
         {
           "plantId": "biet",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -1274,11 +1963,15 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1312,11 +2005,15 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1350,11 +2047,15 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1388,7 +2089,9 @@
       "companions": [
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1422,11 +2125,15 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1460,7 +2167,9 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -1494,7 +2203,9 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -1528,7 +2239,9 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -1562,11 +2275,15 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1600,7 +2317,9 @@
       "companions": [
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -1634,7 +2353,9 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -1668,14 +2389,50 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "dille",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "maïs",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "pronkboon",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "radijs",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "goudsbloemkruid",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "aardappel",
+          "harms": [
+            "diseaseRisk"
+          ]
+        }
+      ],
       "growthHabit": "spreading",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -1706,7 +2463,9 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         }
       ],
       "combatives": [],
@@ -1740,7 +2499,9 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         }
       ],
       "combatives": [],
@@ -1774,13 +2535,17 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "knoflook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "bush",
@@ -1813,13 +2578,17 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "ui",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "climbing",
@@ -1852,7 +2621,9 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [],
@@ -1886,13 +2657,29 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "groene-kool",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "spreading",
@@ -1925,17 +2712,23 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "bloemkool",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -1968,13 +2761,17 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -2007,13 +2804,41 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "wortel",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "salie",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "groene-kool",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -2046,17 +2871,59 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "tomaat",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "bloemkool",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "rozemarijn",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "groene-kool",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "basilicum",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -2089,13 +2956,17 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -2128,7 +2999,9 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -2162,17 +3035,23 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         },
         {
           "plantId": "basilicum",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "dille",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -2205,7 +3084,9 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         }
       ],
       "combatives": [],
@@ -2240,11 +3121,63 @@
       "combatives": [
         {
           "plantId": "dille",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         },
         {
           "plantId": "cilantro",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "paprika",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "wortel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "courgette",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "struikboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "pronkboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -2277,7 +3210,9 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -2311,7 +3246,9 @@
       "companions": [
         {
           "plantId": "radijs",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -2345,11 +3282,15 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "komkommer",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         }
       ],
       "combatives": [],
@@ -2441,7 +3382,9 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -2475,10 +3418,31 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "prei",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -2509,7 +3473,9 @@
       "companions": [
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -2543,7 +3509,9 @@
       "companions": [
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -2577,14 +3545,43 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "knoflook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "sla",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -2615,7 +3612,9 @@
       "companions": [
         {
           "plantId": "ui",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -2649,7 +3648,9 @@
       "companions": [
         {
           "plantId": "sla",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -2683,7 +3684,9 @@
       "companions": [
         {
           "plantId": "sla",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -2717,7 +3720,9 @@
       "companions": [
         {
           "plantId": "biet",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -2751,7 +3756,9 @@
       "companions": [
         {
           "plantId": "biet",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -2814,7 +3821,9 @@
       "companions": [
         {
           "plantId": "biet",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
       "combatives": [],
@@ -2906,11 +3915,50 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "pommer",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "courgette",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "groene-kool",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "broccoli",
+          "benefits": [
+            "detersPests",
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "aardappel",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -3031,13 +4079,17 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "ui",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -3070,7 +4122,9 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [],
@@ -3104,13 +4158,17 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "knoflook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -3143,10 +4201,69 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
+        },
+        {
+          "plantId": "maïs",
+          "benefits": [
+            "fixesNitrogen",
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "pommer",
+          "benefits": [
+            "fixesNitrogen",
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "aardappel",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "radijs",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "ui",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "knoflook",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "prei",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "climbing",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -3177,7 +4294,9 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [],
@@ -3211,7 +4330,9 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [],
@@ -3245,17 +4366,35 @@
       "companions": [
         {
           "plantId": "peterselie",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "growthBoost"
+          ]
         },
         {
           "plantId": "tomaat",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "basilicum",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "ui",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "knoflook",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -3317,11 +4456,15 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -3384,7 +4527,9 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -3418,7 +4563,9 @@
       "companions": [
         {
           "plantId": "snijboon",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
         }
       ],
       "combatives": [],
@@ -3452,13 +4599,17 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "spreading",
@@ -3492,7 +4643,9 @@
       "combatives": [
         {
           "plantId": "dille",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -3525,7 +4678,21 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["growthBoost"]
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "prei",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -3559,13 +4726,17 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "spreading",
@@ -3598,13 +4769,17 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "spreading",
@@ -3637,13 +4812,17 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "spreading",
@@ -3676,11 +4855,15 @@
       "companions": [
         {
           "plantId": "knoflook",
-          "benefits": ["improvesFlavor"]
+          "benefits": [
+            "improvesFlavor"
+          ]
         },
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -3743,17 +4926,23 @@
       "companions": [
         {
           "plantId": "broccoli",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "bieslook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -3786,7 +4975,9 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -3820,11 +5011,15 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         },
         {
           "plantId": "wortel",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
@@ -3887,7 +5082,9 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "fixesNitrogen"
+          ]
         }
       ],
       "combatives": [],
@@ -4643,8 +5840,46 @@
       "indoorStartWeeks": -8,
       "transplantWeeks": -2,
       "directSowWeeks": null,
-      "companions": [],
-      "combatives": [],
+      "companions": [
+        {
+          "plantId": "wortel",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "selderij",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "tomaat",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "knolselderij",
+          "benefits": [
+            "detersPests"
+          ]
+        }
+      ],
+      "combatives": [
+        {
+          "plantId": "struikboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "pronkboon",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -4672,8 +5907,76 @@
       "indoorStartWeeks": null,
       "transplantWeeks": null,
       "directSowWeeks": 2,
-      "companions": [],
-      "combatives": [],
+      "companions": [
+        {
+          "plantId": "knoflook",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "prei",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "struikboon",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "pronkboon",
+          "benefits": [
+            "detersPests"
+          ]
+        },
+        {
+          "plantId": "goudsbloemkruid",
+          "benefits": [
+            "detersPests"
+          ]
+        }
+      ],
+      "combatives": [
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "diseaseRisk"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "harms": [
+            "diseaseRisk"
+          ]
+        },
+        {
+          "plantId": "courgette",
+          "harms": [
+            "diseaseRisk"
+          ]
+        },
+        {
+          "plantId": "zonnebloem",
+          "harms": [
+            "depletesNutrients"
+          ]
+        },
+        {
+          "plantId": "pommer",
+          "harms": [
+            "diseaseRisk"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -4731,8 +6034,35 @@
       "indoorStartWeeks": -2,
       "transplantWeeks": 1,
       "directSowWeeks": 2,
-      "companions": [],
-      "combatives": [],
+      "companions": [
+        {
+          "plantId": "pronkboon",
+          "benefits": [
+            "fixesNitrogen",
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "pommer",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "benefits": [
+            "growthBoost"
+          ]
+        }
+      ],
+      "combatives": [
+        {
+          "plantId": "tomaat",
+          "harms": [
+            "attractsPests"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -5140,17 +6470,23 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         },
         {
           "plantId": "bieslook",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "aubergine",
-          "harms": ["diseaseRisk"]
+          "harms": [
+            "diseaseRisk"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -5270,13 +6606,47 @@
       "companions": [
         {
           "plantId": "wortel",
-          "benefits": ["fixesNitrogen"]
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "aardappel",
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "knoflook",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "ui",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "prei",
+          "harms": [
+            "inhibitsGrowth"
+          ]
+        },
+        {
+          "plantId": "fennel",
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "bush",
@@ -5367,13 +6737,17 @@
       "companions": [
         {
           "plantId": "tomaat",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         }
       ],
       "combatives": [
         {
           "plantId": "dille",
-          "harms": ["inhibitsGrowth"]
+          "harms": [
+            "inhibitsGrowth"
+          ]
         }
       ],
       "growthHabit": "upright",
@@ -5406,10 +6780,37 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
+        },
+        {
+          "plantId": "komkommer",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "courgette",
+          "benefits": [
+            "growthBoost"
+          ]
+        },
+        {
+          "plantId": "maïs",
+          "benefits": [
+            "growthBoost"
+          ]
         }
       ],
-      "combatives": [],
+      "combatives": [
+        {
+          "plantId": "aardappel",
+          "harms": [
+            "depletesNutrients"
+          ]
+        }
+      ],
       "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
@@ -5440,7 +6841,9 @@
       "companions": [
         {
           "plantId": "dille",
-          "benefits": ["attractsPollinators"]
+          "benefits": [
+            "attractsPollinators"
+          ]
         }
       ],
       "combatives": [],
@@ -5503,7 +6906,9 @@
       "companions": [
         {
           "plantId": "basilicum",
-          "benefits": ["detersPests"]
+          "benefits": [
+            "detersPests"
+          ]
         }
       ],
       "combatives": [],
