@@ -11,6 +11,7 @@ export type RootStackParamList = {
   ComponentDetail: { componentId: string };
   PlantSelection: { componentId: string; layerIndex?: number };
   PlantDetails: { plantId: string };
+  AiChat: undefined;
 };
 
 /**
@@ -23,6 +24,7 @@ export type SettingsScreenProps = NativeStackScreenProps<RootStackParamList, 'Se
 export type ComponentDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'ComponentDetail'>;
 export type PlantSelectionScreenProps = NativeStackScreenProps<RootStackParamList, 'PlantSelection'>;
 export type PlantDetailsScreenProps = NativeStackScreenProps<RootStackParamList, 'PlantDetails'>;
+export type AiChatScreenProps = NativeStackScreenProps<RootStackParamList, 'AiChat'>;
 
 /**
  * Type helper for useNavigation hook

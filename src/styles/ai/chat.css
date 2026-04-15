@@ -1,0 +1,42 @@
+/*
+ * Chat BEM styles for the AI Tuinassistent screen.
+ *
+ * These class definitions document the visual contract of the chat UI.
+ * In this project NativeWind is consumed via the  prop on
+ * React Native components; the exact same utility classes listed in the
+ *  directives below are applied directly in the TSX components.
+ *
+ * Dark theme palette (from src/styles/theme.ts):
+ *   primary:      #5DB075
+ *   background:   #1A1C19
+ *   onBackground: #E2E3DD
+ *   error:        #FFB4AB
+ */
+
+.chat__bubble--user {
+  @apply self-end max-w-[80%] my-1 mx-3 px-4 py-3 rounded-2xl bg-green-600;
+}
+
+.chat__bubble--user-text {
+  @apply text-white text-base;
+}
+
+.chat__bubble--assistant {
+  @apply self-start max-w-[80%] my-1 mx-3 px-4 py-3 rounded-2xl bg-neutral-800;
+}
+
+.chat__bubble--assistant-text {
+  @apply text-on-background text-base;
+}
+
+.chat__input {
+  @apply flex-1 min-h-[44px] max-h-32 px-4 py-2 rounded-full bg-neutral-800 text-on-background text-base;
+}
+
+.chat__send-button {
+  @apply ml-2 h-11 px-5 rounded-full bg-green-600 items-center justify-center;
+}
+
+.chat__send-button--disabled {
+  @apply opacity-50;
+}

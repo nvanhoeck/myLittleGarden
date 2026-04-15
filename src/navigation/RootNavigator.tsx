@@ -7,6 +7,7 @@ import { SettingsScreen } from '@screens/SettingsScreen';
 import { ComponentDetailScreen } from '@screens/ComponentDetailScreen';
 import { PlantSelectionScreen } from '@screens/PlantSelectionScreen';
 import { PlantDetailsScreen } from '@screens/PlantDetailsScreen';
+import { ChatScreen } from '@/screens/ai';
 import { theme } from '@/styles/theme';
 import type { RootStackParamList } from './navigationTypes';
 
@@ -67,6 +68,13 @@ export function RootNavigator(): React.JSX.Element {
       <Stack.Screen
         name="PlantDetails"
         component={PlantDetailsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="AiChat"
+        component={ChatScreen}
         options={{
           animation: 'slide_from_right',
         }}

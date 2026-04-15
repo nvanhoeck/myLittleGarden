@@ -1,10 +1,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import nl from './nl.json';
+import aiNl from './ai/nl.json';
 
 const resources = {
   nl: {
-    translation: nl,
+    translation: { ...nl, ...aiNl },
   },
 };
 
