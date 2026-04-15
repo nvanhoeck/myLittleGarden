@@ -324,6 +324,16 @@ export function ComponentDetailScreen({
           </Text>
         </View>
         <Pressable
+          onPress={() => Alert.alert('AI Tuinhulp', 'Komt binnenkort...')}
+          className="bg-blue-600 w-10 h-10 rounded-full items-center justify-center mr-2"
+          android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
+          testID="ai-tuinhulp-button"
+          accessibilityLabel="AI Tuinhulp"
+          accessibilityRole="button"
+        >
+          <Text className="text-lg">🤖</Text>
+        </Pressable>
+        <Pressable
           onPress={handleAddPlant}
           className="bg-green-600 w-10 h-10 rounded-full items-center justify-center"
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}

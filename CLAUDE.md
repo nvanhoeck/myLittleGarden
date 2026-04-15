@@ -152,6 +152,7 @@ Design reference screenshots from the Planter app are in `screenshots/`. Use the
 - **PM handles**: Agent questions, coordination, prioritization
 - **User handles**: Conflicts between agents, missing requirements, final approval
 - **No feature proceeds** without user validation of the previous one
+- **File write/edit failures**: If any agent cannot create or edit a file (e.g. EPERM, permission denied, or any I/O error), it must **immediately stop and report the failure to the user** with the exact error and file path. Do not silently work around it using alternative methods (e.g. Bash, Python, or Node scripts) without first informing the user.
 
 ## Folder Structure (Recommended)
 
@@ -168,3 +169,20 @@ src/
   types/           # Shared TypeScript types
   utils/           # Utility functions
 ```
+
+## File Editing on Windows
+
+The Edit and Write tools frequently fail with EPERM errors on this project (Windows file locking from Metro bundler / IDE). **All agents must use the following pattern for any file create or edit:**
+
+```bash
+node -e "
+const fs = require('fs');
+const path = 'C:/Users/Niko/Desktop/MyLittleGarden/path/to/file';
+let content = fs.readFileSync(path, 'utf8'); // for edits
+content = content.replace(oldStr, newStr);
+fs.writeFileSync(path, content, 'utf8');
+console.log('done');
+"
+```
+
+For new files, use writeFileSync directly without the read step. The Read tool still works normally for reading files — only writes require this workaround.
