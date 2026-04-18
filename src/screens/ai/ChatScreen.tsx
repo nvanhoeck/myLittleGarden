@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Pressable,
   KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -144,7 +143,7 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
       {header}
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior='padding'
       >
         {messages.length === 0 ? (
           <View className="flex-1 items-center justify-center px-6">
