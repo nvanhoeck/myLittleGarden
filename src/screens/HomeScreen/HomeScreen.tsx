@@ -38,9 +38,6 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
     navigation.navigate('Settings');
   };
 
-  const handleAiChatPress = (): void => {
-    navigation.navigate('AiChat');
-  };
 
   const handleFabPress = useCallback(() => {
     setIsCreationModalVisible(true);
@@ -124,17 +121,6 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
         </Text>
 
         <View className="flex-row items-center">
-        <Pressable
-          onPress={handleAiChatPress}
-          className="w-touch-target h-touch-target items-center justify-center rounded-full mr-2"
-          testID="ai-chat-button"
-          accessibilityLabel={t('ai.chat.title')}
-          accessibilityRole="button"
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          android_ripple={{ color: 'rgba(255,255,255,0.1)', borderless: true }}
-        >
-          <Text className="text-2xl text-on-surface">🤖</Text>
-        </Pressable>
         <Pressable
           onPress={handleSettingsPress}
           className="w-touch-target h-touch-target items-center justify-center rounded-full"
