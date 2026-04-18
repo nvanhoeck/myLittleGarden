@@ -5,6 +5,7 @@ import { useGardenStore } from '@/stores/gardenStore';
 import { useComponentStore } from '@/stores/componentStore';
 import { buildGardenSnapshot } from '@/domain/ai/buildGardenSnapshot';
 import { chatService } from '@/services/ai/chatService';
+import type { ChatHistoryMessage } from '@/services/ai/chatService';
 import {
   AiError,
   AiNetworkError,
@@ -67,8 +68,18 @@ export function useAiChat(): UseAiChatResult {
       setStatus('loading');
       setError(null);
 
+      // Read fresh state AFTER addMessage so the new user message is included
+      // in the history we send to the backend.
+      const history: ChatHistoryMessage[] = useAiChatStore
+        .getState()
+        .messages.map((m) => ({ role: m.role, content: m.content }));
+
       try {
-        const reply = await chatService.sendMessage({ message: trimmed, snapshot });
+        const reply = await chatService.sendMessage({
+          message: trimmed,
+          snapshot,
+          history,
+        });
         addMessage('assistant', reply);
         setStatus('idle');
       } catch (e) {
