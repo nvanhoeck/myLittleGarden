@@ -4,7 +4,7 @@
  * and companion/combative plant relationships.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, Pressable, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -118,8 +118,10 @@ export function PlantDetailsScreen({
   const { t } = useTranslation();
   const { plantId } = route.params;
   const plant = usePlantStore((state) => state.getPlantById(plantId));
-  const effectiveCompanions = usePlantStore((state) => state.getEffectiveCompanionsFor(plantId));
-  const effectiveCombatives = usePlantStore((state) => state.getEffectiveCombativesFor(plantId));
+  const getEffectiveCompanionsFor = usePlantStore((state) => state.getEffectiveCompanionsFor);
+  const getEffectiveCombativesFor = usePlantStore((state) => state.getEffectiveCombativesFor);
+  const effectiveCompanions = useMemo(() => getEffectiveCompanionsFor(plantId), [getEffectiveCompanionsFor, plantId]);
+  const effectiveCombatives = useMemo(() => getEffectiveCombativesFor(plantId), [getEffectiveCombativesFor, plantId]);
   const frostDates = useFrostDates();
 
   const handleBack = useCallback(() => {
