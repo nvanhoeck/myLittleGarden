@@ -81,10 +81,28 @@ export interface GardenMetadataSnapshot {
 }
 
 /**
+ * Flat representation of a plant species sent alongside the snapshot so the
+ * AI can reason about sun, spacing, companions, and frost without relying
+ * purely on training knowledge.
+ */
+export interface PlantSpecSnapshot {
+  plantId: string;
+  name: string;
+  sunRequirement: 'fullSun' | 'partialShade' | 'fullShade' | null;
+  spacingInCm: number | null;
+  heightInCm: number | null;
+  waterNeeds: 'low' | 'medium' | 'high' | null;
+  frostTolerant: boolean | null;
+  goodCompanions: string[];
+  badCompanions: string[];
+}
+
+/**
  * Root DTO for the garden snapshot payload sent to the AI backend.
  */
 export interface GardenSnapshot {
   snapshotVersion: string;
   garden: GardenMetadataSnapshot;
   components: ComponentSnapshot[];
+  plantCatalog?: PlantSpecSnapshot[];
 }

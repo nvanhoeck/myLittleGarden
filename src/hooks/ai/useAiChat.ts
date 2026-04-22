@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
 import { useGardenStore } from '@/stores/gardenStore';
 import { useComponentStore } from '@/stores/componentStore';
+import { usePlantStore } from '@/stores/plantStore';
+import type { PlantSpecSnapshot } from '@/domain/ai/GardenSnapshot';
 import { buildGardenSnapshot } from '@/domain/ai/buildGardenSnapshot';
 import { chatService } from '@/services/ai/chatService';
 import type { ChatHistoryMessage } from '@/services/ai/chatService';
@@ -53,6 +55,27 @@ export function useAiChat(): UseAiChatResult {
 
       const gardenState = useGardenStore.getState();
       const componentsState = useComponentStore.getState();
+      const plantState = usePlantStore.getState();
+
+      const uniquePlantIds = new Set(
+        componentsState.components.flatMap((c) => c.plants.map((p) => p.plantId)),
+      );
+      const plantSpecs: PlantSpecSnapshot[] = [...uniquePlantIds].flatMap((id) => {
+        const plant = plantState.getPlantById(id);
+        if (!plant) return [];
+        return [{
+          plantId: plant.id,
+          name: plant.nameNl,
+          sunRequirement: plant.sun === 'full' ? 'fullSun' : plant.sun === 'partial' ? 'partialShade' : 'fullShade',
+          spacingInCm: plant.spacingRadiusCm * 2,
+          heightInCm: null,
+          waterNeeds: plant.water === 'moderate' ? 'medium' : plant.water,
+          frostTolerant: plant.frostTolerance !== 'tender',
+          goodCompanions: plant.companions.map((c) => c.plantId),
+          badCompanions: plant.combatives.map((c) => c.plantId),
+        } satisfies PlantSpecSnapshot];
+      });
+
       const snapshot = buildGardenSnapshot(
         {
           gardenWidth: gardenState.gardenWidth,
@@ -62,6 +85,7 @@ export function useAiChat(): UseAiChatResult {
           fallFrostDate: gardenState.fallFrostDate,
         },
         componentsState.components,
+        plantSpecs,
       );
 
       addMessage('user', trimmed);

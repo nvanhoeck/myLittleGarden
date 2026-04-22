@@ -1,3 +1,5 @@
+// TODO for niko, check if spacing radius overlaps
+
 # My Little Garden - Implementation Roadmap
 
 ## Completed Phases

@@ -18,6 +18,7 @@ import {
   type ComponentSnapshot,
   type GardenSnapshot,
   type PlacedPlantSnapshot,
+  type PlantSpecSnapshot,
   type SnapshotSunDirection,
 } from './GardenSnapshot';
 
@@ -121,6 +122,7 @@ function mapComponent(component: ComponentData): ComponentSnapshot {
 export function buildGardenSnapshot(
   garden: GardenStoreState,
   components: ComponentData[],
+  plantSpecs: PlantSpecSnapshot[] = [],
 ): GardenSnapshot {
   return {
     snapshotVersion: GARDEN_SNAPSHOT_VERSION,
@@ -132,5 +134,6 @@ export function buildGardenSnapshot(
       fallFrostDate: toIsoStringOrNull(garden.fallFrostDate),
     },
     components: components.map(mapComponent),
+    ...(plantSpecs.length > 0 && { plantCatalog: plantSpecs }),
   };
 }
