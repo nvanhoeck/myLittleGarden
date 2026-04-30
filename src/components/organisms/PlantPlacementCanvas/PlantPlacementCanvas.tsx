@@ -120,7 +120,7 @@ function checkSpacingOverlap(
     const dx = plant1.positionX - plant2.positionX;
     const dy = plant1.positionY - plant2.positionY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const minDistance = plant1Spacing + plant2Spacing;
+    const minDistance = Math.max(plant1Spacing, plant2Spacing);
     return distance < minDistance;
 }
 

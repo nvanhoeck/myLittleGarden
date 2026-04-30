@@ -33,6 +33,23 @@
         "empty": "Geen verbeteringen gevonden. Je tuin ziet er goed uit!",
         "move": "Verplaats",
         "swap": "Wissel om"
+      },
+      "placement": {
+        "button": "Optimaliseer opstelling",
+        "loading": "Opstellingen berekenen...",
+        "error": "Optimalisatie mislukt. Probeer opnieuw.",
+        "noPlants": "Voeg eerst planten toe om te optimaliseren.",
+        "title": "Optimalisatie Suggesties",
+        "apply": "Toepassen",
+        "cancel": "Annuleer",
+        "aiFeedback": "AI feedback over huidige opstelling",
+        "score": {
+          "companion": "Companions",
+          "spacing": "Afstand",
+          "sun": "Zon",
+          "combative": "Conflicten"
+        },
+        "alternative": "Optie {{n}} van {{total}}"
       }
     },
     "shared": {

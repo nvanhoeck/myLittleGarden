@@ -1,10 +1,10 @@
-/**
+﻿/**
  * ComponentDetailScreen
  * Zoomed view of a component for viewing and placing plants
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, Pressable, Alert, ScrollView, Image } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, Text, Pressable, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ComponentDetailScreenProps } from '@/navigation/navigationTypes';
@@ -21,6 +21,8 @@ import { TowerLayerTabs } from '@/components/molecules';
 import type { ComponentData, PlacedPlantData, PlantData } from '@/types';
 import { PLANT_CATEGORIES } from '@/types/plant.types';
 import { getPlantIcon, hasPlantIcon } from '@/assets';
+import { useOptimizeComponent } from '@/hooks/ai/useOptimizeComponent';
+import { OptimizationAlternativesModal } from '@/components/ai/OptimizationAlternativesModal';
 
 /**
  * Get component dimensions in cm
@@ -177,6 +179,40 @@ export function ComponentDetailScreen({
   const [showLayerOverview, setShowLayerOverview] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
+  const [showOptimizeModal, setShowOptimizeModal] = useState(false);
+
+  const {
+    status: optimizeStatus,
+    alternatives,
+    selectedIndex: optimizeSelectedIndex,
+    setSelectedIndex: setOptimizeSelectedIndex,
+    requestOptimization,
+    applyAlternative,
+    reset: resetOptimization,
+  } = useOptimizeComponent();
+
+  // Build plant data map keyed by placed-plant instance ID for the optimization modal
+  const plantDataMap = useMemo(() => {
+    const map: Record<string, PlantData | undefined> = {};
+    for (const plant of component?.plants ?? []) {
+      map[plant.id] = getPlantById(plant.plantId);
+    }
+    return map;
+  }, [component?.plants, getPlantById]);
+
+  // Open modal when optimization succeeds
+  useEffect(() => {
+    if (optimizeStatus === 'success') {
+      setShowOptimizeModal(true);
+    }
+  }, [optimizeStatus]);
+
+  // Reset optimization store on unmount
+  useEffect(() => {
+    return () => {
+      resetOptimization();
+    };
+  }, [resetOptimization]);
 
   // Check if component is a tower
   const isTower = component
@@ -195,19 +231,45 @@ export function ComponentDetailScreen({
 
   const handleToggleEditMode = useCallback(() => {
     if (isEditMode) {
-      // Exiting edit mode (save) - remount canvas to flush stale animated values
       setCanvasKey((k) => k + 1);
     }
     setIsEditMode((prev) => !prev);
   }, [isEditMode]);
 
   const handleAddPlant = useCallback(() => {
-    // For towers, pass the selected layer index
     navigation.navigate('PlantSelection', {
       componentId,
       layerIndex: isTower ? selectedLayer : undefined,
     });
   }, [navigation, componentId, isTower, selectedLayer]);
+
+  const handleOptimize = useCallback(async () => {
+    if (!component || component.plants.length === 0) return;
+    await requestOptimization(component, getPlantById, null);
+  }, [component, getPlantById, requestOptimization]);
+
+  const handleApplyOptimization = useCallback(() => {
+    if (!component) return;
+    applyAlternative(
+      component,
+      componentId,
+      (id, updates) => updateComponent(id, updates as Partial<ComponentData>),
+    );
+    resetOptimization();
+    setShowOptimizeModal(false);
+    setCanvasKey((k) => k + 1);
+  }, [component, componentId, applyAlternative, updateComponent, resetOptimization]);
+
+  const handleCloseOptimizeModal = useCallback(() => {
+    setShowOptimizeModal(false);
+    resetOptimization();
+  }, [resetOptimization]);
+
+  const handleOptimizeAiFeedback = useCallback(() => {
+    setShowOptimizeModal(false);
+    resetOptimization();
+    navigation.navigate('AiChat');
+  }, [navigation, resetOptimization]);
 
   const handlePlantPress = useCallback(
     (plantId: string) => {
@@ -286,6 +348,7 @@ export function ComponentDetailScreen({
   const dimensions = getComponentDimensions(component);
   const innerDimensions = getInnerDimensions(component);
   const plants = component.plants || [];
+  const hasPlants = plants.length > 0;
 
   // For towers, calculate layer-specific dimensions and filter plants
   const LAYER_REDUCTION_FACTOR = 0.85;
@@ -332,6 +395,23 @@ export function ComponentDetailScreen({
           accessibilityRole="button"
         >
           <Text className="text-lg">🤖</Text>
+        </Pressable>
+        <Pressable
+          onPress={handleOptimize}
+          disabled={!hasPlants || optimizeStatus === 'loading'}
+          className={`w-10 h-10 rounded-full items-center justify-center mr-2 ${
+            hasPlants ? 'bg-purple-600' : 'bg-gray-700'
+          }`}
+          android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
+          testID="optimize-placement-button"
+          accessibilityLabel={t('ai.optimize.placement.button')}
+          accessibilityRole="button"
+        >
+          {optimizeStatus === 'loading' ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text className="text-lg">✨</Text>
+          )}
         </Pressable>
         <Pressable
           onPress={handleAddPlant}
@@ -466,11 +546,26 @@ export function ComponentDetailScreen({
       )}
 
       {/* Layer overview modal for towers */}
-      {component && isTower && (
+      {isTower && (
         <LayerOverviewModal
           visible={showLayerOverview}
           onClose={() => setShowLayerOverview(false)}
           component={component}
+        />
+      )}
+
+      {/* Optimization alternatives modal */}
+      {showOptimizeModal && alternatives && alternatives.length > 0 && (
+        <OptimizationAlternativesModal
+          visible={showOptimizeModal}
+          onClose={handleCloseOptimizeModal}
+          onApply={handleApplyOptimization}
+          onAiFeedback={handleOptimizeAiFeedback}
+          component={component}
+          alternatives={alternatives}
+          selectedIndex={optimizeSelectedIndex}
+          onSelectIndex={setOptimizeSelectedIndex}
+          plantDataMap={plantDataMap}
         />
       )}
     </SafeAreaView>
