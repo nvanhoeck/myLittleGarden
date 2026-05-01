@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,17 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { ComponentData, PlantData } from '@/types';
 import type { OptimizeComponentAlternative } from '@/schemas/ai/optimizeComponentResponseSchema';
+import {
+  isGardenBox,
+  isPot,
+  isRectangularTower,
+  isCircularTower,
+} from '@/stores/componentStore';
 import { AlternativePageDots } from './AlternativePageDots';
 import { OptimizationMiniCanvas } from './OptimizationMiniCanvas';
 import { ScoreChips } from './ScoreChips';
@@ -26,6 +33,18 @@ interface OptimizationAlternativesModalProps {
   plantDataMap: Record<string, PlantData | undefined>;
 }
 
+function getInnerDimensions(component: ComponentData): { w: number; h: number } {
+  const border = component.borderWidthInCm * 2;
+  if (isGardenBox(component) || isRectangularTower(component)) {
+    return { w: Math.max(1, component.widthInCm - border), h: Math.max(1, component.lengthInCm - border) };
+  }
+  if (isPot(component) || isCircularTower(component)) {
+    const size = Math.max(1, component.diameterInCm - border);
+    return { w: size, h: size };
+  }
+  return { w: 100, h: 100 };
+}
+
 export function OptimizationAlternativesModal({
   visible,
   onClose,
@@ -38,14 +57,24 @@ export function OptimizationAlternativesModal({
   plantDataMap,
 }: OptimizationAlternativesModalProps): React.JSX.Element {
   const { t } = useTranslation();
+  const { width: screenW, height: screenH } = useWindowDimensions();
+  const [isZoomed, setIsZoomed] = useState(false);
   const current = alternatives[selectedIndex];
+
+  const zoomDims = useMemo(() => {
+    const { w: innerW, h: innerH } = getInnerDimensions(component);
+    const scaleByH = (screenH * 0.88) / innerH;
+    const scaleByW = (screenW * 0.95) / innerW;
+    const scale = innerH >= innerW ? Math.min(scaleByH, scaleByW) : Math.min(scaleByW, scaleByH);
+    return { width: innerW * scale, height: innerH * scale };
+  }, [component, screenW, screenH]);
 
   return (
     <Modal
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}
+      onRequestClose={isZoomed ? () => setIsZoomed(false) : onClose}
     >
       <View style={styles.overlay}>
         <View style={styles.sheet}>
@@ -79,7 +108,7 @@ export function OptimizationAlternativesModal({
           >
             {current ? (
               <>
-                {/* Mini canvas */}
+                {/* Mini canvas with zoom button */}
                 <View style={styles.canvasWrapper}>
                   <OptimizationMiniCanvas
                     component={component}
@@ -88,6 +117,13 @@ export function OptimizationAlternativesModal({
                     width={300}
                     height={220}
                   />
+                  <Pressable
+                    onPress={() => setIsZoomed(true)}
+                    style={styles.zoomBtn}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.zoomBtnText}>[  ]</Text>
+                  </Pressable>
                 </View>
 
                 {/* Total score */}
@@ -142,6 +178,27 @@ export function OptimizationAlternativesModal({
             </View>
           </View>
         </View>
+
+        {/* Full-screen zoom overlay */}
+        {isZoomed && current ? (
+          <View style={styles.zoomOverlay}>
+            <OptimizationMiniCanvas
+              component={component}
+              positions={current.positions}
+              plantDataMap={plantDataMap}
+              width={zoomDims.width}
+              height={zoomDims.height}
+              showIcons
+            />
+            <Pressable
+              onPress={() => setIsZoomed(false)}
+              style={styles.zoomCloseBtn}
+              hitSlop={12}
+            >
+              <Text style={styles.closeBtnText}>X</Text>
+            </Pressable>
+          </View>
+        ) : null}
       </View>
     </Modal>
   );
@@ -157,7 +214,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1f2937',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '90%',
+    height: '90%',
     paddingBottom: 24,
   },
   header: {
@@ -208,6 +265,45 @@ const styles = StyleSheet.create({
   canvasWrapper: {
     borderRadius: 12,
     overflow: 'hidden',
+  },
+  zoomBtn: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  zoomBtnText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  zoomOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#000000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  zoomCloseBtn: {
+    position: 'absolute',
+    top: 48,
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(55,65,81,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   totalScoreRow: {
     flexDirection: 'row',

@@ -5,7 +5,16 @@
       "placeholder": "Stel een vraag over je tuin...",
       "send": "Versturen",
       "loading": "De assistent denkt na...",
-      "emptyState": "Stel je eerste vraag om te beginnen."
+      "emptyState": "Stel je eerste vraag om te beginnen.",
+      "newConversation": "Nieuw gesprek",
+      "summarized": "Gesprek samengevat",
+      "compacting": "Gesprek wordt samengevat...",
+      "turnLimit": {
+        "title": "Gesprekslimliet bereikt",
+        "message": "Je hebt het maximum aantal berichten bereikt. Wil je een nieuw gesprek starten of de huidige samenvatten?",
+        "newConversation": "Nieuw gesprek starten",
+        "compact": "Compacteren"
+      }
     },
     "optimize": {
       "buttonLabel": "Optimaliseer tuin",

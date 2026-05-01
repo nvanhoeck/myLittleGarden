@@ -23,6 +23,8 @@ import { PLANT_CATEGORIES } from '@/types/plant.types';
 import { getPlantIcon, hasPlantIcon } from '@/assets';
 import { useOptimizeComponent } from '@/hooks/ai/useOptimizeComponent';
 import { OptimizationAlternativesModal } from '@/components/ai/OptimizationAlternativesModal';
+import { useAiChatStore } from '@/stores/ai/aiChatStore';
+import { useAiOptimizeComponentStore } from '@/stores/ai/aiOptimizeComponentStore';
 
 /**
  * Get component dimensions in cm
@@ -207,6 +209,18 @@ export function ComponentDetailScreen({
     }
   }, [optimizeStatus]);
 
+  // Re-show the optimization modal when returning from AiChat (if results still live)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      const { status, alternatives: alts } = useAiOptimizeComponentStore.getState();
+      if (status === 'success' && alts && alts.length > 0) {
+        setShowOptimizeModal(true);
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+
   // Reset optimization store on unmount
   useEffect(() => {
     return () => {
@@ -266,10 +280,36 @@ export function ComponentDetailScreen({
   }, [resetOptimization]);
 
   const handleOptimizeAiFeedback = useCallback(() => {
+    const { alternatives: alts, selectedIndex: idx } = useAiOptimizeComponentStore.getState();
+    const selected = alts?.[idx];
+
+    const { clearMessages, addMessage } = useAiChatStore.getState();
+    clearMessages();
+    if (selected) {
+      const positionLines = selected.positions
+        .map((p) => {
+          const plant = plantDataMap[p.plantInstanceId];
+          return plant ? ('- ' + plant.nameNl + ': (' + p.positionXInCm + 'cm, ' + p.positionYInCm + 'cm)') : null;
+        })
+        .filter(Boolean)
+        .join('\n');
+      const parts = [
+        'Optimalisatieresultaat optie ' + (idx + 1) + ' van ' + (alts?.length ?? 1) + ':',
+        'Samenvatting: ' + selected.summary,
+        'Score: ' + selected.score.total + '/100 (companion: ' + selected.score.companion + ', spacing: ' + selected.score.spacing + ', sun: ' + selected.score.sun + ', combative: ' + selected.score.combative + ')',
+      ];
+      if (positionLines) parts.push('Plantenposities:\n' + positionLines);
+      addMessage('user', parts.join('\n'));
+    }
+
     setShowOptimizeModal(false);
-    resetOptimization();
     navigation.navigate('AiChat');
-  }, [navigation, resetOptimization]);
+  }, [navigation, plantDataMap]);
+
+  const handleOpenChat = useCallback(() => {
+    useAiChatStore.getState().clearMessages();
+    navigation.navigate('AiChat');
+  }, [navigation]);
 
   const handlePlantPress = useCallback(
     (plantId: string) => {
@@ -387,7 +427,7 @@ export function ComponentDetailScreen({
           </Text>
         </View>
         <Pressable
-          onPress={() => navigation.navigate('AiChat')}
+          onPress={handleOpenChat}
           className="bg-blue-600 w-10 h-10 rounded-full items-center justify-center mr-2"
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
           testID="ai-tuinhulp-button"

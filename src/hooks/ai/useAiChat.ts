@@ -20,21 +20,24 @@ interface UseAiChatResult {
   messages: ReturnType<typeof useAiChatStore.getState>['messages'];
   status: ReturnType<typeof useAiChatStore.getState>['status'];
   error: string | null;
+  turnCount: number;
+  summaryContext: string | null;
   sendMessage: (text: string) => Promise<void>;
+  compactMessages: () => Promise<void>;
 }
 
-/**
- * Hook that owns the chat side-effects: snapshotting the garden, calling
- * the chat service, and updating the non-persisted chat store.
- */
 export function useAiChat(): UseAiChatResult {
   const { t } = useTranslation();
   const messages = useAiChatStore((s) => s.messages);
   const status = useAiChatStore((s) => s.status);
   const error = useAiChatStore((s) => s.error);
+  const turnCount = useAiChatStore((s) => s.turnCount);
+  const summaryContext = useAiChatStore((s) => s.summaryContext);
   const addMessage = useAiChatStore((s) => s.addMessage);
   const setStatus = useAiChatStore((s) => s.setStatus);
   const setError = useAiChatStore((s) => s.setError);
+  const incrementTurnCount = useAiChatStore((s) => s.incrementTurnCount);
+  const resetForCompact = useAiChatStore((s) => s.resetForCompact);
 
   const translateError = useCallback(
     (e: unknown): string => {
@@ -92,11 +95,21 @@ export function useAiChat(): UseAiChatResult {
       setStatus('loading');
       setError(null);
 
-      // Read fresh state AFTER addMessage so the new user message is included
-      // in the history we send to the backend.
-      const history: ChatHistoryMessage[] = useAiChatStore
+      // Read fresh state AFTER addMessage so the new user message is included.
+      const rawHistory: ChatHistoryMessage[] = useAiChatStore
         .getState()
         .messages.map((m) => ({ role: m.role, content: m.content }));
+
+      // Prefix summary context as a synthetic exchange so the AI retains
+      // awareness of compacted earlier turns without resending the full log.
+      const currentSummary = useAiChatStore.getState().summaryContext;
+      const history: ChatHistoryMessage[] = currentSummary
+        ? [
+            { role: 'user', content: '[Samenvatting van eerdere gesprekken]' },
+            { role: 'assistant', content: currentSummary },
+            ...rawHistory,
+          ]
+        : rawHistory;
 
       try {
         const reply = await chatService.sendMessage({
@@ -105,14 +118,33 @@ export function useAiChat(): UseAiChatResult {
           history,
         });
         addMessage('assistant', reply);
+        incrementTurnCount();
         setStatus('idle');
       } catch (e) {
         setError(translateError(e));
         setStatus('error');
       }
     },
-    [addMessage, setStatus, setError, translateError],
+    [addMessage, setStatus, setError, incrementTurnCount, translateError],
   );
 
-  return { messages, status, error, sendMessage };
+  const compactMessages = useCallback(async (): Promise<void> => {
+    const currentMessages = useAiChatStore.getState().messages;
+    if (currentMessages.length === 0) return;
+    setStatus('compacting');
+    setError(null);
+    try {
+      const history: ChatHistoryMessage[] = currentMessages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+      const summary = await chatService.compactConversation(history);
+      resetForCompact(summary);
+    } catch (e) {
+      setError(translateError(e));
+      setStatus('error');
+    }
+  }, [setStatus, setError, resetForCompact, translateError]);
+
+  return { messages, status, error, turnCount, summaryContext, sendMessage, compactMessages };
 }

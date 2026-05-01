@@ -8,7 +8,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { getPlantIcon, hasPlantIcon } from '@/assets';
+import { PLANT_CATEGORIES } from '@/types/plant.types';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import type { ComponentData, PlantData } from '@/types';
 import {
   isCircularTower,
@@ -31,6 +33,7 @@ interface OptimizationMiniCanvasProps {
   plantDataMap: Record<string, PlantData | undefined>;
   width: number;
   height: number;
+  showIcons?: boolean;
 }
 
 function getInnerDimensions(component: ComponentData): { width: number; height: number } {
@@ -75,6 +78,7 @@ export function OptimizationMiniCanvas({
   plantDataMap,
   width,
   height,
+  showIcons = false,
 }: OptimizationMiniCanvasProps): React.JSX.Element {
   const innerDims = useMemo(() => getInnerDimensions(component), [component]);
   const isCircular = isPot(component) || isCircularTower(component);
@@ -112,6 +116,12 @@ export function OptimizationMiniCanvas({
           const cx = position.positionXInCm * scale;
           const cy = position.positionYInCm * scale;
 
+          const iconSize = plantBodyPx * 0.72;
+          const categoryEmoji =
+            PLANT_CATEGORIES.find((cat) => cat.key === plant?.category)?.icon ?? '🌱';
+          const plantIcon = plant ? getPlantIcon(plant.id) : null;
+          const plantHasIcon = plant ? hasPlantIcon(plant.id) : false;
+
           return (
             <View
               key={position.plantInstanceId}
@@ -132,7 +142,9 @@ export function OptimizationMiniCanvas({
                     width: plantBodyPx,
                     height: plantBodyPx,
                     borderRadius: isPatch ? 4 : plantBodyPx / 2,
-                    backgroundColor: isPatch ? '#92400e' : '#16a34a',
+                    backgroundColor: showIcons
+                      ? 'rgba(240,240,235,0.92)'
+                      : isPatch ? '#92400e' : '#16a34a',
                     borderWidth: overlap ? 2 : isPatch ? 2 : 0,
                     borderStyle: isPatch ? 'dashed' : 'solid',
                     borderColor: overlap
@@ -142,7 +154,19 @@ export function OptimizationMiniCanvas({
                       : 'transparent',
                   },
                 ]}
-              />
+              >
+                {showIcons ? (
+                  plantHasIcon && plantIcon ? (
+                    <Image
+                      source={plantIcon}
+                      style={{ width: iconSize, height: iconSize }}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Text style={{ fontSize: iconSize * 0.8 }}>{categoryEmoji}</Text>
+                  )
+                ) : null}
+              </View>
               {plant?.nameNl ? (
                 <View style={styles.labelContainer}>
                   <Text style={styles.labelText} numberOfLines={1}>

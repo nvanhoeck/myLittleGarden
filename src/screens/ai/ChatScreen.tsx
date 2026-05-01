@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Pressable,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +15,9 @@ import type { RootStackParamList } from '@/navigation/navigationTypes';
 import { ChatBubble } from '@/components/ai/ChatBubble';
 import { ChatInputBar } from '@/components/ai/ChatInputBar';
 import { useAiChat } from '@/hooks/ai/useAiChat';
+import { useAiChatStore } from '@/stores/ai/aiChatStore';
 import { getHealth } from '@/services/ai/healthService';
+import { AI_MAX_CHAT_TURNS } from '@/services/ai/aiConfig';
 import type { ChatMessage } from '@/stores/ai/aiChatStore';
 
 type ChatScreenProps = NativeStackScreenProps<RootStackParamList, 'AiChat'>;
@@ -24,17 +27,10 @@ type HealthGateState =
   | { kind: 'ready' }
   | { kind: 'down' };
 
-/**
- * ChatScreen - AI Tuinassistent conversation screen.
- *
- * Responsibilities:
- *  - Health-gate the screen on mount (D11)
- *  - Show message list (D2), input bar (D5), loading spinner (D9)
- *  - Show error banner with retry (D10)
- */
 export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
   const { t } = useTranslation();
-  const { messages, status, error, sendMessage } = useAiChat();
+  const { messages, status, error, turnCount, summaryContext, sendMessage, compactMessages } = useAiChat();
+  const clearMessages = useAiChatStore((s) => s.clearMessages);
   const [draft, setDraft] = useState('');
   const [gate, setGate] = useState<HealthGateState>({ kind: 'loading' });
   const lastUserMessageRef = useRef<string | null>(null);
@@ -66,10 +62,36 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
   const handleSend = useCallback(async () => {
     const text = draft.trim();
     if (!text) return;
+
+    if (turnCount >= AI_MAX_CHAT_TURNS) {
+      Alert.alert(
+        t('ai.chat.turnLimit.title'),
+        t('ai.chat.turnLimit.message'),
+        [
+          {
+            text: t('ai.chat.turnLimit.newConversation'),
+            onPress: () => {
+              clearMessages();
+              setDraft('');
+            },
+          },
+          {
+            text: t('ai.chat.turnLimit.compact'),
+            onPress: async () => {
+              setDraft('');
+              await compactMessages();
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+      return;
+    }
+
     setDraft('');
     lastUserMessageRef.current = text;
     await sendMessage(text);
-  }, [draft, sendMessage]);
+  }, [draft, sendMessage, compactMessages, turnCount, clearMessages, t]);
 
   const handleRetry = useCallback(async () => {
     const last = lastUserMessageRef.current;
@@ -94,7 +116,6 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
     [],
   );
 
-  // Header bar
   const header = (
     <View className="flex-row items-center px-3 h-14 border-b border-neutral-800">
       <Pressable
@@ -109,10 +130,18 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
       <Text className="flex-1 text-on-background text-xl font-medium ml-2">
         {t('ai.chat.title')}
       </Text>
+      <Pressable
+        onPress={() => clearMessages()}
+        className="w-11 h-11 items-center justify-center rounded-full"
+        testID="chat-new-conversation-button"
+        accessibilityRole="button"
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Text className="text-on-background text-sm opacity-70">{t('ai.chat.newConversation')}</Text>
+      </Pressable>
     </View>
   );
 
-  // Health gate: loading
   if (gate.kind === 'loading') {
     return (
       <SafeAreaView className="flex-1 bg-background" testID="chat-screen">
@@ -124,7 +153,6 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
     );
   }
 
-  // Health gate: down
   if (gate.kind === 'down') {
     return (
       <SafeAreaView className="flex-1 bg-background" testID="chat-screen">
@@ -143,7 +171,7 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
       {header}
       <KeyboardAvoidingView
         className="flex-1"
-        behavior='padding'
+        behavior="padding"
       >
         {messages.length === 0 ? (
           <View className="flex-1 items-center justify-center px-6">
@@ -162,6 +190,15 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
           />
         )}
 
+        {summaryContext !== null && (
+          <View
+            className="flex-row items-center mx-3 mb-1 px-3 py-1.5 rounded-lg bg-blue-900/30 border border-blue-700"
+            testID="chat-summary-indicator"
+          >
+            <Text className="text-blue-300 text-xs">{t('ai.chat.summarized')}</Text>
+          </View>
+        )}
+
         {status === 'loading' && (
           <View
             className="flex-row items-center px-4 py-2"
@@ -170,6 +207,18 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
             <ActivityIndicator size="small" color="#5DB075" />
             <Text className="text-on-background ml-2 opacity-70">
               {t('ai.chat.loading')}
+            </Text>
+          </View>
+        )}
+
+        {status === 'compacting' && (
+          <View
+            className="flex-row items-center px-4 py-2"
+            testID="chat-compacting-indicator"
+          >
+            <ActivityIndicator size="small" color="#60A5FA" />
+            <Text className="text-on-background ml-2 opacity-70">
+              {t('ai.chat.compacting')}
             </Text>
           </View>
         )}
@@ -195,7 +244,7 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
           value={draft}
           onChangeText={setDraft}
           onSend={handleSend}
-          disabled={status === 'loading'}
+          disabled={status === 'loading' || status === 'compacting'}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>

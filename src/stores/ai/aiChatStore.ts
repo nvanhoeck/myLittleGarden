@@ -7,16 +7,20 @@ export interface ChatMessage {
   content: string;
 }
 
-export type AiChatStatus = 'idle' | 'loading' | 'error';
+export type AiChatStatus = 'idle' | 'loading' | 'error' | 'compacting';
 
 interface AiChatState {
   messages: ChatMessage[];
   status: AiChatStatus;
   error: string | null;
+  turnCount: number;
+  summaryContext: string | null;
   addMessage: (role: ChatRole, content: string) => void;
   setStatus: (status: AiChatStatus) => void;
   setError: (error: string | null) => void;
   clearMessages: () => void;
+  incrementTurnCount: () => void;
+  resetForCompact: (summary: string) => void;
 }
 
 /**
@@ -27,9 +31,13 @@ export const useAiChatStore = create<AiChatState>((set) => ({
   messages: [],
   status: 'idle',
   error: null,
+  turnCount: 0,
+  summaryContext: null,
   addMessage: (role, content) =>
     set((state) => ({ messages: [...state.messages, { role, content }] })),
   setStatus: (status) => set({ status }),
   setError: (error) => set({ error }),
-  clearMessages: () => set({ messages: [], status: 'idle', error: null }),
+  clearMessages: () => set({ messages: [], status: 'idle', error: null, turnCount: 0, summaryContext: null }),
+  incrementTurnCount: () => set((state) => ({ turnCount: state.turnCount + 1 })),
+  resetForCompact: (summary) => set({ messages: [], status: 'idle', error: null, turnCount: 0, summaryContext: summary }),
 }));
