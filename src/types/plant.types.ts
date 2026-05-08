@@ -153,6 +153,7 @@ export interface PlacedPlantData {
     readonly positionY: number; // Position within component in cm
     readonly placedAt: string; // ISO date string
     readonly layerIndex?: number; // Layer index for towers (0 = bottom layer), undefined for non-towers
+    readonly locked?: boolean; // True when plant position is pinned and cannot be moved by drag or AI optimization
 }
 
 /**

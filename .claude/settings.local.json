@@ -12,7 +12,8 @@
       "WebSearch",
       "Bash(mkdir:*)",
       "Bash(npx tsc:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(node *)"
     ]
   }
 }

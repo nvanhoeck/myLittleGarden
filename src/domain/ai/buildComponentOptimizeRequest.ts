@@ -66,6 +66,7 @@ function mapPlant(plant: PlacedPlantData): PlacedPlantSnapshot {
     positionXInCm: plant.positionX,
     positionYInCm: plant.positionY,
     layerIndex: plant.layerIndex ?? null,
+    locked: plant.locked ?? false,
   };
 }
 
@@ -118,7 +119,7 @@ export function buildComponentOptimizeRequest(
   getPlantById: (id: string) => PlantData | undefined,
   gardenSunDirection: string | null,
   objective: Objective = 'balanced',
-  numberOfAlternatives = 3,
+  numberOfAlternatives = 5,
 ): OptimizeComponentRequest {
   const distinctPlantIds = new Set(component.plants.map((p) => p.plantId));
   const plantCatalog: PlantSpecSnapshot[] = [...distinctPlantIds].flatMap((id) => {

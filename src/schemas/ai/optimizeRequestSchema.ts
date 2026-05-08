@@ -15,6 +15,7 @@ const placedPlantSnapshotSchema = z.object({
   positionXInCm: z.number(),
   positionYInCm: z.number(),
   layerIndex: z.number().nullable(),
+  locked: z.boolean(),
 });
 
 const componentDimensionsSnapshotSchema = z.object({

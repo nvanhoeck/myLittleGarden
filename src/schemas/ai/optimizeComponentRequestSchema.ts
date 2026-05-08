@@ -8,7 +8,7 @@ const componentObjectiveSchema = z
 export const optimizeComponentRequestSchema = z.object({
   componentId: z.string(),
   objective: componentObjectiveSchema,
-  numberOfAlternatives: z.number().int().min(3).max(5).default(3),
+  numberOfAlternatives: z.number().int().min(5).max(5).default(5),
   snapshot: gardenSnapshotSchema,
 });
 

@@ -61,6 +61,19 @@ export function OptimizationAlternativesModal({
   const [isZoomed, setIsZoomed] = useState(false);
   const current = alternatives[selectedIndex];
 
+  const lockedPositions = useMemo(
+    () =>
+      (component.plants ?? [])
+        .filter((p) => p.locked)
+        .map((p) => ({
+          plantInstanceId: p.id,
+          positionXInCm: p.positionX,
+          positionYInCm: p.positionY,
+          locked: true as const,
+        })),
+    [component.plants],
+  );
+
   const zoomDims = useMemo(() => {
     const { w: innerW, h: innerH } = getInnerDimensions(component);
     const scaleByH = (screenH * 0.88) / innerH;
@@ -112,7 +125,7 @@ export function OptimizationAlternativesModal({
                 <View style={styles.canvasWrapper}>
                   <OptimizationMiniCanvas
                     component={component}
-                    positions={current.positions}
+                    positions={[...current.positions, ...lockedPositions]}
                     plantDataMap={plantDataMap}
                     width={300}
                     height={220}
@@ -184,7 +197,7 @@ export function OptimizationAlternativesModal({
           <View style={styles.zoomOverlay}>
             <OptimizationMiniCanvas
               component={component}
-              positions={current.positions}
+              positions={[...current.positions, ...lockedPositions]}
               plantDataMap={plantDataMap}
               width={zoomDims.width}
               height={zoomDims.height}

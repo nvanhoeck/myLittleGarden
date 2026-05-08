@@ -69,6 +69,9 @@ interface ComponentState {
   moveComponent: (id: string, x: number, y: number) => void;
   rotateComponent: (id: string, degrees: number) => void;
   clearAllComponents: () => void;
+  togglePlantLock: (componentId: string, plantInstanceId: string) => void;
+  lockAllPlants: (componentId: string) => void;
+  unlockAllPlants: (componentId: string) => void;
 
   // Selectors
   getComponentById: (id: string) => ComponentData | undefined;
@@ -205,6 +208,47 @@ export const useComponentStore = create<ComponentState>()(
         set({ components: [] });
       },
 
+      // Toggle the locked state of a single plant inside a component
+      togglePlantLock: (componentId, plantInstanceId) => {
+        set((state) => ({
+          components: state.components.map((comp) => {
+            if (comp.id !== componentId) return comp;
+            return {
+              ...comp,
+              plants: comp.plants.map((p) =>
+                p.id === plantInstanceId ? { ...p, locked: !p.locked } : p
+              ),
+            };
+          }),
+        }));
+      },
+
+      // Lock every plant inside a component
+      lockAllPlants: (componentId) => {
+        set((state) => ({
+          components: state.components.map((comp) => {
+            if (comp.id !== componentId) return comp;
+            return {
+              ...comp,
+              plants: comp.plants.map((p) => ({ ...p, locked: true })),
+            };
+          }),
+        }));
+      },
+
+      // Unlock every plant inside a component
+      unlockAllPlants: (componentId) => {
+        set((state) => ({
+          components: state.components.map((comp) => {
+            if (comp.id !== componentId) return comp;
+            return {
+              ...comp,
+              plants: comp.plants.map((p) => ({ ...p, locked: false })),
+            };
+          }),
+        }));
+      },
+
       // Get a component by ID
       getComponentById: (id) => {
         return get().components.find((comp) => comp.id === id);
@@ -317,6 +361,9 @@ export function useComponentActions() {
       moveComponent: state.moveComponent,
       rotateComponent: state.rotateComponent,
       clearAllComponents: state.clearAllComponents,
+      togglePlantLock: state.togglePlantLock,
+      lockAllPlants: state.lockAllPlants,
+      unlockAllPlants: state.unlockAllPlants,
     }))
   );
 }

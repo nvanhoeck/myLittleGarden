@@ -25,6 +25,9 @@ interface PlantPlacementCanvasProps {
     onPlantLongPress?: (plant: PlacedPlantData) => void;
     isEditMode?: boolean;
     onToggleEditMode?: () => void;
+    onBackgroundPress?: () => void;
+    onLockAll?: () => void;
+    onUnlockAll?: () => void;
 }
 
 interface DraggablePlantProps {
@@ -44,6 +47,7 @@ interface DraggablePlantProps {
     showPlantName: boolean;
     isPatch: boolean;
     draggingEnabled: boolean;
+    isLocked: boolean;
 }
 
 /**
@@ -164,6 +168,7 @@ function DraggablePlant({
                             showPlantName,
                             isPatch,
                             draggingEnabled,
+                            isLocked,
                         }: DraggablePlantProps): React.JSX.Element {
 
     // Plant body size (NOT derived from spacing radius)
@@ -193,6 +198,7 @@ function DraggablePlant({
     const onLongPressRef = useRef(onLongPress);
     const onSelectRef = useRef(onSelect);
     const draggingEnabledRef = useRef(draggingEnabled);
+    const isLockedRef = useRef(isLocked);
 
     // Update refs when props/values change
     React.useEffect(() => {
@@ -206,6 +212,7 @@ function DraggablePlant({
         onLongPressRef.current = onLongPress;
         onSelectRef.current = onSelect;
         draggingEnabledRef.current = draggingEnabled;
+        isLockedRef.current = isLocked;
     }, [
         plant,
         scale,
@@ -217,6 +224,7 @@ function DraggablePlant({
         onLongPress,
         onSelect,
         draggingEnabled,
+        isLocked,
     ]);
 
     // Animated values for position
@@ -247,6 +255,9 @@ function DraggablePlant({
             onPanResponderGrant: () => {
                 isDragEnabled.current = false;
                 hasMoved.current = false;
+
+                // Locked plants can still be tapped (to open the action bar) but never dragged
+                if (isLockedRef.current) return;
 
                 // Start long press timer - after 400ms, enable drag mode
                 longPressTimer.current = setTimeout(() => {
@@ -406,9 +417,9 @@ function DraggablePlant({
                             : isPatch
                             ? '#92400e'
                             : '#16a34a',
-                        borderWidth: isPatch ? 2 : 0,
+                        borderWidth: isSelected ? 2 : isPatch ? 2 : 0,
                         borderStyle: isPatch ? 'dashed' : 'solid',
-                        borderColor: isPatch ? '#d97706' : 'transparent',
+                        borderColor: isSelected ? '#ffffff' : isPatch ? '#d97706' : 'transparent',
                     },
                 ]}
             >
@@ -464,6 +475,29 @@ function DraggablePlant({
                 </Pressable>
             )}
 
+            {/* Lock badge when plant is locked */}
+            {isLocked && (
+                <View
+                    pointerEvents="none"
+                    style={{
+                        position: 'absolute',
+                        right: -8,
+                        top: -8,
+                        width: 18,
+                        height: 18,
+                        borderRadius: 9,
+                        backgroundColor: '#1e40af',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 1,
+                        borderColor: '#3b82f6',
+                        zIndex: 200,
+                    }}
+                >
+                    <Text style={{ fontSize: 10 }}>🔒</Text>
+                </View>
+            )}
+
             {/* Plant name label when selected */}
             {(isSelected || showPlantName) && plantData && (
                 <View
@@ -503,6 +537,9 @@ export function PlantPlacementCanvas({
                                          onPlantLongPress,
                                          isEditMode = false,
                                          onToggleEditMode,
+                                         onBackgroundPress,
+                                         onLockAll,
+                                         onUnlockAll,
                                      }: PlantPlacementCanvasProps): React.JSX.Element {
     const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
     const [canvasSize, setCanvasSize] = useState({width: 0, height: 0});
@@ -642,7 +679,8 @@ export function PlantPlacementCanvas({
 
     const handleBackgroundPress = useCallback(() => {
         setSelectedPlantId(null);
-    }, []);
+        onBackgroundPress?.();
+    }, [onBackgroundPress]);
 
     // Calculate content padding for centering when not scrolling
     const contentPaddingX = needsScrolling ? 16 : Math.max(16, (canvasSize.width - containerWidth) / 2);
@@ -650,7 +688,8 @@ export function PlantPlacementCanvas({
 
     return (
         <GestureHandlerRootView style={styles.root}>
-            <View style={styles.container} onLayout={handleLayout}>
+            <View style={styles.outerContainer}>
+                <View style={styles.container} onLayout={handleLayout}>
                 {canvasSize.width > 0 && (
                     <>
                         <ScrollView
@@ -721,6 +760,7 @@ export function PlantPlacementCanvas({
                                                     showPlantName={showPlantNames}
                                                     isPatch={isPatch}
                                                     draggingEnabled={isEditMode}
+                                                    isLocked={plant.locked ?? false}
                                                 />
                                             );
                                         })}
@@ -737,50 +777,6 @@ export function PlantPlacementCanvas({
                             </ScrollView>
                         </ScrollView>
 
-                        {/* Spacing radius toggle */}
-                        <View style={styles.toggleContainer}>
-                            <View style={styles.toggleRow}>
-                                <Pressable
-                                    style={styles.toggleButton}
-                                    onPress={handleToggleSpacingRadius}
-                                >
-                                    <Text style={styles.spacingToggleIcon}>
-                                        {showSpacingRadius ? '◉' : '○'}
-                                    </Text>
-                                    <Text style={styles.spacingToggleText}>Afstand</Text>
-                                </Pressable>
-                                {/*Plant name toggle*/}
-                                <Pressable
-                                    style={styles.toggleButton}
-                                    onPress={handleTogglePlantNames}
-                                >
-                                    <Text style={styles.spacingToggleIcon}>
-                                        {showPlantNames ? '◉' : '○'}
-                                    </Text>
-                                    <Text style={styles.spacingToggleText}>Namen</Text>
-                                </Pressable>
-                                <Pressable
-                                    style={styles.toggleButton}
-                                    onPress={handleToggleRelationships}
-                                >
-                                    <Text style={styles.spacingToggleIcon}>
-                                        {showRelationships ? '◉' : '○'}
-                                    </Text>
-                                    <Text style={styles.spacingToggleText}>Companionships</Text>
-                                </Pressable>
-                            </View>
-                            <Pressable
-                                style={[styles.editModeButton, isEditMode && styles.editModeActiveButton]}
-                                onPress={onToggleEditMode}
-                            >
-                                <Text style={[styles.spacingToggleIcon, isEditMode && styles.editModeActiveIcon]}>
-                                    {isEditMode ? '💾' : '✏️'}
-                                </Text>
-                                <Text style={[styles.spacingToggleText, isEditMode && styles.editModeActiveText]}>
-                                    {isEditMode ? 'Opslaan' : 'Bewerken'}
-                                </Text>
-                            </Pressable>
-                        </View>
 
                         {/* Scale indicator - fixed visual width, dynamic distance label */}
                         <View style={styles.scaleIndicator}>
@@ -849,6 +845,67 @@ export function PlantPlacementCanvas({
                     visible={tooltipVisible}
                     onClose={handleTooltipClose}
                 />
+            </View>
+            {/* Spacing radius toggle */}
+            <View style={styles.toggleContainer}>
+                <View style={styles.toggleRow}>
+                    <Pressable
+                        style={styles.toggleButton}
+                        onPress={handleToggleSpacingRadius}
+                    >
+                        <Text style={styles.spacingToggleIcon}>
+                            {showSpacingRadius ? '◉' : '○'}
+                        </Text>
+                        <Text style={styles.spacingToggleText}>Afstand</Text>
+                    </Pressable>
+                    {/*Plant name toggle*/}
+                    <Pressable
+                        style={styles.toggleButton}
+                        onPress={handleTogglePlantNames}
+                    >
+                        <Text style={styles.spacingToggleIcon}>
+                            {showPlantNames ? '◉' : '○'}
+                        </Text>
+                        <Text style={styles.spacingToggleText}>Namen</Text>
+                    </Pressable>
+                    <Pressable
+                        style={styles.toggleButton}
+                        onPress={handleToggleRelationships}
+                    >
+                        <Text style={styles.spacingToggleIcon}>
+                            {showRelationships ? '◉' : '○'}
+                        </Text>
+                        <Text style={styles.spacingToggleText}>Companionships</Text>
+                    </Pressable>
+                </View>
+                {(onLockAll || onUnlockAll) && (
+                    <View style={styles.toggleRow}>
+                        {onLockAll && (
+                            <Pressable style={styles.toggleButton} onPress={onLockAll}>
+                                <Text style={styles.spacingToggleIcon}>🔒</Text>
+                                <Text style={styles.spacingToggleText}>Vergrendel alles</Text>
+                            </Pressable>
+                        )}
+                        {onUnlockAll && (
+                            <Pressable style={styles.toggleButton} onPress={onUnlockAll}>
+                                <Text style={styles.spacingToggleIcon}>🔓</Text>
+                                <Text style={styles.spacingToggleText}>Ontgrendel alles</Text>
+                            </Pressable>
+                        )}
+                    </View>
+                )}
+                <Pressable
+                    style={[styles.editModeButton, isEditMode && styles.editModeActiveButton]}
+                    onPress={onToggleEditMode}
+                >
+                    <Text style={[styles.spacingToggleIcon, isEditMode && styles.editModeActiveIcon]}>
+                        {isEditMode ? '💾' : '✏️'}
+                    </Text>
+                    <Text style={[styles.spacingToggleText, isEditMode && styles.editModeActiveText]}>
+                        {isEditMode ? 'Opslaan' : 'Bewerken'}
+                    </Text>
+                </Pressable>
+            </View>
             </View>
         </GestureHandlerRootView>
     );
@@ -938,14 +995,14 @@ const styles = StyleSheet.create({
         color: '#6b7280',
         fontSize: 14,
     },
+    outerContainer: {
+        flex: 1,
+        flexDirection: 'column',
+    },
     toggleContainer: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
         flexDirection: 'column',
         alignItems: 'flex-start',
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        borderRadius: 8,
         paddingVertical: 6,
         paddingHorizontal: 10,
         gap: 4,

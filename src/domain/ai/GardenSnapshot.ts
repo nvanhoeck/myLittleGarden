@@ -34,6 +34,7 @@ export interface PlacedPlantSnapshot {
   positionXInCm: number;
   positionYInCm: number;
   layerIndex: number | null;
+  locked: boolean;
 }
 
 /**

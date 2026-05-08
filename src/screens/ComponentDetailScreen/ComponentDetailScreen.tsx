@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ComponentDetailScreenProps } from '@/navigation/navigationTypes';
 import { useComponent, useComponentStore } from '@/stores';
+import { useShallow } from 'zustand/react/shallow';
 import { usePlantStore } from '@/stores/plantStore';
 import {
   isGardenBox,
@@ -175,13 +176,21 @@ export function ComponentDetailScreen({
   const { componentId } = route.params;
   const component = useComponent(componentId);
   const getPlantById = usePlantStore((state) => state.getPlantById);
-  const updateComponent = useComponentStore((state) => state.updateComponent);
+  const { updateComponent, togglePlantLock, lockAllPlants, unlockAllPlants } = useComponentStore(
+    useShallow((state) => ({
+      updateComponent: state.updateComponent,
+      togglePlantLock: state.togglePlantLock,
+      lockAllPlants: state.lockAllPlants,
+      unlockAllPlants: state.unlockAllPlants,
+    }))
+  );
   const [viewMode, setViewMode] = useState<'canvas' | 'list'>('canvas');
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showLayerOverview, setShowLayerOverview] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
+  const [selectedPlantInstance, setSelectedPlantInstance] = useState<{ id: string; name: string } | null>(null);
 
   const {
     status: optimizeStatus,
@@ -366,13 +375,41 @@ export function ComponentDetailScreen({
     [component, componentId, updateComponent, t]
   );
 
-  const handleCanvasPlantLongPress = useCallback(
+  const handleCanvasPlantTap = useCallback(
     (plant: PlacedPlantData) => {
       const plantData = getPlantById(plant.plantId);
-      handleDeletePlant(plant.id, plantData?.nameNl ?? t('componentDetail.unknownPlant'));
+      const name = plantData?.nameNl ?? t('componentDetail.unknownPlant');
+      setSelectedPlantInstance({ id: plant.id, name });
     },
-    [getPlantById, handleDeletePlant, t]
+    [getPlantById, t]
   );
+
+  const handleDeleteSelectedPlant = useCallback(() => {
+    if (!selectedPlantInstance || !component) return;
+    const { id, name } = selectedPlantInstance;
+    Alert.alert(
+      t('common.delete'),
+      `${name} verwijderen?`,
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            const updatedPlants = (component.plants || []).filter((p) => p.id !== id);
+            updateComponent(componentId, { plants: updatedPlants });
+            setSelectedPlantInstance(null);
+          },
+        },
+      ]
+    );
+  }, [selectedPlantInstance, component, componentId, updateComponent, t]);
+
+  const handleToggleLockSelected = useCallback(() => {
+    if (!selectedPlantInstance) return;
+    togglePlantLock(componentId, selectedPlantInstance.id);
+    setSelectedPlantInstance(null);
+  }, [selectedPlantInstance, componentId, togglePlantLock]);
 
   if (!component) {
     return (
@@ -532,17 +569,44 @@ export function ComponentDetailScreen({
             layerDimensions={isTower ? layerDimensions : undefined}
             onPlantPositionChange={handlePlantPositionChange}
             onPlantPress={(plant) => handlePlantPress(plant.plantId)}
-            onPlantLongPress={handleCanvasPlantLongPress}
+            onPlantLongPress={handleCanvasPlantTap}
             isEditMode={isEditMode}
             onToggleEditMode={handleToggleEditMode}
+            onBackgroundPress={() => setSelectedPlantInstance(null)}
+            onLockAll={() => lockAllPlants(componentId)}
+            onUnlockAll={() => unlockAllPlants(componentId)}
           />
           {visiblePlants.length > 0 && (
             <Text className="text-gray-500 text-xs text-center mt-2">
               {isEditMode
-                ? 'Sleep planten om te verplaatsen • Tik om te verwijderen'
+                ? 'Sleep planten om te verplaatsen • Tik om te vergrendelen/verwijderen'
                 : 'Druk op ✏️ Bewerken om planten te verplaatsen'}
             </Text>
           )}
+          {selectedPlantInstance && (() => {
+            const selPlant = visiblePlants.find((p) => p.id === selectedPlantInstance.id);
+            const isLocked = selPlant?.locked ?? false;
+            return (
+              <View className="flex-row mt-2 gap-3">
+                <Pressable
+                  onPress={handleDeleteSelectedPlant}
+                  className="flex-1 flex-row items-center justify-center py-3 rounded-lg bg-red-900/60 border border-red-700"
+                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                >
+                  <Text className="text-red-300 font-medium">🗑️ Verwijderen</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleToggleLockSelected}
+                  className="flex-1 flex-row items-center justify-center py-3 rounded-lg bg-gray-800 border border-gray-600"
+                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                >
+                  <Text className="text-white font-medium">
+                    {isLocked ? '🔓 Ontgrendelen' : '🔒 Vergrendelen'}
+                  </Text>
+                </Pressable>
+              </View>
+            );
+          })()}
         </View>
       ) : (
         <View className="flex-1 p-4">

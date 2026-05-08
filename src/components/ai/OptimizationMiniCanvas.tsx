@@ -25,6 +25,7 @@ export interface MiniCanvasPosition {
   readonly plantInstanceId: string;
   readonly positionXInCm: number;
   readonly positionYInCm: number;
+  readonly locked?: boolean;
 }
 
 interface OptimizationMiniCanvasProps {
@@ -167,6 +168,26 @@ export function OptimizationMiniCanvas({
                   )
                 ) : null}
               </View>
+              {position.locked ? (
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    right: -4,
+                    top: -4,
+                    width: 14,
+                    height: 14,
+                    borderRadius: 7,
+                    backgroundColor: '#1e40af',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderWidth: 1,
+                    borderColor: '#3b82f6',
+                  }}
+                >
+                  <Text style={{ fontSize: 8 }}>🔒</Text>
+                </View>
+              ) : null}
               {plant?.nameNl ? (
                 <View style={styles.labelContainer}>
                   <Text style={styles.labelText} numberOfLines={1}>
