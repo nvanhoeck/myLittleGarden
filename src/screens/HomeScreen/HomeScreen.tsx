@@ -1,60 +1,84 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { HomeScreenProps } from '@/navigation/navigationTypes';
+import { useAllComponents, useComponentStore } from '@/stores';
 import {
-  GardenCanvas,
   ComponentCreationModal,
   ComponentInventory,
   ComponentContextMenu,
 } from '@/components/organisms';
+import { GardenCanvas } from '@/components/organisms/GardenCanvas/GardenCanvas';
+import type { GardenCanvasRef, CanvasMode } from '@/components/organisms/GardenCanvas/GardenCanvas';
 import type { ComponentData } from '@/types';
 
+const ROTATION_STEP = 15;
+
 /**
- * HomeScreen is the main garden view where users can see and interact
- * with their garden components. Features:
- * - Transparent top app bar with garden title and settings button
- * - GardenCanvas showing the garden layout with placed components
- * - Floating action button for adding new components
- * - ComponentInventory accordion at the bottom showing unplaced components
- * - Tap component in inventory to place it on canvas
- * - Long press component for edit/delete options
+ * HomeScreen - main garden view.
+ *
+ * Canvas modes:
+ *  - 'default': tap a component to open its context menu
+ *  - 'rotate':  tap a component to select it; use toolbar to rotate
+ *  - 'drag':    touch a component to drag it to a new position
  */
 export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
   const { t } = useTranslation();
+  const components = useAllComponents();
+  const rotateComponent = useComponentStore((state) => state.rotateComponent);
+
+  const [canvasMode, setCanvasMode] = useState<CanvasMode>('default');
   const [isCreationModalVisible, setIsCreationModalVisible] = useState(false);
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
   const [placingComponent, setPlacingComponent] = useState<ComponentData | null>(null);
-
-  // Context menu state
+  const [isDragPlacing, setIsDragPlacing] = useState(false);
   const [contextMenuComponent, setContextMenuComponent] = useState<ComponentData | null>(null);
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
-
-  // Edit mode state (for editing existing component)
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
 
-  const handleSettingsPress = (): void => {
-    navigation.navigate('Settings');
-  };
+  const gardenCanvasRef = useRef<GardenCanvasRef>(null);
 
+  const selectedComponent = selectedComponentId
+    ? components.find((c) => c.id === selectedComponentId) ?? null
+    : null;
 
-  const handleFabPress = useCallback(() => {
-    setIsCreationModalVisible(true);
+  // ── Mode management ───────────────────────────────────────────────────────
+  const handleEnterRotateMode = useCallback(() => {
+    setCanvasMode('rotate');
+    setSelectedComponentId(null);
   }, []);
 
-  const handleCloseCreationModal = useCallback(() => {
-    setIsCreationModalVisible(false);
-    setEditingComponent(null);
+  const handleEnterDragMode = useCallback(() => {
+    setCanvasMode('drag');
+    setSelectedComponentId(null);
   }, []);
 
-  const handleComponentCreated = useCallback((componentId: string) => {
-    // Component was created and added to inventory
-    console.log('Component created:', componentId);
+  const handleExitMode = useCallback(() => {
+    setCanvasMode('default');
+    setSelectedComponentId(null);
   }, []);
 
-  const handleComponentPress = useCallback((component: ComponentData) => {
-    // Select component on canvas
+  // ── Rotation ──────────────────────────────────────────────────────────────
+  const handleRotateLeft = useCallback(() => {
+    if (selectedComponentId && selectedComponent) {
+      rotateComponent(selectedComponentId, selectedComponent.rotation - ROTATION_STEP);
+    }
+  }, [selectedComponentId, selectedComponent, rotateComponent]);
+
+  const handleRotateRight = useCallback(() => {
+    if (selectedComponentId && selectedComponent) {
+      rotateComponent(selectedComponentId, selectedComponent.rotation + ROTATION_STEP);
+    }
+  }, [selectedComponentId, selectedComponent, rotateComponent]);
+
+  // ── Canvas events ─────────────────────────────────────────────────────────
+  const handleComponentTap = useCallback((component: ComponentData) => {
+    setContextMenuComponent(component);
+    setIsContextMenuVisible(true);
+  }, []);
+
+  const handleComponentSelect = useCallback((component: ComponentData) => {
     setSelectedComponentId(component.id);
   }, []);
 
@@ -62,12 +86,19 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
     setSelectedComponentId(componentId);
   }, []);
 
-  const handleComponentLongPress = useCallback((component: ComponentData) => {
-    // Show context menu
-    setContextMenuComponent(component);
-    setIsContextMenuVisible(true);
+  // ── Navigation / settings ─────────────────────────────────────────────────
+  const handleSettingsPress = (): void => navigation.navigate('Settings');
+
+  const handleFabPress = useCallback(() => setIsCreationModalVisible(true), []);
+
+  const handleCloseCreationModal = useCallback(() => {
+    setIsCreationModalVisible(false);
+    setEditingComponent(null);
   }, []);
 
+  const handleComponentCreated = useCallback((_componentId: string) => {}, []);
+
+  // ── Context menu ──────────────────────────────────────────────────────────
   const handleCloseContextMenu = useCallback(() => {
     setIsContextMenuVisible(false);
     setContextMenuComponent(null);
@@ -78,73 +109,151 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
   }, [navigation]);
 
   const handleEditComponent = useCallback((component: ComponentData) => {
-    // Open creation modal in edit mode
     setEditingComponent(component);
     setIsCreationModalVisible(true);
   }, []);
 
-  const handleComponentDeleted = useCallback(() => {
-    // Clear selection if deleted component was selected
-    setSelectedComponentId(null);
-  }, []);
+  const handleComponentDeleted = useCallback(() => setSelectedComponentId(null), []);
+  const handleReturnedToInventory = useCallback(() => setSelectedComponentId(null), []);
 
-  const handleReturnedToInventory = useCallback(() => {
-    // Clear selection
-    setSelectedComponentId(null);
-  }, []);
-
+  // ── Tap-to-place flow ─────────────────────────────────────────────────────
   const handleInventorySelectComponent = useCallback((component: ComponentData) => {
-    // Enter placement mode - user can now tap on canvas to place
     setPlacingComponent(component);
-    setSelectedComponentId(null); // Deselect any selected component
+    setIsDragPlacing(false);
+    setSelectedComponentId(null);
   }, []);
 
   const handlePlacementComplete = useCallback(() => {
-    // Component was placed successfully
     setPlacingComponent(null);
+    setIsDragPlacing(false);
   }, []);
 
   const handlePlacementCancel = useCallback(() => {
-    // User cancelled placement
     setPlacingComponent(null);
+    setIsDragPlacing(false);
   }, []);
 
-  // Hide FAB and inventory when in placement mode
-  const isPlacementMode = placingComponent !== null;
+  // ── Drag-to-place flow ────────────────────────────────────────────────────
+  const handleInventoryDragStart = useCallback((component: ComponentData) => {
+    setPlacingComponent(component);
+    setIsDragPlacing(true);
+    setSelectedComponentId(null);
+  }, []);
+
+  const handleInventoryDragMove = useCallback((pageX: number, pageY: number) => {
+    gardenCanvasRef.current?.updateDragPlacement(pageX, pageY);
+  }, []);
+
+  const handleInventoryDragRelease = useCallback((pageX: number, pageY: number) => {
+    gardenCanvasRef.current?.commitDragPlacement(pageX, pageY);
+    setPlacingComponent(null);
+    setIsDragPlacing(false);
+  }, []);
+
+  const hideInventoryAndFab = placingComponent !== null && !isDragPlacing;
 
   return (
     <SafeAreaView className="flex-1 bg-background" testID="home-screen">
-      {/* Transparent TopAppBar */}
-      <View className="flex-row items-center justify-between px-4 h-16">
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 h-14">
         <Text className="text-headline-small text-on-background font-medium">
           {t('screens.home.title')}
         </Text>
-
-        <View className="flex-row items-center">
         <Pressable
           onPress={handleSettingsPress}
           className="w-touch-target h-touch-target items-center justify-center rounded-full"
           testID="settings-button"
-          accessibilityLabel={t('screens.settings.title')}
-          accessibilityRole="button"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           android_ripple={{ color: 'rgba(255,255,255,0.1)', borderless: true }}
         >
-          {/* Settings gear icon using Unicode character */}
-          <Text className="text-2xl text-on-surface">
-            ⚙️
-          </Text>
+          <Text className="text-2xl text-on-surface">⚙️</Text>
         </Pressable>
-        </View>
       </View>
 
-      {/* Garden Canvas */}
+      {/* Mode toolbar — hidden during placement */}
+      {!hideInventoryAndFab && !placingComponent && (
+        <View className="flex-row items-center justify-center gap-2 px-4 py-2 bg-surface border-b border-outline/20">
+          {canvasMode === 'default' ? (
+            <>
+              <Pressable
+                onPress={handleEnterRotateMode}
+                className="flex-row items-center gap-1 px-3 py-2 rounded-lg bg-gray-700"
+                android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                testID="enter-rotate-mode-button"
+              >
+                <Text className="text-white text-sm">↺  {t('canvas.mode.rotate')}</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleEnterDragMode}
+                className="flex-row items-center gap-1 px-3 py-2 rounded-lg bg-gray-700"
+                android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                testID="enter-drag-mode-button"
+              >
+                <Text className="text-white text-sm">✥  {t('canvas.mode.move')}</Text>
+              </Pressable>
+            </>
+          ) : canvasMode === 'rotate' ? (
+            <>
+              {selectedComponent ? (
+                <View className="flex-row items-center gap-2">
+                  <Pressable
+                    onPress={handleRotateLeft}
+                    className="w-10 h-10 items-center justify-center rounded-full bg-gray-700"
+                    hitSlop={8}
+                    testID="rotate-left-button"
+                  >
+                    <Text className="text-white text-lg">↺</Text>
+                  </Pressable>
+                  <Text className="text-white text-sm min-w-[40px] text-center">
+                    {selectedComponent.rotation}°
+                  </Text>
+                  <Pressable
+                    onPress={handleRotateRight}
+                    className="w-10 h-10 items-center justify-center rounded-full bg-gray-700"
+                    hitSlop={8}
+                    testID="rotate-right-button"
+                  >
+                    <Text className="text-white text-lg">↻</Text>
+                  </Pressable>
+                  <View className="w-px h-6 bg-gray-600 mx-1" />
+                </View>
+              ) : (
+                <Text className="text-gray-400 text-sm mr-2">{t('canvas.mode.tapToRotate')}</Text>
+              )}
+              <Pressable
+                onPress={handleExitMode}
+                className="px-3 py-2 rounded-lg bg-green-600"
+                android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
+                testID="exit-mode-button"
+              >
+                <Text className="text-white text-sm font-medium">✓  {t('common.done')}</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Text className="text-gray-400 text-sm mr-2">{t('canvas.mode.dragToMove')}</Text>
+              <Pressable
+                onPress={handleExitMode}
+                className="px-3 py-2 rounded-lg bg-green-600"
+                android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
+                testID="exit-mode-button"
+              >
+                <Text className="text-white text-sm font-medium">✓  {t('common.done')}</Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+      )}
+
+      {/* Canvas */}
       <View className="flex-1">
         <GardenCanvas
+          ref={gardenCanvasRef}
+          mode={canvasMode}
           selectedComponentId={selectedComponentId}
           onSelectionChange={handleSelectionChange}
-          onComponentPress={handleComponentPress}
-          onComponentLongPress={handleComponentLongPress}
+          onComponentTap={handleComponentTap}
+          onComponentSelect={handleComponentSelect}
           placingComponent={placingComponent}
           onPlacementComplete={handlePlacementComplete}
           onPlacementCancel={handlePlacementCancel}
@@ -152,17 +261,18 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
         />
       </View>
 
-      {/* Component Inventory - hidden during placement */}
-      {!isPlacementMode && (
+      {!hideInventoryAndFab && (
         <ComponentInventory
           onSelectComponent={handleInventorySelectComponent}
-          onLongPressComponent={handleComponentLongPress}
+          onLongPressComponent={handleComponentTap}
+          onStartPlacement={handleInventoryDragStart}
+          onPlacementMove={handleInventoryDragMove}
+          onPlacementRelease={handleInventoryDragRelease}
           testID="home-component-inventory"
         />
       )}
 
-      {/* Floating Action Button - hidden during placement */}
-      {!isPlacementMode && (
+      {!hideInventoryAndFab && (
         <Pressable
           onPress={handleFabPress}
           className="absolute bottom-28 right-4 w-14 h-14 bg-green-600 rounded-full items-center justify-center shadow-lg"
@@ -175,7 +285,6 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
         </Pressable>
       )}
 
-      {/* Component Creation Modal */}
       <ComponentCreationModal
         visible={isCreationModalVisible}
         onClose={handleCloseCreationModal}
@@ -184,7 +293,6 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
         testID="home-creation-modal"
       />
 
-      {/* Component Context Menu */}
       <ComponentContextMenu
         component={contextMenuComponent}
         visible={isContextMenuVisible}

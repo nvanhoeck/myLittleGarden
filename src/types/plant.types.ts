@@ -154,6 +154,10 @@ export interface PlacedPlantData {
     readonly placedAt: string; // ISO date string
     readonly layerIndex?: number; // Layer index for towers (0 = bottom layer), undefined for non-towers
     readonly locked?: boolean; // True when plant position is pinned and cannot be moved by drag or AI optimization
+  // Patch-only fields — undefined for individual plants
+  readonly patchWidthInCm?: number;
+  readonly patchHeightInCm?: number;
+  readonly patchRotationDeg?: number;
 }
 
 /**

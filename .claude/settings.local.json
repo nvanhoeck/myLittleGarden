@@ -13,7 +13,15 @@
       "Bash(mkdir:*)",
       "Bash(npx tsc:*)",
       "Bash(dir:*)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(ls C:/Users/Niko/Desktop/MyLittleGarden/*ANALYSIS*)",
+      "Bash(node:*)",
+      "Bash(python3 -c \":*)",
+      "Read(//c/tmp/**)",
+      "Bash(printf '%s' 'const fs = require\\(\"\"fs\"\"\\); const path = \"\"C:/Users/Niko/Desktop/MyLittleGarden/src/data/plants.json\"\"; const data = JSON.parse\\(fs.readFileSync\\(path, \"\"utf8\"\"\\)\\); const newPlants = [{\"\"id\"\":\"\"appel\"\",\"\"nameNl\"\":\"\"Appel\"\",\"\"scientificName\"\":\"\"Malus domestica\"\",\"\"category\"\":\"\"fruit\"\",\"\"description\"\":\"\"Appel is een populaire fruitboom in Nederlandse tuinen. Voorkeur volle zon, matig water. Hardy tot -20°C. Plantafstand 3-4 meter. Teeltduur tot oogst 3-5 jaar.\"\",\"\"spacingRadiusCm\"\":300,\"\"plantingDepthCm\"\":100,\"\"sun\"\":\"\"full\"\",\"\"water\"\":\"\"moderate\"\",\"\"frostTolerance\"\":\"\"very-hardy\"\",\"\"germinationDays\"\":{\"\"min\"\":14,\"\"max\"\":60},\"\"daysToHarvest\"\":{\"\"min\"\":1095,\"\"max\"\":1825},\"\"indoorStartWeeks\"\":null,\"\"transplantWeeks\"\":null,\"\"directSowWeeks\"\":null,\"\"companions\"\":[{\"\"plantId\"\":\"\"peer\"\",\"\"benefits\"\":[\"\"attractsPollinators\"\"]}],\"\"combatives\"\":[],\"\"growthHabit\"\":\"\"tree\"\",\"\"spreadsViaRunners\"\":false,\"\"plantType\"\":\"\"fruit\"\",\"\"plantingStyle\"\":\"\"individual\"\"},{\"\"id\"\":\"\"peer\"\",\"\"nameNl\"\":\"\"Peer\"\",\"\"scientificName\"\":\"\"Pyrus communis\"\",\"\"category\"\":\"\"fruit\"\",\"\"description\"\":\"\"Peer is een klassieke Europese fruitboom. Voorkeur volle zon, matig water. Hardy tot -20°C, gevoelig voor voorjaarsvorst. Plantafstand 4-5 meter. Teeltduur tot oogst 3-5 jaar.\"\",\"\"spacingRadiusCm\"\":350,\"\"plantingDepthCm\"\":100,\"\"sun\"\":\"\"full\"\",\"\"water\"\":\"\"moderate\"\",\"\"frostTolerance\"\":\"\"hardy\"\",\"\"germinationDays\"\":{\"\"min\"\":21,\"\"max\"\":90},\"\"daysToHarvest\"\":{\"\"min\"\":1095,\"\"max\"\":1825},\"\"indoorStartWeeks\"\":null,\"\"transplantWeeks\"\":null,\"\"directSowWeeks\"\":null,\"\"companions\"\":[{\"\"plantId\"\":\"\"appel\"\",\"\"benefits\"\":[\"\"attractsPollinators\"\"]}],\"\"combatives\"\":[],\"\"growthHabit\"\":\"\"tree\"\",\"\"spreadsViaRunners\"\":false,\"\"plantType\"\":\"\"fruit\"\",\"\"plantingStyle\"\":\"\"individual\"\"}]; data.plants.push\\(...newPlants\\); fs.writeFileSync\\(path, JSON.stringify\\(data, null, 2\\), \"\"utf8\"\"\\); console.log\\(\"\"Done\"\"\\);')",
+      "Bash(python3)",
+      "Bash(/tmp/summary.txt:*)",
+      "Read(//tmp/**)"
     ]
   }
 }

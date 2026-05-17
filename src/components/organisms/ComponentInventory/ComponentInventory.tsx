@@ -3,8 +3,8 @@
  * Collapsible accordion showing unplaced garden components
  */
 
-import React, { useState, useCallback } from 'react';
-import { View, Text, Pressable, FlatList } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
+import { View, Text, Pressable, FlatList, PanResponder } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useUnplacedComponents, useComponentActions } from '@/stores';
 import type { ComponentData } from '@/types';
@@ -15,6 +15,12 @@ interface ComponentInventoryProps {
   onSelectComponent?: (component: ComponentData) => void;
   /** Callback when long pressing a component (for edit/delete) */
   onLongPressComponent?: (component: ComponentData) => void;
+  /** Callback when drag starts on an inventory item (for cross-component placement) */
+  onStartPlacement?: (component: ComponentData) => void;
+  /** Callback during drag movement with page coordinates */
+  onPlacementMove?: (pageX: number, pageY: number) => void;
+  /** Callback when drag is released with page coordinates */
+  onPlacementRelease?: (pageX: number, pageY: number) => void;
   /** Test ID prefix */
   testID?: string;
 }
@@ -67,12 +73,18 @@ function InventoryItem({
   component,
   onPress,
   onLongPress,
+  onDragStart,
+  onDragMove,
+  onDragRelease,
   testID,
   t,
 }: {
   component: ComponentData;
   onPress?: () => void;
   onLongPress?: () => void;
+  onDragStart?: () => void;
+  onDragMove?: (pageX: number, pageY: number) => void;
+  onDragRelease?: (pageX: number, pageY: number) => void;
   testID: string;
   t: (key: string) => string;
 }): React.JSX.Element {
@@ -80,15 +92,51 @@ function InventoryItem({
   const dimensions = getComponentDimensions(component);
   const info = getComponentInfo(component, t);
 
+  const isDraggingRef = useRef(false);
+  const hasMovedRef = useRef(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dy) > 10;
+      },
+      onPanResponderGrant: () => {
+        isDraggingRef.current = false;
+        hasMovedRef.current = false;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (!isDraggingRef.current && Math.abs(gestureState.dy) > 10) {
+          isDraggingRef.current = true;
+          hasMovedRef.current = true;
+          onDragStart?.();
+        }
+        if (isDraggingRef.current) {
+          onDragMove?.(evt.nativeEvent.pageX, evt.nativeEvent.pageY);
+        }
+      },
+      onPanResponderRelease: (evt) => {
+        if (isDraggingRef.current) {
+          onDragRelease?.(evt.nativeEvent.pageX, evt.nativeEvent.pageY);
+          isDraggingRef.current = false;
+        } else if (!hasMovedRef.current) {
+          onPress?.();
+        }
+      },
+      onPanResponderTerminate: () => {
+        isDraggingRef.current = false;
+      },
+    })
+  ).current;
+
   return (
-    <Pressable
-      onPress={onPress}
-      onLongPress={onLongPress}
+    <View
+      {...panResponder.panHandlers}
       className="flex-row items-center bg-green-900/40 rounded-lg p-3 mb-2 mr-2 border border-green-700/50"
       style={{ minWidth: 140 }}
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={`${component.name}, ${t(`components.${component.type}`)}`}
+      accessibilityLabel={component.name + ', ' + t('components.' + component.type)}
     >
       {/* Icon */}
       <View className="w-10 h-10 rounded-full bg-green-800/50 items-center justify-center mr-3">
@@ -113,7 +161,7 @@ function InventoryItem({
         <Text className="text-yellow-400 text-xs">☀</Text>
         <Text className="text-green-500 text-xs">{component.sunDirection}</Text>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
@@ -123,6 +171,9 @@ function InventoryItem({
 export function ComponentInventory({
   onSelectComponent,
   onLongPressComponent,
+  onStartPlacement,
+  onPlacementMove,
+  onPlacementRelease,
   testID = 'component-inventory',
 }: ComponentInventoryProps): React.JSX.Element {
   const { t } = useTranslation();
@@ -153,11 +204,14 @@ export function ComponentInventory({
         component={item}
         onPress={() => handleItemPress(item)}
         onLongPress={() => handleItemLongPress(item)}
-        testID={`${testID}-item-${item.id}`}
+        onDragStart={() => onStartPlacement?.(item)}
+        onDragMove={(pageX, pageY) => onPlacementMove?.(pageX, pageY)}
+        onDragRelease={(pageX, pageY) => onPlacementRelease?.(pageX, pageY)}
+        testID={testID + '-item-' + item.id}
         t={t}
       />
     ),
-    [handleItemPress, handleItemLongPress, testID, t]
+    [handleItemPress, handleItemLongPress, onStartPlacement, onPlacementMove, onPlacementRelease, testID, t]
   );
 
   const keyExtractor = useCallback((item: ComponentData) => item.id, []);

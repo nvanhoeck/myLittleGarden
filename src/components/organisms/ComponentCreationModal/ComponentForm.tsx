@@ -395,6 +395,9 @@ export function ComponentForm({
         <Text className="text-green-200 text-sm font-medium mb-2 text-center">
           {t('componentCreation.sunDirection')}
         </Text>
+        <Text className="text-green-500 text-xs text-center mb-3">
+          {t('componentCreation.sunDirectionHint')}
+        </Text>
         <CompassSelector
           selectedDirection={sunDirection}
           onSelect={setSunDirection}

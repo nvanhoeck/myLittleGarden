@@ -124,11 +124,15 @@ function PlacedPlantItem({
   plantData,
   onPress,
   onDelete,
+  isEditMode,
+  onResizePatch,
 }: {
   plant: PlacedPlantData;
   plantData: PlantData | undefined;
   onPress: () => void;
   onDelete: () => void;
+  isEditMode?: boolean;
+  onResizePatch?: () => void;
 }): React.JSX.Element {
   const plantName = plantData?.nameNl ?? 'Onbekende plant';
   const spacingRadius = plantData?.spacingRadiusCm ?? 15;
@@ -148,12 +152,28 @@ function PlacedPlantItem({
           <Text className="text-white font-medium">{plantName}</Text>
           <Text className={`text-xs ${isPatch ? 'text-amber-400' : 'text-green-400'}`}>
             {isPatch
-              ? `${plant.positionX.toFixed(0)}cm, ${plant.positionY.toFixed(0)}cm • zaaidichtheid ${spacingRadius}cm`
-              : `${plant.positionX.toFixed(0)}cm, ${plant.positionY.toFixed(0)}cm • ${spacingRadius}cm afstand`
+              ? (() => {
+                  const minCm = spacingRadius * 2;
+                  const wCm = Math.round(plant.patchWidthInCm ?? minCm);
+                  const hCm = Math.round(plant.patchHeightInCm ?? minCm);
+                  const rot = plant.patchRotationDeg ?? 0;
+                  const rotStr = rot > 0 ? ' • ' + rot + '° gedraaid' : '';
+                  return plant.positionX.toFixed(0) + 'cm, ' + plant.positionY.toFixed(0) + 'cm • ' + wCm + ' x ' + hCm + ' cm' + rotStr;
+                })()
+              : plant.positionX.toFixed(0) + 'cm, ' + plant.positionY.toFixed(0) + 'cm • ' + spacingRadius + 'cm afstand'
             }
           </Text>
         </View>
       </Pressable>
+      {isEditMode && isPatch && onResizePatch && (
+        <Pressable
+          onPress={onResizePatch}
+          className="px-4 py-3 bg-purple-900/40"
+          android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+        >
+          <Text className="text-purple-300 text-lg">⤢</Text>
+        </Pressable>
+      )}
       <Pressable
         onPress={onDelete}
         className="px-4 py-3 bg-red-900/40"
@@ -176,18 +196,23 @@ export function ComponentDetailScreen({
   const { componentId } = route.params;
   const component = useComponent(componentId);
   const getPlantById = usePlantStore((state) => state.getPlantById);
-  const { updateComponent, togglePlantLock, lockAllPlants, unlockAllPlants } = useComponentStore(
+  const { updateComponent, togglePlantLock, lockAllPlants, unlockAllPlants, updatePatchDimensions } = useComponentStore(
     useShallow((state) => ({
       updateComponent: state.updateComponent,
       togglePlantLock: state.togglePlantLock,
       lockAllPlants: state.lockAllPlants,
       unlockAllPlants: state.unlockAllPlants,
+      updatePatchDimensions: state.updatePatchDimensions,
     }))
   );
   const [viewMode, setViewMode] = useState<'canvas' | 'list'>('canvas');
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showLayerOverview, setShowLayerOverview] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [patchEditPlantId, setPatchEditPlantId] = useState<string | null>(null);
+  const [patchEditOriginalDimensions, setPatchEditOriginalDimensions] = useState<{
+    widthInCm: number; heightInCm: number; rotationDeg: number;
+  } | null>(null);
   const [canvasKey, setCanvasKey] = useState(0);
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
   const [selectedPlantInstance, setSelectedPlantInstance] = useState<{ id: string; name: string } | null>(null);
@@ -247,6 +272,47 @@ export function ComponentDetailScreen({
     if (isCircularTower(component)) return component.numberOfLayers;
     return 1;
   }, [component]);
+
+  const handlePatchDimensionsChange = useCallback(
+    (plantInstanceId: string, widthInCm: number, heightInCm: number, rotationDeg: number) => {
+      updatePatchDimensions(componentId, plantInstanceId, widthInCm, heightInCm, rotationDeg);
+    },
+    [componentId, updatePatchDimensions]
+  );
+
+  const handleEnterPatchEditMode = useCallback(
+    (plant: PlacedPlantData) => {
+      const plantData = getPlantById(plant.plantId);
+      const minCm = (plantData?.spacingRadiusCm ?? 15) * 2;
+      setPatchEditOriginalDimensions({
+        widthInCm: plant.patchWidthInCm ?? minCm,
+        heightInCm: plant.patchHeightInCm ?? minCm,
+        rotationDeg: plant.patchRotationDeg ?? 0,
+      });
+      setPatchEditPlantId(plant.id);
+      setViewMode('canvas');
+    },
+    [getPlantById]
+  );
+
+  const handleConfirmPatchEdit = useCallback(() => {
+    setPatchEditPlantId(null);
+    setPatchEditOriginalDimensions(null);
+  }, []);
+
+  const handleCancelPatchEdit = useCallback(() => {
+    if (patchEditPlantId && patchEditOriginalDimensions) {
+      updatePatchDimensions(
+        componentId,
+        patchEditPlantId,
+        patchEditOriginalDimensions.widthInCm,
+        patchEditOriginalDimensions.heightInCm,
+        patchEditOriginalDimensions.rotationDeg,
+      );
+    }
+    setPatchEditPlantId(null);
+    setPatchEditOriginalDimensions(null);
+  }, [patchEditPlantId, patchEditOriginalDimensions, componentId, updatePatchDimensions]);
 
   const handleBack = useCallback(() => {
     navigation.goBack();
@@ -460,7 +526,7 @@ export function ComponentDetailScreen({
             {component.name}
           </Text>
           <Text className="text-gray-400 text-sm">
-            {getComponentTypeLabel(component, t)} • {component.sunDirection}
+            {getComponentTypeLabel(component, t)} • {t('componentDetail.sunAt')} {component.sunDirection}
           </Text>
         </View>
         <Pressable
@@ -575,6 +641,11 @@ export function ComponentDetailScreen({
             onBackgroundPress={() => setSelectedPlantInstance(null)}
             onLockAll={() => lockAllPlants(componentId)}
             onUnlockAll={() => unlockAllPlants(componentId)}
+            onActionPress={() => setSelectedPlantInstance(null)}
+            onPatchDimensionsChange={handlePatchDimensionsChange}
+            patchEditPlantId={patchEditPlantId}
+            onPatchEditConfirm={handleConfirmPatchEdit}
+            onPatchEditCancel={handleCancelPatchEdit}
           />
           {visiblePlants.length > 0 && (
             <Text className="text-gray-500 text-xs text-center mt-2">
@@ -585,9 +656,20 @@ export function ComponentDetailScreen({
           )}
           {selectedPlantInstance && (() => {
             const selPlant = visiblePlants.find((p) => p.id === selectedPlantInstance.id);
+            const selPlantData = getPlantById(selPlant?.plantId ?? '');
             const isLocked = selPlant?.locked ?? false;
+            const isSelPatch = selPlantData?.plantingStyle === 'patch';
             return (
               <View className="flex-row mt-2 gap-3">
+                {isEditMode && isSelPatch && selPlant && (
+                  <Pressable
+                    onPress={() => { handleEnterPatchEditMode(selPlant); setSelectedPlantInstance(null); }}
+                    className="flex-1 flex-row items-center justify-center py-3 rounded-lg bg-purple-900/60 border border-purple-700"
+                    android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                  >
+                    <Text className="text-purple-300 font-medium">⤢ Formaat</Text>
+                  </Pressable>
+                )}
                 <Pressable
                   onPress={handleDeleteSelectedPlant}
                   className="flex-1 flex-row items-center justify-center py-3 rounded-lg bg-red-900/60 border border-red-700"
@@ -641,6 +723,8 @@ export function ComponentDetailScreen({
                         plantData?.nameNl ?? t('componentDetail.unknownPlant')
                       )
                     }
+                    isEditMode={isEditMode}
+                    onResizePatch={plantData?.plantingStyle === 'patch' ? () => handleEnterPatchEditMode(plant) : undefined}
                   />
                 );
               })}

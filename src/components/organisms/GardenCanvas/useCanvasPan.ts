@@ -1,10 +1,9 @@
 /**
- * Custom hook for canvas pan gestures
- * Handles panning of the garden canvas with gesture handler
+ * Custom hook for canvas pan gestures using PanResponder
  */
 
-import { useCallback, useState } from 'react';
-import type { GestureResponderEvent } from 'react-native';
+import { useRef, useState } from 'react';
+import { PanResponder } from 'react-native';
 
 interface PanOffset {
   x: number;
@@ -12,122 +11,69 @@ interface PanOffset {
 }
 
 interface UseCanvasPanOptions {
-  /** Initial offset */
   initialOffset?: PanOffset;
-  /** Minimum allowed offset (for bounds) */
-  minOffset?: PanOffset;
-  /** Maximum allowed offset (for bounds) */
-  maxOffset?: PanOffset;
-  /** Whether panning is enabled */
   enabled?: boolean;
 }
 
 interface UseCanvasPanResult {
-  /** Current pan offset */
   offset: PanOffset;
-  /** Whether user is currently panning */
   isPanning: boolean;
-  /** Handler for touch start */
-  onTouchStart: (event: GestureResponderEvent) => void;
-  /** Handler for touch move */
-  onTouchMove: (event: GestureResponderEvent) => void;
-  /** Handler for touch end */
-  onTouchEnd: () => void;
-  /** Reset offset to initial position */
+  panHandlers: ReturnType<typeof PanResponder.create>['panHandlers'];
   resetOffset: () => void;
-  /** Set offset programmatically */
   setOffset: (offset: PanOffset) => void;
 }
 
-/**
- * Hook for handling canvas pan gestures
- * Uses simple touch events for compatibility
- */
 export function useCanvasPan(options: UseCanvasPanOptions = {}): UseCanvasPanResult {
-  const {
-    initialOffset = { x: 0, y: 0 },
-    minOffset,
-    maxOffset,
-    enabled = true,
-  } = options;
+  const { initialOffset = { x: 0, y: 0 }, enabled = true } = options;
 
-  const [offset, setOffset] = useState<PanOffset>(initialOffset);
+  const [offset, setOffsetState] = useState<PanOffset>(initialOffset);
   const [isPanning, setIsPanning] = useState(false);
-  const [startTouch, setStartTouch] = useState<PanOffset | null>(null);
-  const [startOffset, setStartOffset] = useState<PanOffset>(initialOffset);
 
-  const clampOffset = useCallback(
-    (newOffset: PanOffset): PanOffset => {
-      let clampedX = newOffset.x;
-      let clampedY = newOffset.y;
+  const enabledRef = useRef(enabled);
+  const startOffsetRef = useRef<PanOffset>(initialOffset);
+  const offsetRef = useRef<PanOffset>(initialOffset);
 
-      if (minOffset) {
-        clampedX = Math.max(clampedX, minOffset.x);
-        clampedY = Math.max(clampedY, minOffset.y);
-      }
-      if (maxOffset) {
-        clampedX = Math.min(clampedX, maxOffset.x);
-        clampedY = Math.min(clampedY, maxOffset.y);
-      }
+  // Keep refs current every render
+  enabledRef.current = enabled;
+  offsetRef.current = offset;
 
-      return { x: clampedX, y: clampedY };
-    },
-    [minOffset, maxOffset]
-  );
+  const panResponder = useRef(
+    PanResponder.create({
+      // Do NOT claim on start — let Pressable handle taps and DraggableComponents handle their own.
+      // Claim on move so that a swipe on the background steals from Pressable and pans.
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: () => enabledRef.current,
 
-  const onTouchStart = useCallback(
-    (event: GestureResponderEvent) => {
-      if (!enabled) return;
+      onPanResponderGrant: () => {
+        startOffsetRef.current = offsetRef.current;
+        setIsPanning(true);
+      },
 
-      const touch = event.nativeEvent;
-      setStartTouch({ x: touch.pageX, y: touch.pageY });
-      setStartOffset(offset);
-      setIsPanning(true);
-    },
-    [enabled, offset]
-  );
+      onPanResponderMove: (_, gestureState) => {
+        if (!enabledRef.current) return;
+        const next = {
+          x: startOffsetRef.current.x + gestureState.dx,
+          y: startOffsetRef.current.y + gestureState.dy,
+        };
+        offsetRef.current = next;
+        setOffsetState(next);
+      },
 
-  const onTouchMove = useCallback(
-    (event: GestureResponderEvent) => {
-      if (!enabled || !startTouch || !isPanning) return;
+      onPanResponderRelease: () => {
+        setIsPanning(false);
+      },
 
-      const touch = event.nativeEvent;
-      const deltaX = touch.pageX - startTouch.x;
-      const deltaY = touch.pageY - startTouch.y;
-
-      const newOffset = clampOffset({
-        x: startOffset.x + deltaX,
-        y: startOffset.y + deltaY,
-      });
-
-      setOffset(newOffset);
-    },
-    [enabled, startTouch, startOffset, isPanning, clampOffset]
-  );
-
-  const onTouchEnd = useCallback(() => {
-    setIsPanning(false);
-    setStartTouch(null);
-  }, []);
-
-  const resetOffset = useCallback(() => {
-    setOffset(initialOffset);
-  }, [initialOffset]);
-
-  const setOffsetManual = useCallback(
-    (newOffset: PanOffset) => {
-      setOffset(clampOffset(newOffset));
-    },
-    [clampOffset]
-  );
+      onPanResponderTerminate: () => {
+        setIsPanning(false);
+      },
+    })
+  ).current;
 
   return {
     offset,
     isPanning,
-    onTouchStart,
-    onTouchMove,
-    onTouchEnd,
-    resetOffset,
-    setOffset: setOffsetManual,
+    panHandlers: panResponder.panHandlers,
+    resetOffset: () => setOffsetState(initialOffset),
+    setOffset: (newOffset: PanOffset) => setOffsetState(newOffset),
   };
 }

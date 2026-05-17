@@ -160,6 +160,9 @@ export const placedPlantDataSchema = z.object({
     positionY: z.number(),
     placedAt: z.string().datetime(),
     locked: z.boolean().optional().default(false),
+  patchWidthInCm: z.number().positive().optional(),
+  patchHeightInCm: z.number().positive().optional(),
+  patchRotationDeg: z.number().min(0).max(359).optional(),
 });
 export type PlacedPlantDataType = z.infer<typeof placedPlantDataSchema>;
 

@@ -2,6 +2,7 @@
   "common": {
     "save": "Opslaan",
     "cancel": "Annuleren",
+    "done": "Klaar",
     "delete": "Verwijderen",
     "edit": "Bewerken",
     "add": "Toevoegen",
@@ -75,6 +76,7 @@
     "title": "Mijn Tuintje",
     "size": "Tuingrootte",
     "sunDirection": "Zonrichting",
+    "sunDirectionHint": "De richting waar de zon het hoogst staat, meestal het zuiden.",
     "frostDates": "Vorstdata",
     "area": "Oppervlakte",
     "growingSeason": "Groeiseizoen"
@@ -158,7 +160,8 @@
       "nameRequired": "Naam is verplicht",
       "invalidDimensions": "Ongeldige afmetingen",
       "invalidLayers": "Aantal lagen moet tussen 1 en 10 zijn"
-    }
+    },
+    "sunDirectionHint": "De richting waar de zon het hoogst staat, meestal het zuiden."
   },
   "componentInventory": {
     "title": "Componenten",
@@ -173,7 +176,13 @@
   },
   "canvas": {
     "placementMode": "Plaatsen: {{name}}",
-    "tapToPlace": "Tik op het canvas om te plaatsen"
+    "tapToPlace": "Tik op het canvas om te plaatsen",
+    "mode": {
+      "rotate": "Roteren",
+      "move": "Verplaatsen",
+      "tapToRotate": "Tik een component om te roteren",
+      "dragToMove": "Sleep een component om te verplaatsen"
+    }
   },
   "plantSelection": {
     "title": "Plant kiezen",
@@ -191,6 +200,7 @@
     "outerSize": "Buitenmaat",
     "innerSize": "Binnenmaat",
     "sunDirection": "Zon",
+    "sunAt": "Zon op",
     "layers": "Lagen",
     "layer": "Laag",
     "layerOverview": "Laag overzicht",
@@ -222,6 +232,12 @@
     "componentNotSelected": "Component niet geselecteerd",
     "tapToSelect": "Tik om te selecteren",
     "longPressForOptions": "Houd ingedrukt voor opties"
+  },
+  "patch": {
+    "resize": "Grootte aanpassen",
+    "rotate": "Draaien",
+    "dimensions": "{{width}} x {{height}} cm",
+    "rotated": "{{degrees}}° gedraaid"
   },
   "plantDetails": {
     "notFound": "Plant niet gevonden",

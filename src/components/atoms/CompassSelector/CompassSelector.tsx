@@ -76,7 +76,7 @@ function calculatePosition(
 /**
  * CompassSelector displays a circular compass interface allowing users
  * to select one of 8 sun directions. The sun icon in the center represents
- * the direction the sun comes from.
+ * the compass direction where the sun reaches its highest point (solar noon).
  *
  * Layout:
  * - 8 direction segments arranged in a circle (N, NE, E, SE, S, SW, W, NW)
@@ -102,6 +102,7 @@ export function CompassSelector({
       testID={testID}
       accessibilityRole="radiogroup"
       accessibilityLabel="Selecteer zonrichting"
+      accessibilityHint="Selecteer de richting waar de zon het hoogst staat op het middaguur"
     >
       <View
         style={{ width: containerSize, height: containerSize }}
@@ -189,6 +190,9 @@ export function CompassSelector({
           </View>
         )}
       </View>
+      <Text className="text-green-400 text-xs text-center mt-3 px-4">
+        Selecteer de richting waar de zon het hoogst staat (op het zuiden = meeste zon)
+      </Text>
     </View>
   );
 }

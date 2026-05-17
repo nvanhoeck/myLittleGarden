@@ -1,11 +1,16 @@
 /**
  * PlantPlacementCanvas
  * Interactive canvas for placing and arranging plants within a component.
- * Shows spacing radius circles, collision warnings, and companion plant indicators.
+ * Patch plants (plantingStyle === 'patch') render as resizable, rotatable rectangles.
+ *
+ * Patch resize/rotate mode:
+ *   Enter via patchEditPlantId prop (set by parent when user taps a patch row in edit mode).
+ *   While active: all drag-and-drop is disabled; resize/rotate handles appear on the active patch.
+ *   Parent provides onPatchEditConfirm / onPatchEditCancel to exit the mode.
  */
 
 import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
-import {Animated, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,} from 'react-native';
+import {Animated, GestureResponderEvent, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import type {ComponentData, PlacedPlantData, PlantData} from '@/types';
 import {PLANT_CATEGORIES} from '@/types/plant.types';
@@ -18,8 +23,8 @@ import {getPlantIcon, hasPlantIcon} from '@/assets';
 
 interface PlantPlacementCanvasProps {
     component: ComponentData;
-    plants?: readonly PlacedPlantData[]; // Optional filtered plants (for tower layers)
-    layerDimensions?: { width: number; height: number }; // Optional layer-specific dimensions
+    plants?: readonly PlacedPlantData[];
+    layerDimensions?: { width: number; height: number };
     onPlantPositionChange: (plantId: string, x: number, y: number) => void;
     onPlantPress?: (plant: PlacedPlantData) => void;
     onPlantLongPress?: (plant: PlacedPlantData) => void;
@@ -28,6 +33,14 @@ interface PlantPlacementCanvasProps {
     onBackgroundPress?: () => void;
     onLockAll?: () => void;
     onUnlockAll?: () => void;
+    onActionPress?: () => void;
+    onPatchDimensionsChange?: (plantId: string, widthInCm: number, heightInCm: number, rotationDeg: number) => void;
+    /** ID of the patch plant currently being resized/rotated. Provided by the parent screen. */
+    patchEditPlantId?: string | null;
+    /** Called when the user confirms patch resize/rotate changes. */
+    onPatchEditConfirm?: () => void;
+    /** Called when the user cancels patch resize/rotate changes. */
+    onPatchEditCancel?: () => void;
 }
 
 interface DraggablePlantProps {
@@ -48,14 +61,15 @@ interface DraggablePlantProps {
     isPatch: boolean;
     draggingEnabled: boolean;
     isLocked: boolean;
+    hasWallProximityWarning: boolean;
+    onWarningBadgePress: () => void;
+    /** True when this specific patch plant is in resize/rotate mode. Drag is disabled externally. */
+    isInPatchEditMode: boolean;
+    onPatchDimensionsChange?: (plantId: string, widthInCm: number, heightInCm: number, rotationDeg: number) => void;
 }
 
-/**
- * Get inner dimensions (excluding border) for a component
- */
 function getInnerDimensions(component: ComponentData): { width: number; height: number } {
     const border = component.borderWidthInCm * 2;
-
     if (isGardenBox(component) || isRectangularTower(component)) {
         return {
             width: Math.max(0, component.widthInCm - border),
@@ -69,70 +83,25 @@ function getInnerDimensions(component: ComponentData): { width: number; height: 
     return {width: 100, height: 100};
 }
 
-// Inner circle size in cm (the actual plant body, not the spacing)
 const PLANT_INNER_RADIUS_CM = 5;
+const PLANT_IMAGE_SIZE = 28;
 
-/**
- * Get the category icon emoji for a plant (fallback)
- */
 function getCategoryIconEmoji(plantData: PlantData | undefined): string {
     if (!plantData) return '🌱';
     const categoryInfo = PLANT_CATEGORIES.find((cat) => cat.key === plantData.category);
     return categoryInfo?.icon ?? '🌱';
 }
 
-// Fixed size for plant images on canvas (in pixels)
-const PLANT_IMAGE_SIZE = 28;
-
-/**
- * Plant icon component for canvas - shows image or emoji fallback
- */
 function PlantIconInCanvas({plantData}: { plantData: PlantData | undefined }): React.JSX.Element {
-    if (!plantData) {
-        return <Text style={styles.plantEmoji}>🌱</Text>;
-    }
-
+    if (!plantData) return <Text style={styles.plantEmoji}>🌱</Text>;
     const plantIcon = getPlantIcon(plantData.id);
     const hasIcon = hasPlantIcon(plantData.id);
-
     if (hasIcon && plantIcon) {
-        return (
-            <Image
-                source={plantIcon}
-                style={styles.plantImage}
-                resizeMode="cover"
-            />
-        );
+        return <Image source={plantIcon} style={styles.plantImage} resizeMode="cover" />;
     }
-
     return <Text style={styles.plantEmoji}>{getCategoryIconEmoji(plantData)}</Text>;
 }
 
-/**
- * Check if two plants' spacing circles overlap (indicative warning only)
- * Returns false if either plant is patch-sown (no individual spacing enforced)
- */
-function checkSpacingOverlap(
-    plant1: PlacedPlantData,
-    plant1Spacing: number,
-    plant1IsPatch: boolean,
-    plant2: PlacedPlantData,
-    plant2Spacing: number,
-    plant2IsPatch: boolean,
-): boolean {
-    if (plant1IsPatch || plant2IsPatch) return false;
-    const dx = plant1.positionX - plant2.positionX;
-    const dy = plant1.positionY - plant2.positionY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const minDistance = Math.max(plant1Spacing, plant2Spacing);
-    return distance < minDistance;
-}
-
-/**
- * Check if two plants' inner circles (actual plant bodies) overlap
- * This is a hard collision that should block placement
- * Returns false if either plant is patch-sown (dense planting is intentional)
- */
 function checkInnerCollision(
     plant1: PlacedPlantData,
     plant1IsPatch: boolean,
@@ -142,52 +111,96 @@ function checkInnerCollision(
     if (plant1IsPatch || plant2IsPatch) return false;
     const dx = plant1.positionX - plant2.positionX;
     const dy = plant1.positionY - plant2.positionY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    // Inner collision when the plant bodies overlap
-    const minDistance = PLANT_INNER_RADIUS_CM * 2;
-    return distance < minDistance;
+    return Math.sqrt(dx * dx + dy * dy) < PLANT_INNER_RADIUS_CM * 2;
 }
 
 /**
- * Draggable plant component using PanResponder
+ * Draggable plant.
+ * Individual plants: long-press to drag.
+ * Patch plants: resizable rotatable rectangle.
+ *   Handles appear ONLY when isInPatchEditMode = true.
+ *   While in patch edit mode, draggingEnabled is false (set by parent), so the
+ *   PanResponder does not claim touches and child handle views work freely.
  */
 function DraggablePlant({
-                            plant,
-                            plantData,
-                            scale,
-                            containerWidth,
-                            containerHeight,
-                            onPositionChange,
-                            onPress,
-                            onLongPress,
-                            hasSpacingOverlap,
-                            hasInnerCollision,
-                            isSelected,
-                            onSelect,
-                            showSpacingRadius,
-                            showPlantName,
-                            isPatch,
-                            draggingEnabled,
-                            isLocked,
-                        }: DraggablePlantProps): React.JSX.Element {
+    plant,
+    plantData,
+    scale,
+    containerWidth,
+    containerHeight,
+    onPositionChange,
+    onPress,
+    onLongPress,
+    hasSpacingOverlap,
+    hasInnerCollision,
+    isSelected,
+    onSelect,
+    showSpacingRadius,
+    showPlantName,
+    isPatch,
+    draggingEnabled,
+    isLocked,
+    hasWallProximityWarning,
+    onWarningBadgePress,
+    isInPatchEditMode,
+    onPatchDimensionsChange,
+}: DraggablePlantProps): React.JSX.Element {
 
-    // Plant body size (NOT derived from spacing radius)
     const plantBodyRadiusPx = PLANT_INNER_RADIUS_CM * scale;
     const plantSizePx = Math.max(24, plantBodyRadiusPx * 2);
 
-    // ✅ Wrapper size now based only on plant size (spacing circle removed)
-    const containerSize = plantSizePx;
+    const minPatchCm = (plantData?.spacingRadiusCm ?? 15) * 2;
+    const minPatchPx = minPatchCm * scale;
+
+    const [localPatchWidthPx, setLocalPatchWidthPx] = useState(() =>
+        isPatch ? Math.max(minPatchPx, (plant.patchWidthInCm ?? minPatchCm) * scale) : plantSizePx
+    );
+    const [localPatchHeightPx, setLocalPatchHeightPx] = useState(() =>
+        isPatch ? Math.max(minPatchPx, (plant.patchHeightInCm ?? minPatchCm) * scale) : plantSizePx
+    );
+    const [localPatchRotDeg, setLocalPatchRotDeg] = useState(
+        isPatch ? (plant.patchRotationDeg ?? 0) : 0
+    );
+
+    // Sync with persisted values when they change (e.g. AI optimization applied)
+    useEffect(() => {
+        if (!isPatch) return;
+        setLocalPatchWidthPx(Math.max(minPatchPx, (plant.patchWidthInCm ?? minPatchCm) * scale));
+        setLocalPatchHeightPx(Math.max(minPatchPx, (plant.patchHeightInCm ?? minPatchCm) * scale));
+        setLocalPatchRotDeg(plant.patchRotationDeg ?? 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [plant.patchWidthInCm, plant.patchHeightInCm, plant.patchRotationDeg]);
+
+    // Rescale pixel dimensions when zoom changes
+    useEffect(() => {
+        if (!isPatch) return;
+        setLocalPatchWidthPx(Math.max(minPatchPx, (plant.patchWidthInCm ?? minPatchCm) * scale));
+        setLocalPatchHeightPx(Math.max(minPatchPx, (plant.patchHeightInCm ?? minPatchCm) * scale));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [scale]);
+
+    // Refs for non-stale access inside responder callbacks
+    const localPatchWidthPxRef = useRef(localPatchWidthPx);
+    const localPatchHeightPxRef = useRef(localPatchHeightPx);
+    const localPatchRotDegRef = useRef(localPatchRotDeg);
+    const minPatchPxRef = useRef(minPatchPx);
+    localPatchWidthPxRef.current = localPatchWidthPx;
+    localPatchHeightPxRef.current = localPatchHeightPx;
+    localPatchRotDegRef.current = localPatchRotDeg;
+    minPatchPxRef.current = minPatchPx;
+
+    // Container sizing: patch uses bounding box of rotated rectangle + handle clearance
+    const patchBounding = isPatch
+        ? Math.ceil(Math.sqrt(
+              localPatchWidthPx * localPatchWidthPx +
+              localPatchHeightPx * localPatchHeightPx
+          )) + 32
+        : plantSizePx;
+    const containerSize = patchBounding;
     const positionOffset = containerSize / 2;
 
     const [isDragging, setIsDragging] = useState(false);
 
-    // ✅ Warning tooltip toggle (click icon -> show message)
-    const [showSpacingWarningText, setShowSpacingWarningText] = useState(false);
-
-    // Required spacing distance (cm) used in the warning text
-    const requiredSpacingCm = plantData?.spacingRadiusCm ?? 15;
-
-    // Refs to track current values - prevents stale closure bugs in panResponder
     const plantRef = useRef(plant);
     const scaleRef = useRef(scale);
     const containerWidthRef = useRef(containerWidth);
@@ -199,8 +212,8 @@ function DraggablePlant({
     const onSelectRef = useRef(onSelect);
     const draggingEnabledRef = useRef(draggingEnabled);
     const isLockedRef = useRef(isLocked);
+    const isPatchRef = useRef(isPatch);
 
-    // Update refs when props/values change
     React.useEffect(() => {
         plantRef.current = plant;
         scaleRef.current = scale;
@@ -213,37 +226,21 @@ function DraggablePlant({
         onSelectRef.current = onSelect;
         draggingEnabledRef.current = draggingEnabled;
         isLockedRef.current = isLocked;
-    }, [
-        plant,
-        scale,
-        containerWidth,
-        containerHeight,
-        plantSizePx,
-        positionOffset,
-        onPositionChange,
-        onLongPress,
-        onSelect,
-        draggingEnabled,
-        isLocked,
-    ]);
+        isPatchRef.current = isPatch;
+    }, [plant, scale, containerWidth, containerHeight, plantSizePx, positionOffset,
+        onPositionChange, onLongPress, onSelect, draggingEnabled, isLocked, isPatch]);
 
-    // Animated values for position
     const pan = useRef(
         new Animated.ValueXY({
             x: plant.positionX * scale - positionOffset,
             y: plant.positionY * scale - positionOffset,
         })
     ).current;
-
     const scaleAnim = useRef(new Animated.Value(1)).current;
-
-    // Track current position for bounds checking
     const currentPosition = useRef({
         x: plant.positionX * scale,
         y: plant.positionY * scale,
     });
-
-    // Long press timer for drag mode
     const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const isDragEnabled = useRef(false);
     const hasMoved = useRef(false);
@@ -255,104 +252,80 @@ function DraggablePlant({
             onPanResponderGrant: () => {
                 isDragEnabled.current = false;
                 hasMoved.current = false;
-
-                // Locked plants can still be tapped (to open the action bar) but never dragged
                 if (isLockedRef.current) return;
-
-                // Start long press timer - after 400ms, enable drag mode
                 longPressTimer.current = setTimeout(() => {
                     isDragEnabled.current = true;
                     onSelectRef.current();
                     setIsDragging(true);
-
-                    // Optional: hide tooltip while dragging
-                    setShowSpacingWarningText(false);
-
-                    Animated.spring(scaleAnim, {
-                        toValue: 1.1,
-                        useNativeDriver: true,
-                    }).start();
+                    Animated.spring(scaleAnim, {toValue: 1.1, useNativeDriver: true}).start();
                 }, 400);
             },
             onPanResponderMove: (_, gestureState) => {
-                // Track if user has moved
                 if (Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5) {
                     hasMoved.current = true;
-                    // Cancel long press if moved before it triggered
                     if (longPressTimer.current && !isDragEnabled.current) {
                         clearTimeout(longPressTimer.current);
                         longPressTimer.current = null;
                     }
                 }
-
-                // Only move if drag mode is enabled
                 if (!isDragEnabled.current) return;
 
-                // Use refs to get current values (prevents stale closure)
                 const currentPlant = plantRef.current;
                 const currentScale = scaleRef.current;
                 const currentContainerWidth = containerWidthRef.current;
                 const currentContainerHeight = containerHeightRef.current;
-                const currentPlantSizePx = plantSizePxRef.current;
                 const currentPositionOffset = positionOffsetRef.current;
 
-                // Calculate bounded position - constrain by plant body
-                const plantBodyRadius = currentPlantSizePx / 2;
+                // Axis-aligned bounding box clamp: works correctly for rotated patches
+                let clampHalfX: number;
+                let clampHalfY: number;
+                if (isPatchRef.current) {
+                    const rotRad = localPatchRotDegRef.current * Math.PI / 180;
+                    const hw = localPatchWidthPxRef.current / 2;
+                    const hh = localPatchHeightPxRef.current / 2;
+                    clampHalfX = hw * Math.abs(Math.cos(rotRad)) + hh * Math.abs(Math.sin(rotRad));
+                    clampHalfY = hw * Math.abs(Math.sin(rotRad)) + hh * Math.abs(Math.cos(rotRad));
+                } else {
+                    clampHalfX = plantSizePxRef.current / 2;
+                    clampHalfY = plantSizePxRef.current / 2;
+                }
+                // Guard: prevent impossible range when patch is larger than container
+                const safeHalfX = Math.min(clampHalfX, currentContainerWidth / 2);
+                const safeHalfY = Math.min(clampHalfY, currentContainerHeight / 2);
+
                 const newX = Math.max(
-                    plantBodyRadius,
+                    safeHalfX,
                     Math.min(
-                        currentContainerWidth - plantBodyRadius,
+                        currentContainerWidth - safeHalfX,
                         currentPlant.positionX * currentScale + gestureState.dx
                     )
                 );
                 const newY = Math.max(
-                    plantBodyRadius,
+                    safeHalfY,
                     Math.min(
-                        currentContainerHeight - plantBodyRadius,
+                        currentContainerHeight - safeHalfY,
                         currentPlant.positionY * currentScale + gestureState.dy
                     )
                 );
-
-                currentPosition.current = { x: newX, y: newY };
-                pan.setValue({
-                    x: newX - currentPositionOffset,
-                    y: newY - currentPositionOffset,
-                });
+                currentPosition.current = {x: newX, y: newY};
+                pan.setValue({x: newX - currentPositionOffset, y: newY - currentPositionOffset});
             },
             onPanResponderRelease: () => {
-                // Clear long press timer
                 if (longPressTimer.current) {
                     clearTimeout(longPressTimer.current);
                     longPressTimer.current = null;
                 }
-
                 setIsDragging(false);
-                Animated.spring(scaleAnim, {
-                    toValue: 1,
-                    useNativeDriver: true,
-                }).start();
-
-                // Check if it was a tap (no movement and drag wasn't enabled)
+                Animated.spring(scaleAnim, {toValue: 1, useNativeDriver: true}).start();
                 const wasTap = !hasMoved.current && !isDragEnabled.current;
                 if (wasTap) {
-                    // Tap shows context menu (what long press used to do)
-                    if (onLongPressRef.current) {
-                        onLongPressRef.current();
-                    }
+                    if (onLongPressRef.current) onLongPressRef.current();
                     return;
                 }
-
-                // If drag wasn't enabled, don't update position
                 if (!isDragEnabled.current) return;
-
-                // Use refs to get current values (prevents stale closure)
-                const currentPlant = plantRef.current;
-                const currentScale = scaleRef.current;
-
-                // Report position change
-                const newXCm = currentPosition.current.x / currentScale;
-                const newYCm = currentPosition.current.y / currentScale;
-                onPositionChangeRef.current(currentPlant.id, newXCm, newYCm);
+                const newXCm = currentPosition.current.x / scaleRef.current;
+                const newYCm = currentPosition.current.y / scaleRef.current;
+                onPositionChangeRef.current(plantRef.current.id, newXCm, newYCm);
             },
             onPanResponderTerminate: () => {
                 if (longPressTimer.current) {
@@ -360,32 +333,118 @@ function DraggablePlant({
                     longPressTimer.current = null;
                 }
                 setIsDragging(false);
-                Animated.spring(scaleAnim, {
-                    toValue: 1,
-                    useNativeDriver: true,
-                }).start();
+                Animated.spring(scaleAnim, {toValue: 1, useNativeDriver: true}).start();
             },
         })
     ).current;
 
-    // Update position when plant data changes
-    // Uses useLayoutEffect to update synchronously before visual render
     useLayoutEffect(() => {
         const storedX = plant.positionX * scale;
         const storedY = plant.positionY * scale;
-
         if (!isDragging) {
-            currentPosition.current = { x: storedX, y: storedY };
+            currentPosition.current = {x: storedX, y: storedY};
         }
-
         pan.setValue({
             x: currentPosition.current.x - positionOffset,
             y: currentPosition.current.y - positionOffset,
         });
     }, [plant.positionX, plant.positionY, scale, positionOffset, isDragging, pan]);
 
+    // ─── Patch resize / rotate responders ────────────────────────────────────
+    // These only activate when isInPatchEditMode = true.
+    // At that point draggingEnabled = false, so the parent PanResponder never
+    // claims the touch — child handle views win responder negotiation freely.
+
+    const resizeStartRef = useRef<{
+        pageX: number; pageY: number;
+        widthPx: number; heightPx: number; rotDeg: number;
+    } | null>(null);
+    const rotateStartRef = useRef<{pageX: number; rotDeg: number} | null>(null);
+    const onPatchDimensionsChangeRef = useRef(onPatchDimensionsChange);
+    onPatchDimensionsChangeRef.current = onPatchDimensionsChange;
+
+    const commitPatch = useCallback(() => {
+        const wCm = localPatchWidthPxRef.current / scaleRef.current;
+        const hCm = localPatchHeightPxRef.current / scaleRef.current;
+        const rotDeg = ((Math.round(localPatchRotDegRef.current) % 360) + 360) % 360;
+        onPatchDimensionsChangeRef.current?.(plantRef.current.id, wCm, hCm, rotDeg);
+    }, []);
+
+    // Handles visible and interactive only when in patch edit mode and not locked
+    const canUseHandles = isPatch && isInPatchEditMode && !isLocked;
+
+    const rightHandleResponders = {
+        onStartShouldSetResponder: () => canUseHandles,
+        onMoveShouldSetResponder: () => true,
+        onResponderGrant: (e: GestureResponderEvent) => {
+            resizeStartRef.current = {
+                pageX: e.nativeEvent.pageX,
+                pageY: e.nativeEvent.pageY,
+                widthPx: localPatchWidthPxRef.current,
+                heightPx: localPatchHeightPxRef.current,
+                rotDeg: localPatchRotDegRef.current,
+            };
+        },
+        onResponderMove: (e: GestureResponderEvent) => {
+            if (!resizeStartRef.current) return;
+            const dx = e.nativeEvent.pageX - resizeStartRef.current.pageX;
+            const dy = e.nativeEvent.pageY - resizeStartRef.current.pageY;
+            const rotRad = (resizeStartRef.current.rotDeg * Math.PI) / 180;
+            const localDx = dx * Math.cos(rotRad) + dy * Math.sin(rotRad);
+            setLocalPatchWidthPx(Math.max(minPatchPxRef.current, resizeStartRef.current.widthPx + localDx));
+        },
+        onResponderRelease: () => { resizeStartRef.current = null; commitPatch(); },
+        onResponderTerminate: () => { resizeStartRef.current = null; },
+    };
+
+    const bottomHandleResponders = {
+        onStartShouldSetResponder: () => canUseHandles,
+        onMoveShouldSetResponder: () => true,
+        onResponderGrant: (e: GestureResponderEvent) => {
+            resizeStartRef.current = {
+                pageX: e.nativeEvent.pageX,
+                pageY: e.nativeEvent.pageY,
+                widthPx: localPatchWidthPxRef.current,
+                heightPx: localPatchHeightPxRef.current,
+                rotDeg: localPatchRotDegRef.current,
+            };
+        },
+        onResponderMove: (e: GestureResponderEvent) => {
+            if (!resizeStartRef.current) return;
+            const dx = e.nativeEvent.pageX - resizeStartRef.current.pageX;
+            const dy = e.nativeEvent.pageY - resizeStartRef.current.pageY;
+            const rotRad = (resizeStartRef.current.rotDeg * Math.PI) / 180;
+            const localDy = -dx * Math.sin(rotRad) + dy * Math.cos(rotRad);
+            setLocalPatchHeightPx(Math.max(minPatchPxRef.current, resizeStartRef.current.heightPx + localDy));
+        },
+        onResponderRelease: () => { resizeStartRef.current = null; commitPatch(); },
+        onResponderTerminate: () => { resizeStartRef.current = null; },
+    };
+
+    const rotateHandleResponders = {
+        onStartShouldSetResponder: () => canUseHandles,
+        onMoveShouldSetResponder: () => true,
+        onResponderGrant: (e: GestureResponderEvent) => {
+            rotateStartRef.current = {
+                pageX: e.nativeEvent.pageX,
+                rotDeg: localPatchRotDegRef.current,
+            };
+        },
+        onResponderMove: (e: GestureResponderEvent) => {
+            if (!rotateStartRef.current) return;
+            const dx = e.nativeEvent.pageX - rotateStartRef.current.pageX;
+            const newRot = rotateStartRef.current.rotDeg + dx * 0.5;
+            setLocalPatchRotDeg(((newRot % 360) + 360) % 360);
+        },
+        onResponderRelease: () => { rotateStartRef.current = null; commitPatch(); },
+        onResponderTerminate: () => { rotateStartRef.current = null; },
+    };
+
+    const patchLeft = (containerSize - localPatchWidthPx) / 2;
+    const patchTop = (containerSize - localPatchHeightPx) / 2;
+
     const showWarningIcon =
-        showSpacingRadius && hasSpacingOverlap && !hasInnerCollision;
+        showSpacingRadius && (hasSpacingOverlap || hasWallProximityWarning) && !hasInnerCollision;
 
     return (
         <Animated.View
@@ -394,9 +453,9 @@ function DraggablePlant({
                 styles.plantContainer,
                 {
                     transform: [
-                        { translateX: pan.x },
-                        { translateY: pan.y },
-                        { scale: scaleAnim },
+                        {translateX: pan.x},
+                        {translateY: pan.y},
+                        {scale: scaleAnim},
                     ],
                     width: containerSize,
                     height: containerSize,
@@ -404,42 +463,96 @@ function DraggablePlant({
                 },
             ]}
         >
-            {/* Plant icon - patch plants show amber square, individual plants show green circle */}
-            <View
-                style={[
-                    styles.plantIcon,
-                    {
-                        width: plantSizePx,
-                        height: plantSizePx,
-                        borderRadius: isPatch ? 4 : plantSizePx / 2,
-                        backgroundColor: hasInnerCollision
-                            ? '#dc2626'
-                            : isPatch
-                            ? '#92400e'
-                            : '#16a34a',
-                        borderWidth: isSelected ? 2 : isPatch ? 2 : 0,
-                        borderStyle: isPatch ? 'dashed' : 'solid',
-                        borderColor: isSelected ? '#ffffff' : isPatch ? '#d97706' : 'transparent',
-                    },
-                ]}
-            >
-                <PlantIconInCanvas plantData={plantData} />
-            </View>
+            {isPatch ? (
+                <>
+                    {/* Rotate handle — above the bounding box, outside the rotated rect */}
+                    {canUseHandles && (
+                        <View
+                            {...rotateHandleResponders}
+                            style={[styles.rotateHandle, {
+                                top: Math.max(0, patchTop - 28),
+                                left: containerSize / 2 - 12,
+                            }]}
+                        >
+                            <Text style={styles.rotateHandleText}>&#8635;</Text>
+                        </View>
+                    )}
 
-            {/* ✅ Warning icon when spacing distance is not ok (toggleable like before) */}
+                    {/* Patch rectangle */}
+                    <View
+                        style={[
+                            styles.patchRect,
+                            {
+                                left: patchLeft,
+                                top: patchTop,
+                                width: localPatchWidthPx,
+                                height: localPatchHeightPx,
+                                transform: [{rotate: localPatchRotDeg + 'deg'}],
+                                backgroundColor: hasInnerCollision ? '#dc2626' : '#92400e',
+                                borderColor: isInPatchEditMode ? '#ffffff' : '#d97706',
+                                opacity: isInPatchEditMode ? 1 : 0.85,
+                            },
+                        ]}
+                    >
+                        <PlantIconInCanvas plantData={plantData} />
+
+                        {/* Right-edge handle — drag stretches width */}
+                        {canUseHandles && (
+                            <View
+                                {...rightHandleResponders}
+                                style={[styles.resizeHandle, {
+                                    position: 'absolute',
+                                    right: -10,
+                                    top: localPatchHeightPx / 2 - 10,
+                                }]}
+                            />
+                        )}
+
+                        {/* Bottom-edge handle — drag stretches height */}
+                        {canUseHandles && (
+                            <View
+                                {...bottomHandleResponders}
+                                style={[styles.resizeHandle, {
+                                    position: 'absolute',
+                                    bottom: -10,
+                                    left: localPatchWidthPx / 2 - 10,
+                                }]}
+                            />
+                        )}
+                    </View>
+                </>
+            ) : (
+                /* Individual plant */
+                <View
+                    style={[
+                        styles.plantIcon,
+                        {
+                            width: plantSizePx,
+                            height: plantSizePx,
+                            borderRadius: plantSizePx / 2,
+                            backgroundColor: hasInnerCollision ? '#dc2626' : '#16a34a',
+                            borderWidth: isSelected ? 2 : 0,
+                            borderColor: isSelected ? '#ffffff' : 'transparent',
+                        },
+                    ]}
+                >
+                    <PlantIconInCanvas plantData={plantData} />
+                </View>
+            )}
+
+            {/* Warning badge */}
             {showWarningIcon && (
                 <Pressable
-                    onPress={() => setShowSpacingWarningText(v => !v)}
-                    // Capture responder so parent PanResponder doesn't hijack this tap/press
+                    onPress={onWarningBadgePress}
                     onStartShouldSetResponder={() => true}
                     style={{
                         position: 'absolute',
-                        right: -10,
-                        top: -10,
+                        right: isPatch ? Math.max(0, patchLeft - 6) : -10,
+                        top: isPatch ? Math.max(0, patchTop - 6) : -10,
                         width: 22,
                         height: 22,
                         borderRadius: 11,
-                        backgroundColor: '#f59e0b', // orange
+                        backgroundColor: '#f59e0b',
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderWidth: 1,
@@ -447,42 +560,18 @@ function DraggablePlant({
                         zIndex: 200,
                     }}
                 >
-                    <Text style={{ color: 'white', fontSize: 14, fontWeight: '800' }}>
-                        !
-                    </Text>
-
-                    {/* Tooltip bubble */}
-                    {showSpacingWarningText && (
-                        <View
-                            pointerEvents="none"
-                            style={{
-                                position: 'absolute',
-                                top: 26,
-                                right: 0,
-                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                                paddingHorizontal: 10,
-                                paddingVertical: 6,
-                                borderRadius: 8,
-                                maxWidth: 180,
-                                zIndex: 1000
-                            }}
-                        >
-                            <Text style={{ color: 'white', fontSize: 12 }}>
-                                {`Afstand moet ${requiredSpacingCm}cm zijn.`}
-                            </Text>
-                        </View>
-                    )}
+                    <Text style={{color: 'white', fontSize: 14, fontWeight: '800'}}>!</Text>
                 </Pressable>
             )}
 
-            {/* Lock badge when plant is locked */}
+            {/* Lock badge */}
             {isLocked && (
                 <View
                     pointerEvents="none"
                     style={{
                         position: 'absolute',
-                        right: -8,
-                        top: -8,
+                        right: isPatch ? Math.max(0, patchLeft - 4) : -8,
+                        top: isPatch ? Math.max(0, patchTop - 4) : -8,
                         width: 18,
                         height: 18,
                         borderRadius: 9,
@@ -494,17 +583,17 @@ function DraggablePlant({
                         zIndex: 200,
                     }}
                 >
-                    <Text style={{ fontSize: 10 }}>🔒</Text>
+                    <Text style={{fontSize: 10}}>🔒</Text>
                 </View>
             )}
 
-            {/* Plant name label when selected */}
+            {/* Plant name label */}
             {(isSelected || showPlantName) && plantData && (
                 <View
                     style={[
                         styles.plantLabelWrapper,
                         {
-                            top: containerSize / 2 + plantSizePx / 2 + 4,
+                            top: containerSize / 2 + (isPatch ? localPatchHeightPx / 2 : plantSizePx / 2) + 4,
                         },
                     ]}
                     pointerEvents="none"
@@ -520,61 +609,63 @@ function DraggablePlant({
     );
 }
 
-/**
- * PlantPlacementCanvas - main canvas for plant arrangement
- */
-// Zoom constants
+// ─── PlantPlacementCanvas ─────────────────────────────────────────────────────
+
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3.0;
 const ZOOM_STEP = 0.25;
 
 export function PlantPlacementCanvas({
-                                         component,
-                                         plants: filteredPlants,
-                                         layerDimensions,
-                                         onPlantPositionChange,
-                                         onPlantPress,
-                                         onPlantLongPress,
-                                         isEditMode = false,
-                                         onToggleEditMode,
-                                         onBackgroundPress,
-                                         onLockAll,
-                                         onUnlockAll,
-                                     }: PlantPlacementCanvasProps): React.JSX.Element {
+    component,
+    plants: filteredPlants,
+    layerDimensions,
+    onPlantPositionChange,
+    onPlantPress,
+    onPlantLongPress,
+    isEditMode = false,
+    onToggleEditMode,
+    onBackgroundPress,
+    onLockAll,
+    onUnlockAll,
+    onActionPress,
+    onPatchDimensionsChange,
+    patchEditPlantId,
+    onPatchEditConfirm,
+    onPatchEditCancel,
+}: PlantPlacementCanvasProps): React.JSX.Element {
     const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
     const [canvasSize, setCanvasSize] = useState({width: 0, height: 0});
-    const [selectedRelationship, setSelectedRelationship] =
-        useState<PlantRelationship | null>(null);
+    const [selectedRelationship, setSelectedRelationship] = useState<PlantRelationship | null>(null);
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1.0);
     const [showSpacingRadius, setShowSpacingRadius] = useState(false);
     const [showPlantNames, setShowPlantNames] = useState(false);
     const [showRelationships, setShowRelationships] = useState(false);
+    const [activeWarningPlantId, setActiveWarningPlantId] = useState<string | null>(null);
+    const [scrollOffsetX, setScrollOffsetX] = useState(0);
+    const [scrollOffsetY, setScrollOffsetY] = useState(0);
     const scrollViewRef = useRef<ScrollView>(null);
     const getPlantById = usePlantStore((state) => state.getPlantById);
 
     const componentInnerDimensions = useMemo(() => getInnerDimensions(component), [component]);
-    // Use layer dimensions if provided (for towers), otherwise use component inner dimensions
     const innerDimensions = layerDimensions ?? componentInnerDimensions;
     const isCircular = isPot(component) || isCircularTower(component);
-    // Use filtered plants if provided, otherwise use all plants from component
     const plants = filteredPlants ?? (component.plants || []);
 
-    // Calculate base scale to fit canvas in available space
+    // While a patch is being edited, disable all drag-and-drop
+    const draggingAllowed = isEditMode && patchEditPlantId == null;
+
     const baseScale = useMemo(() => {
         if (canvasSize.width === 0 || canvasSize.height === 0) return 1;
-        // Leave some padding
         const availableWidth = canvasSize.width - 32;
         const availableHeight = canvasSize.height - 32;
         const scaleX = availableWidth / innerDimensions.width;
         const scaleY = availableHeight / innerDimensions.height;
-        return Math.min(scaleX, scaleY, 3); // Max scale of 3x
+        return Math.min(scaleX, scaleY, 3);
     }, [canvasSize, innerDimensions]);
 
-    // Apply zoom level to base scale
     const scale = baseScale * zoomLevel;
 
-    // Zoom handlers
     const handleZoomIn = useCallback(() => {
         setZoomLevel((prev) => Math.min(prev + ZOOM_STEP, MAX_ZOOM));
     }, []);
@@ -583,41 +674,39 @@ export function PlantPlacementCanvas({
         setZoomLevel((prev) => Math.max(prev - ZOOM_STEP, MIN_ZOOM));
     }, []);
 
-    // Toggle spacing radius visibility
     const handleToggleSpacingRadius = useCallback(() => {
+        onActionPress?.();
         setShowSpacingRadius((prev) => !prev);
-    }, []);
+    }, [onActionPress]);
 
-    // Toggle plant names visibility
     const handleTogglePlantNames = useCallback(() => {
+        onActionPress?.();
         setShowPlantNames((prev) => !prev);
-    }, []);
+    }, [onActionPress]);
 
-    // Toggle relationships visibility
     const handleToggleRelationships = useCallback(() => {
+        onActionPress?.();
         setShowRelationships((prev) => !prev);
-    }, []);
+    }, [onActionPress]);
 
     const containerWidth = innerDimensions.width * scale;
     const containerHeight = innerDimensions.height * scale;
-
-    // Check if content is larger than viewport (scrolling needed)
     const needsScrolling = containerWidth > canvasSize.width - 32 || containerHeight > canvasSize.height - 32;
 
-    // Center scroll position when zoom changes
     useEffect(() => {
-        if (scrollViewRef.current && needsScrolling) {
-            // Calculate center offset
+        if (scrollViewRef.current && needsScrolling && patchEditPlantId == null) {
             const scrollX = Math.max(0, (containerWidth - canvasSize.width + 32) / 2);
             const scrollY = Math.max(0, (containerHeight - canvasSize.height + 32) / 2);
             scrollViewRef.current.scrollTo({x: scrollX, y: scrollY, animated: false});
         }
-    }, [zoomLevel, containerWidth, containerHeight, canvasSize.width, canvasSize.height, needsScrolling]);
+    }, [zoomLevel, containerWidth, containerHeight, canvasSize.width, canvasSize.height, needsScrolling, patchEditPlantId]);
 
-    // Calculate collisions between all plants (both spacing overlap and inner collision)
-    const {spacingOverlaps, innerCollisions} = useMemo(() => {
+    // ─── Collision detection ──────────────────────────────────────────────────
+
+    const {spacingOverlaps, innerCollisions, wallProximityViolations} = useMemo(() => {
         const spacingOverlaps = new Map<string, boolean>();
         const innerCollisions = new Map<string, boolean>();
+        const wallProximityViolations = new Map<string, boolean>();
 
         plants.forEach((plant1) => {
             const plant1Data = getPlantById(plant1.plantId);
@@ -626,18 +715,18 @@ export function PlantPlacementCanvas({
 
             plants.forEach((plant2) => {
                 if (plant1.id === plant2.id) return;
-
                 const plant2Data = getPlantById(plant2.plantId);
                 const plant2Spacing = plant2Data?.spacingRadiusCm ?? 15;
                 const plant2IsPatch = plant2Data?.plantingStyle === 'patch';
 
-                // Check spacing overlap (indicative warning, skipped for patch plants)
-                if (checkSpacingOverlap(plant1, plant1Spacing, plant1IsPatch, plant2, plant2Spacing, plant2IsPatch)) {
-                    spacingOverlaps.set(plant1.id, true);
-                    spacingOverlaps.set(plant2.id, true);
+                if (!plant1IsPatch && !plant2IsPatch) {
+                    const dx = plant1.positionX - plant2.positionX;
+                    const dy = plant1.positionY - plant2.positionY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < plant1Spacing) spacingOverlaps.set(plant1.id, true);
+                    if (distance < plant2Spacing) spacingOverlaps.set(plant2.id, true);
                 }
 
-                // Check inner collision (hard error, skipped for patch plants)
                 if (checkInnerCollision(plant1, plant1IsPatch, plant2, plant2IsPatch)) {
                     innerCollisions.set(plant1.id, true);
                     innerCollisions.set(plant2.id, true);
@@ -645,25 +734,57 @@ export function PlantPlacementCanvas({
             });
         });
 
-        return {spacingOverlaps, innerCollisions};
-    }, [plants, getPlantById]);
+        plants.forEach((plant) => {
+            const plantData = getPlantById(plant.plantId);
+            const isPatchPlant = plantData?.plantingStyle === 'patch';
 
-    // Calculate companion/combative relationships between plants
+            if (isPatchPlant) {
+                const spacingCm = plantData?.spacingRadiusCm ?? 15;
+                const minCm = spacingCm * 2;
+                const wCm = Math.max(minCm, plant.patchWidthInCm ?? minCm);
+                const hCm = Math.max(minCm, plant.patchHeightInCm ?? minCm);
+                const rotRad = ((plant.patchRotationDeg ?? 0) * Math.PI) / 180;
+                const cx = plant.positionX;
+                const cy = plant.positionY;
+                const hw = wCm / 2;
+                const hh = hCm / 2;
+                const corners: [number, number][] = [
+                    [hw, hh], [hw, -hh], [-hw, hh], [-hw, -hh],
+                ];
+                const outOfBounds = corners.some(([lx, ly]) => {
+                    const px = cx + lx * Math.cos(rotRad) - ly * Math.sin(rotRad);
+                    const py = cy + lx * Math.sin(rotRad) + ly * Math.cos(rotRad);
+                    return px < 0 || px > innerDimensions.width || py < 0 || py > innerDimensions.height;
+                });
+                if (outOfBounds) wallProximityViolations.set(plant.id, true);
+            } else {
+                const spacing = plantData?.spacingRadiusCm ?? 15;
+                const x = plant.positionX;
+                const y = plant.positionY;
+                if (
+                    x < spacing ||
+                    x > innerDimensions.width - spacing ||
+                    y < spacing ||
+                    y > innerDimensions.height - spacing
+                ) {
+                    wallProximityViolations.set(plant.id, true);
+                }
+            }
+        });
+
+        return {spacingOverlaps, innerCollisions, wallProximityViolations};
+    }, [plants, getPlantById, innerDimensions]);
+
     const plantRelationships = useMemo(
         () => calculatePlantRelationships(plants, getPlantById),
         [plants, getPlantById]
     );
 
-    // Handle relationship indicator tap
-    const handleRelationshipPress = useCallback(
-        (relationship: PlantRelationship) => {
-            setSelectedRelationship(relationship);
-            setTooltipVisible(true);
-        },
-        []
-    );
+    const handleRelationshipPress = useCallback((relationship: PlantRelationship) => {
+        setSelectedRelationship(relationship);
+        setTooltipVisible(true);
+    }, []);
 
-    // Handle tooltip close
     const handleTooltipClose = useCallback(() => {
         setTooltipVisible(false);
         setSelectedRelationship(null);
@@ -679,12 +800,27 @@ export function PlantPlacementCanvas({
 
     const handleBackgroundPress = useCallback(() => {
         setSelectedPlantId(null);
+        setActiveWarningPlantId(null);
         onBackgroundPress?.();
     }, [onBackgroundPress]);
 
-    // Calculate content padding for centering when not scrolling
     const contentPaddingX = needsScrolling ? 16 : Math.max(16, (canvasSize.width - containerWidth) / 2);
     const contentPaddingY = needsScrolling ? 16 : Math.max(16, (canvasSize.height - containerHeight) / 2);
+
+    const warningTooltip = (() => {
+        if (!activeWarningPlantId || !showSpacingRadius) return null;
+        const plant = plants.find((p) => p.id === activeWarningPlantId);
+        if (!plant) return null;
+        const plantData = getPlantById(plant.plantId);
+        const spacingCm = plantData?.spacingRadiusCm ?? 15;
+        const hasSpacing = spacingOverlaps.get(plant.id) ?? false;
+        const text = hasSpacing
+            ? 'Afstand moet ' + spacingCm + 'cm zijn.'
+            : 'Te dicht bij de rand. Minimale afstand: ' + spacingCm + 'cm.';
+        const px = contentPaddingX + plant.positionX * scale - scrollOffsetX;
+        const py = contentPaddingY + plant.positionY * scale - scrollOffsetY;
+        return {px, py, text};
+    })();
 
     return (
         <GestureHandlerRootView style={styles.root}>
@@ -697,26 +833,26 @@ export function PlantPlacementCanvas({
                             style={styles.scrollView}
                             contentContainerStyle={[
                                 styles.scrollContent,
-                                {
-                                    paddingHorizontal: contentPaddingX,
-                                    paddingVertical: contentPaddingY,
-                                },
+                                {paddingHorizontal: contentPaddingX, paddingVertical: contentPaddingY},
                             ]}
                             horizontal={false}
                             showsVerticalScrollIndicator={needsScrolling}
                             showsHorizontalScrollIndicator={needsScrolling}
-                            scrollEnabled={needsScrolling}
+                            scrollEnabled={needsScrolling && patchEditPlantId == null}
                             nestedScrollEnabled={true}
+                            onScroll={(e) => setScrollOffsetY(e.nativeEvent.contentOffset.y)}
+                            scrollEventThrottle={16}
                         >
                             <ScrollView
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
-                                scrollEnabled={needsScrolling}
+                                scrollEnabled={needsScrolling && patchEditPlantId == null}
                                 nestedScrollEnabled={true}
                                 contentContainerStyle={styles.horizontalScrollContent}
+                                onScroll={(e) => setScrollOffsetX(e.nativeEvent.contentOffset.x)}
+                                scrollEventThrottle={16}
                             >
                                 <Pressable onPress={handleBackgroundPress}>
-                                    {/* Component shape */}
                                     <View
                                         style={[
                                             styles.componentShape,
@@ -727,20 +863,18 @@ export function PlantPlacementCanvas({
                                             },
                                         ]}
                                     >
-                                        {/* Relationship indicators layer (below plants) */}
                                         {showRelationships && plantRelationships.map((relationship) => (
                                             <RelationshipIndicator
-                                                key={`${relationship.plant1Id}-${relationship.plant2Id}`}
+                                                key={relationship.plant1Id + '-' + relationship.plant2Id}
                                                 relationship={relationship}
                                                 scale={scale}
                                                 onPress={handleRelationshipPress}
                                             />
                                         ))}
 
-                                        {/* Plants layer */}
                                         {plants.map((plant) => {
                                             const plantData = getPlantById(plant.plantId);
-                                            const isPatch = plantData?.plantingStyle === 'patch';
+                                            const isPatchPlant = plantData?.plantingStyle === 'patch';
                                             return (
                                                 <DraggablePlant
                                                     key={plant.id}
@@ -754,18 +888,21 @@ export function PlantPlacementCanvas({
                                                     onLongPress={onPlantLongPress ? () => onPlantLongPress(plant) : undefined}
                                                     hasSpacingOverlap={spacingOverlaps.get(plant.id) ?? false}
                                                     hasInnerCollision={innerCollisions.get(plant.id) ?? false}
+                                                    hasWallProximityWarning={wallProximityViolations.get(plant.id) ?? false}
                                                     isSelected={selectedPlantId === plant.id}
                                                     onSelect={() => setSelectedPlantId(plant.id)}
                                                     showSpacingRadius={showSpacingRadius}
                                                     showPlantName={showPlantNames}
-                                                    isPatch={isPatch}
-                                                    draggingEnabled={isEditMode}
+                                                    isPatch={isPatchPlant}
+                                                    draggingEnabled={draggingAllowed}
                                                     isLocked={plant.locked ?? false}
+                                                    onWarningBadgePress={() => setActiveWarningPlantId((prev) => prev === plant.id ? null : plant.id)}
+                                                    isInPatchEditMode={patchEditPlantId === plant.id}
+                                                    onPatchDimensionsChange={onPatchDimensionsChange}
                                                 />
                                             );
                                         })}
 
-                                        {/* Empty state */}
                                         {plants.length === 0 && (
                                             <View style={styles.emptyState}>
                                                 <Text style={styles.emptyIcon}>🌱</Text>
@@ -777,117 +914,115 @@ export function PlantPlacementCanvas({
                             </ScrollView>
                         </ScrollView>
 
-
-                        {/* Scale indicator - fixed visual width, dynamic distance label */}
                         <View style={styles.scaleIndicator}>
                             {(() => {
-                                // Fixed visual line width in pixels
                                 const targetLineWidth = 60;
-                                // Calculate what distance this represents in cm
                                 const rawDistanceCm = targetLineWidth / scale;
-                                // Round to a "nice" number for readability
                                 const niceNumbers = [5, 10, 15, 20, 25, 50, 75, 100, 150, 200, 250, 500];
                                 const niceDistance = niceNumbers.reduce((prev, curr) =>
                                     Math.abs(curr - rawDistanceCm) < Math.abs(prev - rawDistanceCm) ? curr : prev
                                 );
-                                // Adjust line width to match the nice distance exactly
                                 const adjustedLineWidth = niceDistance * scale;
                                 const displayText = niceDistance >= 100
-                                    ? `${niceDistance / 100} m`
-                                    : `${niceDistance} cm`;
+                                    ? (niceDistance / 100) + ' m'
+                                    : niceDistance + ' cm';
                                 return (
                                     <>
-                                        <View style={[styles.scaleLine, {width: adjustedLineWidth}]}/>
+                                        <View style={[styles.scaleLine, {width: adjustedLineWidth}]} />
                                         <Text style={styles.scaleText}>{displayText}</Text>
                                     </>
                                 );
                             })()}
                         </View>
 
-                        {/* Zoom controls - only visible in view mode */}
                         {!isEditMode && (
                             <View style={styles.zoomControls}>
                                 <Pressable
-                                    style={[
-                                        styles.zoomButton,
-                                        zoomLevel >= MAX_ZOOM && styles.zoomButtonDisabled,
-                                    ]}
+                                    style={[styles.zoomButton, zoomLevel >= MAX_ZOOM && styles.zoomButtonDisabled]}
                                     onPress={handleZoomIn}
                                     disabled={zoomLevel >= MAX_ZOOM}
                                 >
-                                    <Text style={[
-                                        styles.zoomButtonText,
-                                        zoomLevel >= MAX_ZOOM && styles.zoomButtonTextDisabled,
-                                    ]}>+</Text>
+                                    <Text style={[styles.zoomButtonText, zoomLevel >= MAX_ZOOM && styles.zoomButtonTextDisabled]}>+</Text>
                                 </Pressable>
                                 <Text style={styles.zoomLevelText}>{Math.round(zoomLevel * 100)}%</Text>
                                 <Pressable
-                                    style={[
-                                        styles.zoomButton,
-                                        zoomLevel <= MIN_ZOOM && styles.zoomButtonDisabled,
-                                    ]}
+                                    style={[styles.zoomButton, zoomLevel <= MIN_ZOOM && styles.zoomButtonDisabled]}
                                     onPress={handleZoomOut}
                                     disabled={zoomLevel <= MIN_ZOOM}
                                 >
-                                    <Text style={[
-                                        styles.zoomButtonText,
-                                        zoomLevel <= MIN_ZOOM && styles.zoomButtonTextDisabled,
-                                    ]}>−</Text>
+                                    <Text style={[styles.zoomButtonText, zoomLevel <= MIN_ZOOM && styles.zoomButtonTextDisabled]}>-</Text>
                                 </Pressable>
+                            </View>
+                        )}
+
+                        {/* Patch edit mode: confirm/cancel overlay */}
+                        {patchEditPlantId != null && (
+                            <View style={styles.patchEditOverlay}>
+                                <Text style={styles.patchEditLabel}>Formaat en rotatie aanpassen</Text>
+                                <View style={styles.patchEditButtons}>
+                                    <Pressable style={styles.patchCancelButton} onPress={onPatchEditCancel}>
+                                        <Text style={styles.patchButtonText}>Annuleren</Text>
+                                    </Pressable>
+                                    <Pressable style={styles.patchConfirmButton} onPress={onPatchEditConfirm}>
+                                        <Text style={styles.patchButtonText}>Bevestigen</Text>
+                                    </Pressable>
+                                </View>
                             </View>
                         )}
                     </>
                 )}
 
-                {/* Relationship tooltip */}
+                {warningTooltip && (
+                    <View
+                        pointerEvents="none"
+                        style={{
+                            position: 'absolute',
+                            left: Math.min(warningTooltip.px + 12, canvasSize.width - 172),
+                            top: Math.min(warningTooltip.py + 12, canvasSize.height - 60),
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            borderRadius: 8,
+                            width: 160,
+                            zIndex: 2000,
+                        }}
+                    >
+                        <Text style={{color: 'white', fontSize: 12}}>{warningTooltip.text}</Text>
+                    </View>
+                )}
+
                 <RelationshipTooltip
                     relationship={selectedRelationship}
                     visible={tooltipVisible}
                     onClose={handleTooltipClose}
                 />
             </View>
-            {/* Spacing radius toggle */}
+
             <View style={styles.toggleContainer}>
                 <View style={styles.toggleRow}>
-                    <Pressable
-                        style={styles.toggleButton}
-                        onPress={handleToggleSpacingRadius}
-                    >
-                        <Text style={styles.spacingToggleIcon}>
-                            {showSpacingRadius ? '◉' : '○'}
-                        </Text>
+                    <Pressable style={styles.toggleButton} onPress={handleToggleSpacingRadius}>
+                        <Text style={styles.spacingToggleIcon}>{showSpacingRadius ? '◉' : '○'}</Text>
                         <Text style={styles.spacingToggleText}>Afstand</Text>
                     </Pressable>
-                    {/*Plant name toggle*/}
-                    <Pressable
-                        style={styles.toggleButton}
-                        onPress={handleTogglePlantNames}
-                    >
-                        <Text style={styles.spacingToggleIcon}>
-                            {showPlantNames ? '◉' : '○'}
-                        </Text>
+                    <Pressable style={styles.toggleButton} onPress={handleTogglePlantNames}>
+                        <Text style={styles.spacingToggleIcon}>{showPlantNames ? '◉' : '○'}</Text>
                         <Text style={styles.spacingToggleText}>Namen</Text>
                     </Pressable>
-                    <Pressable
-                        style={styles.toggleButton}
-                        onPress={handleToggleRelationships}
-                    >
-                        <Text style={styles.spacingToggleIcon}>
-                            {showRelationships ? '◉' : '○'}
-                        </Text>
+                    <Pressable style={styles.toggleButton} onPress={handleToggleRelationships}>
+                        <Text style={styles.spacingToggleIcon}>{showRelationships ? '◉' : '○'}</Text>
                         <Text style={styles.spacingToggleText}>Companionships</Text>
                     </Pressable>
                 </View>
                 {(onLockAll || onUnlockAll) && (
                     <View style={styles.toggleRow}>
                         {onLockAll && (
-                            <Pressable style={styles.toggleButton} onPress={onLockAll}>
+                            <Pressable style={styles.toggleButton} onPress={() => { onActionPress?.(); onLockAll(); }}>
                                 <Text style={styles.spacingToggleIcon}>🔒</Text>
                                 <Text style={styles.spacingToggleText}>Vergrendel alles</Text>
                             </Pressable>
                         )}
                         {onUnlockAll && (
-                            <Pressable style={styles.toggleButton} onPress={onUnlockAll}>
+                            <Pressable style={styles.toggleButton} onPress={() => { onActionPress?.(); onUnlockAll(); }}>
                                 <Text style={styles.spacingToggleIcon}>🔓</Text>
                                 <Text style={styles.spacingToggleText}>Ontgrendel alles</Text>
                             </Pressable>
@@ -896,7 +1031,7 @@ export function PlantPlacementCanvas({
                 )}
                 <Pressable
                     style={[styles.editModeButton, isEditMode && styles.editModeActiveButton]}
-                    onPress={onToggleEditMode}
+                    onPress={() => { onActionPress?.(); onToggleEditMode?.(); }}
                 >
                     <Text style={[styles.spacingToggleIcon, isEditMode && styles.editModeActiveIcon]}>
                         {isEditMode ? '💾' : '✏️'}
@@ -912,26 +1047,11 @@ export function PlantPlacementCanvas({
 }
 
 const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-        backgroundColor: '#1f2937',
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-    },
-    horizontalScrollContent: {
-        flexGrow: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+    root: {flex: 1},
+    container: {flex: 1, backgroundColor: '#1f2937', borderRadius: 12, overflow: 'hidden'},
+    scrollView: {flex: 1},
+    scrollContent: {flexGrow: 1},
+    horizontalScrollContent: {flexGrow: 1, alignItems: 'center', justifyContent: 'center'},
     componentShape: {
         backgroundColor: '#3d2914',
         borderWidth: 3,
@@ -939,15 +1059,8 @@ const styles = StyleSheet.create({
         position: 'relative',
         overflow: 'hidden',
     },
-    plantContainer: {
-        position: 'absolute',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    spacingCircle: {
-        position: 'absolute',
-        borderStyle: 'dashed',
-    },
+    plantContainer: {position: 'absolute', alignItems: 'center', justifyContent: 'center'},
+    spacingCircle: {position: 'absolute', borderStyle: 'dashed'},
     plantIcon: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -957,48 +1070,50 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
         elevation: 4,
     },
-    plantEmoji: {
-        fontSize: 14,
-    },
-    plantImage: {
-        width: PLANT_IMAGE_SIZE,
-        height: PLANT_IMAGE_SIZE,
-        borderRadius: PLANT_IMAGE_SIZE / 2,
-    },
-    plantLabel: {
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
-    },
-    plantLabelWrapper: {
+    patchRect: {
         position: 'absolute',
-        left: 0,
-        right: 0,
-        alignItems: 'center', // centers the label under the plant
-    },
-    plantLabelText: {
-        color: '#fff',
-        fontSize: 10,
-        fontWeight: '500',
-    },
-    emptyState: {
-        flex: 1,
+        borderRadius: 4,
+        borderWidth: 2,
+        borderStyle: 'dashed',
         alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 4,
     },
-    emptyIcon: {
-        fontSize: 32,
-        marginBottom: 8,
+    resizeHandle: {
+        width: 20,
+        height: 20,
+        borderRadius: 4,
+        backgroundColor: '#d97706',
+        borderWidth: 2,
+        borderColor: '#ffffff',
+        zIndex: 300,
     },
-    emptyText: {
-        color: '#6b7280',
-        fontSize: 14,
+    rotateHandle: {
+        position: 'absolute',
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#7c3aed',
+        borderWidth: 2,
+        borderColor: '#ffffff',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 300,
     },
-    outerContainer: {
-        flex: 1,
-        flexDirection: 'column',
-    },
+    rotateHandleText: {color: '#ffffff', fontSize: 14, fontWeight: '700'},
+    plantEmoji: {fontSize: 14},
+    plantImage: {width: PLANT_IMAGE_SIZE, height: PLANT_IMAGE_SIZE, borderRadius: PLANT_IMAGE_SIZE / 2},
+    plantLabel: {backgroundColor: 'rgba(0,0,0,0.8)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4},
+    plantLabelWrapper: {position: 'absolute', left: 0, right: 0, alignItems: 'center'},
+    plantLabelText: {color: '#fff', fontSize: 10, fontWeight: '500'},
+    emptyState: {flex: 1, alignItems: 'center', justifyContent: 'center'},
+    emptyIcon: {fontSize: 32, marginBottom: 8},
+    emptyText: {color: '#6b7280', fontSize: 14},
+    outerContainer: {flex: 1, flexDirection: 'column'},
     toggleContainer: {
         flexDirection: 'column',
         alignItems: 'flex-start',
@@ -1006,11 +1121,9 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         paddingHorizontal: 10,
         gap: 4,
+        marginTop: 8,
     },
-    toggleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
+    toggleRow: {flexDirection: 'row', alignItems: 'center'},
     editModeButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -1019,7 +1132,6 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: 6,
     },
-
     toggleButton: {
         position: 'relative',
         flexDirection: 'row',
@@ -1029,31 +1141,11 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         paddingHorizontal: 10,
     },
-    spacingToggleIcon: {
-        color: '#4ade80',
-        fontSize: 16,
-        marginRight: 6,
-    },
-    spacingToggleText: {
-        color: '#ffffff',
-        fontSize: 12,
-        fontWeight: '500',
-    },
-    scaleIndicator: {
-        position: 'absolute',
-        bottom: 16,
-        right: 16,
-        alignItems: 'center',
-    },
-    scaleLine: {
-        height: 2,
-        backgroundColor: '#9ca3af',
-        marginBottom: 4,
-    },
-    scaleText: {
-        color: '#9ca3af',
-        fontSize: 10,
-    },
+    spacingToggleIcon: {color: '#4ade80', fontSize: 16, marginRight: 6},
+    spacingToggleText: {color: '#ffffff', fontSize: 12, fontWeight: '500'},
+    scaleIndicator: {position: 'absolute', bottom: 16, right: 16, alignItems: 'center'},
+    scaleLine: {height: 2, backgroundColor: '#9ca3af', marginBottom: 4},
+    scaleText: {color: '#9ca3af', fontSize: 10},
     zoomControls: {
         position: 'absolute',
         bottom: 16,
@@ -1064,40 +1156,57 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 4,
     },
-    zoomButton: {
-        width: 36,
-        height: 36,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#374151',
-        borderRadius: 6,
+    zoomButton: {width: 36, height: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: '#374151', borderRadius: 6},
+    zoomButtonDisabled: {backgroundColor: '#1f2937'},
+    zoomButtonText: {color: '#ffffff', fontSize: 20, fontWeight: '600'},
+    zoomButtonTextDisabled: {color: '#6b7280'},
+    zoomLevelText: {color: '#9ca3af', fontSize: 10, marginVertical: 4},
+    editModeActiveButton: {backgroundColor: 'rgba(22, 163, 74, 0.4)', borderWidth: 1, borderColor: '#16a34a'},
+    editModeActiveIcon: {color: '#4ade80'},
+    editModeActiveText: {color: '#4ade80', fontWeight: '700'},
+    patchEditOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.88)',
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#7c3aed',
     },
-    zoomButtonDisabled: {
-        backgroundColor: '#1f2937',
-    },
-    zoomButtonText: {
-        color: '#ffffff',
-        fontSize: 20,
+    patchEditLabel: {
+        color: '#c4b5fd',
+        fontSize: 12,
         fontWeight: '600',
+        marginBottom: 8,
+        textAlign: 'center',
     },
-    zoomButtonTextDisabled: {
-        color: '#6b7280',
+    patchEditButtons: {
+        flexDirection: 'row',
+        gap: 8,
     },
-    zoomLevelText: {
-        color: '#9ca3af',
-        fontSize: 10,
-        marginVertical: 4,
+    patchCancelButton: {
+        flex: 1,
+        paddingVertical: 10,
+        backgroundColor: '#7f1d1d',
+        borderRadius: 8,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#dc2626',
     },
-    editModeActiveButton: {
-        backgroundColor: 'rgba(22, 163, 74, 0.4)',
+    patchConfirmButton: {
+        flex: 1,
+        paddingVertical: 10,
+        backgroundColor: '#14532d',
+        borderRadius: 8,
+        alignItems: 'center',
         borderWidth: 1,
         borderColor: '#16a34a',
     },
-    editModeActiveIcon: {
-        color: '#4ade80',
-    },
-    editModeActiveText: {
-        color: '#4ade80',
+    patchButtonText: {
+        color: '#ffffff',
         fontWeight: '700',
+        fontSize: 14,
     },
 });

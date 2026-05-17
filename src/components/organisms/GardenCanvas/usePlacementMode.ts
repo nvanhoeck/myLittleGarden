@@ -13,6 +13,13 @@ interface PlacementPosition {
   y: number;
 }
 
+export interface CanvasLayout {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface UsePlacementModeResult {
   /** Component currently being placed (null if not in placement mode) */
   placingComponent: ComponentData | null;
@@ -30,6 +37,10 @@ interface UsePlacementModeResult {
   onPlacementTouchMove: (event: GestureResponderEvent, canvasOffset: PlacementPosition, canvasCenter: PlacementPosition) => void;
   /** Handle touch end - confirm placement */
   onPlacementTouchEnd: (canvasOffset: PlacementPosition, canvasCenter: PlacementPosition, pixelsPerMeter: number) => void;
+  /** Update placement position from page coordinates (for cross-component drag) */
+  updatePlacementFromPageCoords: (pageX: number, pageY: number, canvasLayout: CanvasLayout) => void;
+  /** Commit placement from page coordinates (for cross-component drag) */
+  commitPlacementFromPageCoords: (pageX: number, pageY: number, canvasLayout: CanvasLayout, canvasOffset: PlacementPosition, canvasCenter: PlacementPosition, pixelsPerMeter: number) => void;
 }
 
 /**
@@ -88,8 +99,6 @@ export function usePlacementMode(): UsePlacementModeResult {
       }
 
       // Convert screen position to canvas position in meters
-      // The canvas content is positioned at (canvasCenter.x + offset.x, canvasCenter.y + offset.y)
-      // So we need to subtract that to get position relative to canvas origin
       const canvasOriginX = canvasCenter.x + canvasOffset.x;
       const canvasOriginY = canvasCenter.y + canvasOffset.y;
 
@@ -111,6 +120,73 @@ export function usePlacementMode(): UsePlacementModeResult {
     [placingComponent, placementPosition, moveComponent, cancelPlacement]
   );
 
+  const updatePlacementFromPageCoords = useCallback(
+    (pageX: number, pageY: number, canvasLayout: CanvasLayout) => {
+      if (!placingComponent) return;
+
+      // Convert page coordinates to canvas-relative coordinates
+      const canvasRelativeX = pageX - canvasLayout.x;
+      const canvasRelativeY = pageY - canvasLayout.y;
+
+      setPlacementPosition({ x: canvasRelativeX, y: canvasRelativeY });
+      setIsDragging(true);
+    },
+    [placingComponent]
+  );
+
+  const commitPlacementFromPageCoords = useCallback(
+    (
+      pageX: number,
+      pageY: number,
+      canvasLayout: CanvasLayout,
+      canvasOffset: PlacementPosition,
+      canvasCenter: PlacementPosition,
+      pixelsPerMeter: number
+    ) => {
+      if (!placingComponent) {
+        cancelPlacement();
+        return;
+      }
+
+      // Convert page coordinates to canvas-relative coordinates
+      const canvasRelativeX = pageX - canvasLayout.x;
+      const canvasRelativeY = pageY - canvasLayout.y;
+
+      // Check if the release point is within the canvas bounds
+      const isInsideCanvas =
+        canvasRelativeX >= 0 &&
+        canvasRelativeX <= canvasLayout.width &&
+        canvasRelativeY >= 0 &&
+        canvasRelativeY <= canvasLayout.height;
+
+      if (!isInsideCanvas) {
+        // Released outside the canvas - cancel placement
+        cancelPlacement();
+        return;
+      }
+
+      // Convert to canvas content coordinates (accounting for pan offset and center)
+      const canvasOriginX = canvasCenter.x + canvasOffset.x;
+      const canvasOriginY = canvasCenter.y + canvasOffset.y;
+
+      const relativeX = canvasRelativeX - canvasOriginX;
+      const relativeY = canvasRelativeY - canvasOriginY;
+
+      // Convert pixels to meters
+      const positionXInMeters = relativeX / pixelsPerMeter;
+      const positionYInMeters = relativeY / pixelsPerMeter;
+
+      // Update the component's position in the store
+      moveComponent(placingComponent.id, positionXInMeters, positionYInMeters);
+
+      // Exit placement mode
+      setPlacingComponent(null);
+      setPlacementPosition(null);
+      setIsDragging(false);
+    },
+    [placingComponent, moveComponent, cancelPlacement]
+  );
+
   return {
     placingComponent,
     placementPosition,
@@ -120,5 +196,7 @@ export function usePlacementMode(): UsePlacementModeResult {
     onPlacementTouchStart,
     onPlacementTouchMove,
     onPlacementTouchEnd,
+    updatePlacementFromPageCoords,
+    commitPlacementFromPageCoords,
   };
 }

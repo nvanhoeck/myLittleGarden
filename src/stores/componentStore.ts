@@ -72,6 +72,13 @@ interface ComponentState {
   togglePlantLock: (componentId: string, plantInstanceId: string) => void;
   lockAllPlants: (componentId: string) => void;
   unlockAllPlants: (componentId: string) => void;
+  updatePatchDimensions: (
+    componentId: string,
+    plantInstanceId: string,
+    patchWidthInCm: number,
+    patchHeightInCm: number,
+    patchRotationDeg: number,
+  ) => void;
 
   // Selectors
   getComponentById: (id: string) => ComponentData | undefined;
@@ -249,6 +256,23 @@ export const useComponentStore = create<ComponentState>()(
         }));
       },
 
+      // Update patch dimensions for a placed plant
+      updatePatchDimensions: (componentId, plantInstanceId, patchWidthInCm, patchHeightInCm, patchRotationDeg) => {
+        set((state) => ({
+          components: state.components.map((comp) => {
+            if (comp.id !== componentId) return comp;
+            return {
+              ...comp,
+              plants: comp.plants.map((p) =>
+                p.id === plantInstanceId
+                  ? { ...p, patchWidthInCm, patchHeightInCm, patchRotationDeg }
+                  : p
+              ),
+            };
+          }),
+        }));
+      },
+
       // Get a component by ID
       getComponentById: (id) => {
         return get().components.find((comp) => comp.id === id);
@@ -364,6 +388,7 @@ export function useComponentActions() {
       togglePlantLock: state.togglePlantLock,
       lockAllPlants: state.lockAllPlants,
       unlockAllPlants: state.unlockAllPlants,
+      updatePatchDimensions: state.updatePatchDimensions,
     }))
   );
 }
