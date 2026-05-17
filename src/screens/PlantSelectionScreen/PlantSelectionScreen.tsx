@@ -79,7 +79,7 @@ function PlantTile({
         {plant.nameNl}
       </Text>
       <Text className={`text-xs ${isSelected ? 'text-green-200' : 'text-gray-400'}`}>
-        {plant.spacingRadiusCm}cm
+        {plant.plantingStyle === "patch" ? (plant.sowingSpacingCm ?? plant.spacingRadiusCm) : plant.spacingRadiusCm}cm
       </Text>
     </Pressable>
   );
@@ -369,7 +369,7 @@ export function PlantSelectionScreen({
             <View className="flex-1">
               <Text className="text-white font-semibold">{selectedPlant.nameNl}</Text>
               <Text className="text-gray-400 text-sm">
-                {t('plantSelection.spacing')}: {selectedPlant.spacingRadiusCm}cm
+                {selectedPlant.plantingStyle === 'thinning' ? t('plantSelection.finalSpacing') : selectedPlant.plantingStyle === 'patch' ? t('plantSelection.sowingSpacing') : t('plantSelection.spacing')}: {selectedPlant.plantingStyle === 'patch' ? (selectedPlant.sowingSpacingCm ?? selectedPlant.spacingRadiusCm) : selectedPlant.spacingRadiusCm}cm
               </Text>
             </View>
 

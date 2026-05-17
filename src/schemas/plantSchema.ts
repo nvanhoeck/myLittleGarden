@@ -20,26 +20,26 @@ export type WaterRequirementType = z.infer<typeof waterRequirementSchema>;
 /**
  * Frost tolerance schema
  */
-export const frostToleranceSchema = z.enum(['tender', 'semi-hardy', 'hardy']);
+export const frostToleranceSchema = z.enum(['tender', 'semi-hardy', 'hardy', 'half-hardy', 'very-hardy']);
 export type FrostToleranceType = z.infer<typeof frostToleranceSchema>;
 
 
 /**
  * Growth habit schema
  */
-export const growthHabitSchema = z.enum(['upright', 'climbing', 'spreading', 'bush']);
+export const growthHabitSchema = z.enum(['upright', 'climbing', 'spreading', 'bush', 'tree']);
 export type GrowthHabitType = z.infer<typeof growthHabitSchema>;
 
 /**
  * Plant type schema
  */
-export const plantTypeSchema = z.enum(['vegetable', 'herb', 'shrub', 'tree']);
+export const plantTypeSchema = z.enum(['vegetable', 'herb', 'shrub', 'tree', 'fruit']);
 export type PlantTypeType = z.infer<typeof plantTypeSchema>;
 
 /**
  * Planting style schema
  */
-export const plantingStyleSchema = z.enum(['individual', 'patch']);
+export const plantingStyleSchema = z.enum(['individual', 'patch', 'thinning', 'cluster']);
 export type PlantingStyleType = z.infer<typeof plantingStyleSchema>;
 
 /**
@@ -68,6 +68,7 @@ export const companionBenefitSchema = z.enum([
     'growthBoost',
     'improvesFlavor',
     'fixesNitrogen',
+    'improvesSoil',
 ]);
 export type CompanionBenefitType = z.infer<typeof companionBenefitSchema>;
 

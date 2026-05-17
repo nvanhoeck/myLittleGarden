@@ -187,7 +187,10 @@
   "plantSelection": {
     "title": "Plant kiezen",
     "searchPlaceholder": "Zoek planten...",
-    "spacing": "Afstand",
+    "spacing": "Plantafstand",
+    "sowingSpacing": "Zaaiafstand",
+    "finalSpacing": "Eindafstand",
+    "finalSpacing": "Eindafstand",
     "addToComponent": "Voeg {{count}} plant(en) toe"
   },
   "componentDetail": {
@@ -243,7 +246,8 @@
     "notFound": "Plant niet gevonden",
     "description": "Beschrijving",
     "quickInfo": "Snelle Info",
-    "spacing": "Afstand",
+    "spacing": "Plantafstand",
+    "sowingSpacing": "Zaaiafstand",
     "depth": "Diepte",
     "sun": "Zon",
     "water": "Water",

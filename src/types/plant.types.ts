@@ -28,7 +28,7 @@ export type PlantType = 'vegetable' | 'herb' | 'shrub' | 'tree';
  * - patch: broadcast-sown densely in an area (grains, some groundcovers)
  *   spacingRadiusCm represents sowing density within the patch, not plant-to-plant distance
  */
-export type PlantingStyle = 'individual' | 'patch';
+export type PlantingStyle = 'individual' | 'patch' | 'thinning';
 
 /**
  * Sun exposure requirements
@@ -115,6 +115,13 @@ export interface PlantData {
     readonly category: PlantCategory;
     readonly description: string;
     readonly spacingRadiusCm: number;
+    /**
+     * Patch-only: spacing between seeds when broadcast-sowing within the patch (cm).
+     * Drives minimum patch size (sowingSpacingCm * 2).
+     * Only meaningful for plantingStyle === 'patch'.
+     * For inter-patch clearance distance, use spacingRadiusCm.
+     */
+    readonly sowingSpacingCm?: number;
     readonly rootSpacingRadiusCm?: number; // Optional: underground spread when different from canopy spacing
     readonly growthHabit: GrowthHabit;
     readonly plantType: PlantType;

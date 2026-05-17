@@ -136,7 +136,8 @@ function PlacedPlantItem({
 }): React.JSX.Element {
   const plantName = plantData?.nameNl ?? 'Onbekende plant';
   const spacingRadius = plantData?.spacingRadiusCm ?? 15;
-  const isPatch = plantData?.plantingStyle === 'patch';
+  const isPatch = plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning';
+  const isThinning = plantData?.plantingStyle === 'thinning';
 
   return (
     <View className="flex-row items-center bg-green-900/40 rounded-lg mb-2 overflow-hidden">
@@ -145,12 +146,12 @@ function PlacedPlantItem({
         className="flex-row items-center flex-1 p-3"
         android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
       >
-        <View className={`w-10 h-10 ${isPatch ? 'rounded-md bg-amber-900' : 'rounded-full bg-green-700'} items-center justify-center mr-3`}>
+        <View className={`w-10 h-10 ${isThinning ? 'rounded-md bg-orange-900' : isPatch ? 'rounded-md bg-amber-900' : 'rounded-full bg-green-700'} items-center justify-center mr-3`}>
           <PlantIconDisplay plantData={plantData} />
         </View>
         <View className="flex-1">
           <Text className="text-white font-medium">{plantName}</Text>
-          <Text className={`text-xs ${isPatch ? 'text-amber-400' : 'text-green-400'}`}>
+          <Text className={`text-xs ${isThinning ? 'text-orange-400' : isPatch ? 'text-amber-400' : 'text-green-400'}`}>
             {isPatch
               ? (() => {
                   const minCm = spacingRadius * 2;
@@ -283,7 +284,7 @@ export function ComponentDetailScreen({
   const handleEnterPatchEditMode = useCallback(
     (plant: PlacedPlantData) => {
       const plantData = getPlantById(plant.plantId);
-      const minCm = (plantData?.spacingRadiusCm ?? 15) * 2;
+      const minCm = (plantData?.sowingSpacingCm ?? plantData?.spacingRadiusCm ?? 15) * 2;
       setPatchEditOriginalDimensions({
         widthInCm: plant.patchWidthInCm ?? minCm,
         heightInCm: plant.patchHeightInCm ?? minCm,
@@ -658,7 +659,7 @@ export function ComponentDetailScreen({
             const selPlant = visiblePlants.find((p) => p.id === selectedPlantInstance.id);
             const selPlantData = getPlantById(selPlant?.plantId ?? '');
             const isLocked = selPlant?.locked ?? false;
-            const isSelPatch = selPlantData?.plantingStyle === 'patch';
+            const isSelPatch = selPlantData?.plantingStyle === 'patch' || selPlantData?.plantingStyle === 'thinning';
             return (
               <View className="flex-row mt-2 gap-3">
                 {isEditMode && isSelPatch && selPlant && (
@@ -724,7 +725,7 @@ export function ComponentDetailScreen({
                       )
                     }
                     isEditMode={isEditMode}
-                    onResizePatch={plantData?.plantingStyle === 'patch' ? () => handleEnterPatchEditMode(plant) : undefined}
+                    onResizePatch={plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning' ? () => handleEnterPatchEditMode(plant) : undefined}
                   />
                 );
               })}

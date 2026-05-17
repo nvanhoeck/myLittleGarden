@@ -94,11 +94,24 @@ function getFrostIcon(frost: string): string {
 export function QuickInfoGrid({ plant }: QuickInfoGridProps): React.JSX.Element {
   const { t } = useTranslation();
 
+  const isThinning = plant.plantingStyle === 'thinning';
+  const isPatch = plant.plantingStyle === 'patch';
+  const spacingLabel = isThinning
+    ? t('plantDetails.finalSpacing')
+    : isPatch
+      ? t('plantDetails.sowingSpacing')
+      : t('plantDetails.spacing');
+  const spacingValue = isThinning
+    ? plant.spacingRadiusCm
+    : isPatch
+      ? (plant.sowingSpacingCm ?? plant.spacingRadiusCm)
+      : plant.spacingRadiusCm;
+
   const infoCards = [
     {
-      label: t('plantDetails.spacing'),
-      icon: '📏', // Ruler
-      value: `${plant.spacingRadiusCm} cm`,
+      label: spacingLabel,
+      icon: isThinning ? '✂️' : isPatch ? '🌾' : '📏',
+      value: `${spacingValue} cm`,
     },
     {
       label: t('plantDetails.depth'),
