@@ -655,37 +655,38 @@ export function ComponentDetailScreen({
                 : 'Druk op ✏️ Bewerken om planten te verplaatsen'}
             </Text>
           )}
-          {selectedPlantInstance && (() => {
-            const selPlant = visiblePlants.find((p) => p.id === selectedPlantInstance.id);
-            const selPlantData = getPlantById(selPlant?.plantId ?? '');
+          {isEditMode && (() => {
+            const selPlant = selectedPlantInstance ? visiblePlants.find((p) => p.id === selectedPlantInstance.id) : null;
+            const selPlantData = selPlant ? getPlantById(selPlant.plantId) : null;
             const isLocked = selPlant?.locked ?? false;
             const isSelPatch = selPlantData?.plantingStyle === 'patch' || selPlantData?.plantingStyle === 'thinning';
+            const hasSelection = selectedPlantInstance != null;
+            const canResize = hasSelection && isSelPatch && selPlant != null;
             return (
               <View className="flex-row mt-2 gap-3">
-                {isEditMode && isSelPatch && selPlant && (
-                  <Pressable
-                    onPress={() => { handleEnterPatchEditMode(selPlant); setSelectedPlantInstance(null); }}
-                    className="flex-1 flex-row items-center justify-center py-3 rounded-lg bg-purple-900/60 border border-purple-700"
-                    android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
-                  >
-                    <Text className="text-purple-300 font-medium">⤢ Formaat</Text>
-                  </Pressable>
-                )}
                 <Pressable
-                  onPress={handleDeleteSelectedPlant}
-                  className="flex-1 flex-row items-center justify-center py-3 rounded-lg bg-red-900/60 border border-red-700"
-                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                  onPress={canResize ? () => { handleEnterPatchEditMode(selPlant); setSelectedPlantInstance(null); } : undefined}
+                  disabled={!canResize}
+                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border ${canResize ? 'bg-purple-900/60 border-purple-700' : 'bg-gray-900/20 border-gray-800 opacity-30'}`}
+                  android_ripple={canResize ? { color: 'rgba(255,255,255,0.1)' } : undefined}
                 >
-                  <Text className="text-red-300 font-medium">🗑️ Verwijderen</Text>
+                  <Text className={`font-medium ${canResize ? 'text-purple-300' : 'text-gray-600'}`}>⧂ Formaat</Text>
                 </Pressable>
                 <Pressable
-                  onPress={handleToggleLockSelected}
-                  className="flex-1 flex-row items-center justify-center py-3 rounded-lg bg-gray-800 border border-gray-600"
-                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                  onPress={hasSelection ? handleDeleteSelectedPlant : undefined}
+                  disabled={!hasSelection}
+                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border ${hasSelection ? 'bg-red-900/60 border-red-700' : 'bg-gray-900/20 border-gray-800 opacity-30'}`}
+                  android_ripple={hasSelection ? { color: 'rgba(255,255,255,0.1)' } : undefined}
                 >
-                  <Text className="text-white font-medium">
-                    {isLocked ? '🔓 Ontgrendelen' : '🔒 Vergrendelen'}
-                  </Text>
+                  <Text className={`font-medium ${hasSelection ? 'text-red-300' : 'text-gray-600'}`}>🗑️ Verwijderen</Text>
+                </Pressable>
+                <Pressable
+                  onPress={hasSelection ? handleToggleLockSelected : undefined}
+                  disabled={!hasSelection}
+                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border ${hasSelection ? 'bg-gray-800 border-gray-600' : 'bg-gray-900/20 border-gray-800 opacity-30'}`}
+                  android_ripple={hasSelection ? { color: 'rgba(255,255,255,0.1)' } : undefined}
+                >
+                  <Text className={`font-medium ${hasSelection ? 'text-white' : 'text-gray-600'}`}>{isLocked ? '🔓 Ontgrendelen' : '🔒 Vergrendelen'}</Text>
                 </Pressable>
               </View>
             );

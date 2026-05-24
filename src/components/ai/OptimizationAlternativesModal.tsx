@@ -125,7 +125,7 @@ export function OptimizationAlternativesModal({
                 <View style={styles.canvasWrapper}>
                   <OptimizationMiniCanvas
                     component={component}
-                    positions={[...current.positions, ...lockedPositions]}
+                    positions={[...current.positions, ...lockedPositions.filter((lp) => !current.positions.some((p) => p.plantInstanceId === lp.plantInstanceId))]}
                     plantDataMap={plantDataMap}
                     width={300}
                     height={220}
@@ -197,7 +197,7 @@ export function OptimizationAlternativesModal({
           <View style={styles.zoomOverlay}>
             <OptimizationMiniCanvas
               component={component}
-              positions={[...current.positions, ...lockedPositions]}
+              positions={[...current.positions, ...lockedPositions.filter((lp) => !current.positions.some((p) => p.plantInstanceId === lp.plantInstanceId))]}
               plantDataMap={plantDataMap}
               width={zoomDims.width}
               height={zoomDims.height}

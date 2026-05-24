@@ -67,6 +67,9 @@ function mapPlant(plant: PlacedPlantData): PlacedPlantSnapshot {
     positionYInCm: plant.positionY,
     layerIndex: plant.layerIndex ?? null,
     locked: plant.locked ?? false,
+    patchWidthInCm: plant.patchWidthInCm ?? null,
+    patchHeightInCm: plant.patchHeightInCm ?? null,
+    patchRotationDeg: plant.patchRotationDeg ?? null,
   };
 }
 
@@ -109,6 +112,7 @@ function mapPlantSpec(plant: PlantData): PlantSpecSnapshot {
     heightInCm: null,
     waterNeeds: mapWaterNeeds(plant.water),
     frostTolerant: plant.frostTolerance !== 'tender',
+    plantingStyle: plant.plantingStyle ?? null,
     goodCompanions: plant.companions.map((c) => c.plantId),
     badCompanions: plant.combatives.map((c) => c.plantId),
   };

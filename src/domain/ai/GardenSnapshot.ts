@@ -35,6 +35,9 @@ export interface PlacedPlantSnapshot {
   positionYInCm: number;
   layerIndex: number | null;
   locked: boolean;
+  patchWidthInCm: number | null;
+  patchHeightInCm: number | null;
+  patchRotationDeg: number | null;
 }
 
 /**
@@ -94,6 +97,7 @@ export interface PlantSpecSnapshot {
   heightInCm: number | null;
   waterNeeds: 'low' | 'medium' | 'high' | null;
   frostTolerant: boolean | null;
+  plantingStyle: 'individual' | 'patch' | 'thinning' | null;
   goodCompanions: string[];
   badCompanions: string[];
 }

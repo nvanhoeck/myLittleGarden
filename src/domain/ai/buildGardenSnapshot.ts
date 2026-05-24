@@ -94,6 +94,9 @@ function mapPlant(plant: PlacedPlantData): PlacedPlantSnapshot {
     positionYInCm: plant.positionY,
     layerIndex: plant.layerIndex ?? null,
     locked: plant.locked ?? false,
+    patchWidthInCm: plant.patchWidthInCm ?? null,
+    patchHeightInCm: plant.patchHeightInCm ?? null,
+    patchRotationDeg: plant.patchRotationDeg ?? null,
   };
 }
 
