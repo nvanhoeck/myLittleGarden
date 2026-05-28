@@ -51,12 +51,15 @@ export function useOptimizeComponent(): UseOptimizeComponentResult {
 
   const translateError = useCallback(
     (e: unknown): string => {
-      if (e instanceof AiNetworkError) return t('ai.shared.errors.network');
-      if (e instanceof AiTimeoutError) return t('ai.shared.errors.timeout');
-      if (e instanceof AiServerDownError) return t('ai.shared.errors.serverDown');
-      if (e instanceof AiInvalidResponseError) return t('ai.shared.errors.invalidResponse');
-      if (e instanceof AiError) return t('ai.shared.errors.unknown');
-      return t('ai.shared.errors.unknown');
+      const detail = e instanceof AiError
+        ? ' (' + e.code + ': ' + e.message + ')'
+        : e instanceof Error ? ' (' + e.message + ')' : '';
+      if (e instanceof AiNetworkError) return t('ai.shared.errors.network') + detail;
+      if (e instanceof AiTimeoutError) return t('ai.shared.errors.timeout') + detail;
+      if (e instanceof AiServerDownError) return t('ai.shared.errors.serverDown') + detail;
+      if (e instanceof AiInvalidResponseError) return t('ai.shared.errors.invalidResponse') + detail;
+      if (e instanceof AiError) return t('ai.shared.errors.unknown') + detail;
+      return t('ai.shared.errors.unknown') + detail;
     },
     [t],
   );
@@ -81,6 +84,7 @@ export function useOptimizeComponent(): UseOptimizeComponentResult {
         );
         setSuccess(response.alternatives);
       } catch (e) {
+        console.error('mylittlegarden: requestOptimization failed', e);
         setError(translateError(e));
       }
     },

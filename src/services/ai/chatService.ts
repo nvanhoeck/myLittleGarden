@@ -74,11 +74,13 @@ export const chatService = {
     try {
       json = await response.json();
     } catch {
+      console.error('mylittlegarden: chat response is not valid JSON');
       throw new AiInvalidResponseError('Chat response is not valid JSON');
     }
 
     const parsed = chatResponseSchema.safeParse(json);
     if (!parsed.success) {
+      console.error('mylittlegarden: chat response failed schema validation', parsed.error);
       throw new AiInvalidResponseError('Chat response failed schema validation');
     }
 
@@ -114,11 +116,13 @@ export const chatService = {
     try {
       json = await response.json();
     } catch {
+      console.error('mylittlegarden: compact response is not valid JSON');
       throw new AiInvalidResponseError('Compact response is not valid JSON');
     }
 
     const parsed = chatResponseSchema.safeParse(json);
     if (!parsed.success) {
+      console.error('mylittlegarden: compact response failed schema validation', parsed.error);
       throw new AiInvalidResponseError('Compact response failed schema validation');
     }
 

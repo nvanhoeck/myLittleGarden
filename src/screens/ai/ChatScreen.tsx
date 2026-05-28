@@ -25,7 +25,7 @@ type ChatScreenProps = NativeStackScreenProps<RootStackParamList, 'AiChat'>;
 type HealthGateState =
   | { kind: 'loading' }
   | { kind: 'ready' }
-  | { kind: 'down' };
+  | { kind: 'down'; reason: string };
 
 export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
   const { t } = useTranslation();
@@ -42,10 +42,11 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
       try {
         const health = await getHealth();
         if (cancelled) return;
-        setGate(health.status === 'down' ? { kind: 'down' } : { kind: 'ready' });
-      } catch {
+        setGate(health.status === 'down' ? { kind: 'down', reason: 'Service meldt status: down' } : { kind: 'ready' });
+      } catch (e) {
         if (cancelled) return;
-        setGate({ kind: 'down' });
+        const reason = e instanceof Error ? e.message : String(e);
+        setGate({ kind: 'down', reason });
       }
     })();
     return () => {
@@ -160,6 +161,9 @@ export function ChatScreen({ navigation }: ChatScreenProps): React.JSX.Element {
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-on-background text-center text-base">
             {t('ai.shared.offline')}
+          </Text>
+          <Text className="text-error text-center text-xs mt-2 opacity-70">
+            {gate.reason}
           </Text>
         </View>
       </SafeAreaView>

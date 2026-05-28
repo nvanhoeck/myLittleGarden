@@ -21,11 +21,13 @@ export async function getHealth(): Promise<HealthResponse> {
   try {
     json = await response.json();
   } catch {
+    console.error('mylittlegarden: health response is not valid JSON');
     throw new AiInvalidResponseError('Health response is not valid JSON');
   }
 
   const parsed = healthResponseSchema.safeParse(json);
   if (!parsed.success) {
+    console.error('mylittlegarden: health response failed schema validation', parsed.error);
     throw new AiInvalidResponseError('Health response failed schema validation');
   }
 

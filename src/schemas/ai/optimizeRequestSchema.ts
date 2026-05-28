@@ -16,6 +16,9 @@ const placedPlantSnapshotSchema = z.object({
   positionYInCm: z.number(),
   layerIndex: z.number().nullable(),
   locked: z.boolean(),
+  patchWidthInCm: z.number().nullable(),
+  patchHeightInCm: z.number().nullable(),
+  patchRotationDeg: z.number().nullable(),
 });
 
 const componentDimensionsSnapshotSchema = z.object({
@@ -47,10 +50,24 @@ const gardenMetadataSnapshotSchema = z.object({
   fallFrostDate: z.string().nullable(),
 });
 
+const plantSpecSnapshotSchema = z.object({
+  plantId: z.string(),
+  name: z.string(),
+  sunRequirement: z.enum(['fullSun', 'partialShade', 'fullShade']).nullable(),
+  spacingInCm: z.number().nullable(),
+  heightInCm: z.number().nullable(),
+  waterNeeds: z.enum(['low', 'medium', 'high']).nullable(),
+  frostTolerant: z.boolean().nullable(),
+  plantingStyle: z.enum(['individual', 'patch', 'thinning']).nullable(),
+  goodCompanions: z.array(z.string()),
+  badCompanions: z.array(z.string()),
+});
+
 export const gardenSnapshotSchema = z.object({
   snapshotVersion: z.string(),
   garden: gardenMetadataSnapshotSchema,
   components: z.array(componentSnapshotSchema),
+  plantCatalog: z.array(plantSpecSnapshotSchema).optional(),
 });
 
 const constraintsSchema = z.object({

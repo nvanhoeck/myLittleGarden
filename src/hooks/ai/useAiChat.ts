@@ -41,12 +41,15 @@ export function useAiChat(): UseAiChatResult {
 
   const translateError = useCallback(
     (e: unknown): string => {
-      if (e instanceof AiNetworkError) return t('ai.shared.errors.network');
-      if (e instanceof AiTimeoutError) return t('ai.shared.errors.timeout');
-      if (e instanceof AiServerDownError) return t('ai.shared.errors.serverDown');
-      if (e instanceof AiInvalidResponseError) return t('ai.shared.errors.invalidResponse');
-      if (e instanceof AiError) return t('ai.shared.errors.unknown');
-      return t('ai.shared.errors.unknown');
+      const detail = e instanceof AiError
+        ? ' (' + e.code + ': ' + e.message + ')'
+        : e instanceof Error ? ' (' + e.message + ')' : '';
+      if (e instanceof AiNetworkError) return t('ai.shared.errors.network') + detail;
+      if (e instanceof AiTimeoutError) return t('ai.shared.errors.timeout') + detail;
+      if (e instanceof AiServerDownError) return t('ai.shared.errors.serverDown') + detail;
+      if (e instanceof AiInvalidResponseError) return t('ai.shared.errors.invalidResponse') + detail;
+      if (e instanceof AiError) return t('ai.shared.errors.unknown') + detail;
+      return t('ai.shared.errors.unknown') + detail;
     },
     [t],
   );
@@ -70,10 +73,11 @@ export function useAiChat(): UseAiChatResult {
           plantId: plant.id,
           name: plant.nameNl,
           sunRequirement: plant.sun === 'full' ? 'fullSun' : plant.sun === 'partial' ? 'partialShade' : 'fullShade',
-          spacingInCm: plant.spacingRadiusCm * 2,
+          spacingInCm: plant.spacingRadiusCm,
           heightInCm: null,
           waterNeeds: plant.water === 'moderate' ? 'medium' : plant.water,
           frostTolerant: plant.frostTolerance !== 'tender',
+          plantingStyle: plant.plantingStyle ?? null,
           goodCompanions: plant.companions.map((c) => c.plantId),
           badCompanions: plant.combatives.map((c) => c.plantId),
         } satisfies PlantSpecSnapshot];
@@ -121,6 +125,7 @@ export function useAiChat(): UseAiChatResult {
         incrementTurnCount();
         setStatus('idle');
       } catch (e) {
+        console.error('mylittlegarden: sendMessage failed', e);
         setError(translateError(e));
         setStatus('error');
       }
@@ -141,6 +146,7 @@ export function useAiChat(): UseAiChatResult {
       const summary = await chatService.compactConversation(history);
       resetForCompact(summary);
     } catch (e) {
+      console.error('mylittlegarden: compactMessages failed', e);
       setError(translateError(e));
       setStatus('error');
     }

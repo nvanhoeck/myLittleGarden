@@ -25,13 +25,15 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#166534"
       },
-      "package": "com.mylittlegarden.app"
+      "package": "com.mylittlegarden.app",
+      "usesCleartextTraffic": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "./plugins/withNetworkSecurityConfig"
     ],
     "extra": {
       "eas": {

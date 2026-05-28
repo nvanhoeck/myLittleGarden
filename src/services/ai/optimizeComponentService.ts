@@ -21,11 +21,13 @@ export const optimizeComponentService = {
     try {
       json = await response.json();
     } catch {
+      console.error('mylittlegarden: optimize response is not valid JSON');
       throw new AiInvalidResponseError('Optimize response is not valid JSON');
     }
 
     const parsed = optimizeComponentResponseSchema.safeParse(json);
     if (!parsed.success) {
+      console.error('mylittlegarden: optimize response failed schema validation', parsed.error);
       throw new AiInvalidResponseError('Optimize response failed schema validation');
     }
 
@@ -38,6 +40,7 @@ export const optimizeComponentService = {
     for (const alt of parsed.data.alternatives) {
       for (const pos of alt.positions) {
         if (!requestedIds.has(pos.plantInstanceId)) {
+          console.error('mylittlegarden: optimize response contains unknown plantInstanceId', pos.plantInstanceId);
           throw new AiInvalidResponseError(
             'Optimize response contains unknown plantInstanceId: ' + pos.plantInstanceId,
           );
