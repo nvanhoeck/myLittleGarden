@@ -359,9 +359,13 @@ export function ComponentDetailScreen({
     const { alternatives: alts, selectedIndex: idx } = useAiOptimizeComponentStore.getState();
     const selected = alts?.[idx];
 
-    const { clearMessages, addMessage } = useAiChatStore.getState();
-    clearMessages();
-    if (selected) {
+    const store = useAiChatStore.getState();
+    const switching = store.chatMode !== 'optimization';
+    if (switching) {
+      store.clearMessages();
+    }
+    store.setChatMode('optimization');
+    if (switching && selected) {
       const positionLines = selected.positions
         .map((p) => {
           const plant = plantDataMap[p.plantInstanceId];
@@ -375,7 +379,7 @@ export function ComponentDetailScreen({
         'Score: ' + selected.score.total + '/100 (companion: ' + selected.score.companion + ', spacing: ' + selected.score.spacing + ', sun: ' + selected.score.sun + ', combative: ' + selected.score.combative + ')',
       ];
       if (positionLines) parts.push('Plantenposities:\n' + positionLines);
-      addMessage('user', parts.join('\n'));
+      store.addMessage('user', parts.join('\n'));
     }
 
     setShowOptimizeModal(false);
@@ -383,7 +387,11 @@ export function ComponentDetailScreen({
   }, [navigation, plantDataMap]);
 
   const handleOpenChat = useCallback(() => {
-    useAiChatStore.getState().clearMessages();
+    const store = useAiChatStore.getState();
+    if (store.chatMode !== 'normal') {
+      store.clearMessages();
+    }
+    store.setChatMode('normal');
     navigation.navigate('AiChat');
   }, [navigation]);
 
