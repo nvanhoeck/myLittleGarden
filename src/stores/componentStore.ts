@@ -20,11 +20,7 @@ import {
   CircularTower,
 } from '@/domain/component';
 import { generateId } from '@/utils/idGenerator';
-
-/**
- * Current store version for migrations
- */
-const STORE_VERSION = 1;
+import { migrateComponentState, COMPONENT_STORE_VERSION } from './migrations/componentStoreMigrations';
 
 /**
  * Component store state interface
@@ -66,8 +62,6 @@ interface ComponentState {
   }) => string;
   updateComponent: (id: string, data: Partial<ComponentData>) => void;
   removeComponent: (id: string) => void;
-  moveComponent: (id: string, x: number, y: number) => void;
-  rotateComponent: (id: string, degrees: number) => void;
   clearAllComponents: () => void;
   togglePlantLock: (componentId: string, plantInstanceId: string) => void;
   lockAllPlants: (componentId: string) => void;
@@ -83,8 +77,6 @@ interface ComponentState {
   // Selectors
   getComponentById: (id: string) => ComponentData | undefined;
   getComponentsByType: (type: ComponentType) => ComponentData[];
-  getPlacedComponents: () => ComponentData[];
-  getUnplacedComponents: () => ComponentData[];
 }
 
 /**
@@ -187,29 +179,6 @@ export const useComponentStore = create<ComponentState>()(
         }));
       },
 
-      // Move a component to new position
-      moveComponent: (id, x, y) => {
-        set((state) => ({
-          components: state.components.map((comp) =>
-            comp.id === id
-              ? { ...comp, positionX: x, positionY: y }
-              : comp
-          ),
-        }));
-      },
-
-      // Rotate a component
-      rotateComponent: (id, degrees) => {
-        // Snap to 15-degree increments
-        const snapped = Math.round(degrees / 15) * 15;
-        const normalized = ((snapped % 360) + 360) % 360;
-        set((state) => ({
-          components: state.components.map((comp) =>
-            comp.id === id ? { ...comp, rotation: normalized } : comp
-          ),
-        }));
-      },
-
       // Clear all components
       clearAllComponents: () => {
         set({ components: [] });
@@ -282,25 +251,13 @@ export const useComponentStore = create<ComponentState>()(
       getComponentsByType: (type) => {
         return get().components.filter((comp) => comp.type === type);
       },
-
-      // Get placed components (on canvas)
-      getPlacedComponents: () => {
-        return get().components.filter(
-          (comp) => comp.positionX !== 0 || comp.positionY !== 0 || comp.rotation !== 0
-        );
-      },
-
-      // Get unplaced components (in inventory)
-      getUnplacedComponents: () => {
-        return get().components.filter(
-          (comp) => comp.positionX === 0 && comp.positionY === 0 && comp.rotation === 0
-        );
-      },
     }),
     {
       name: 'component-storage',
       storage: createJSONStorage(() => AsyncStorage as StateStorage),
-      version: STORE_VERSION,
+      version: COMPONENT_STORE_VERSION,
+      migrate: (persistedState, version) =>
+        migrateComponentState(persistedState, version) as unknown as ComponentState,
       // Only persist the components array
       partialize: (state) => ({
         components: state.components,
@@ -338,32 +295,6 @@ export function useComponentsByType(type: ComponentType): ComponentData[] {
 }
 
 /**
- * Select placed components (on canvas)
- */
-export function usePlacedComponents(): ComponentData[] {
-  return useComponentStore(
-    useShallow((state) =>
-      state.components.filter(
-        (comp) => comp.positionX !== 0 || comp.positionY !== 0 || comp.rotation !== 0
-      )
-    )
-  );
-}
-
-/**
- * Select unplaced components (in inventory)
- */
-export function useUnplacedComponents(): ComponentData[] {
-  return useComponentStore(
-    useShallow((state) =>
-      state.components.filter(
-        (comp) => comp.positionX === 0 && comp.positionY === 0 && comp.rotation === 0
-      )
-    )
-  );
-}
-
-/**
  * Select component count
  */
 export function useComponentCount(): number {
@@ -382,8 +313,6 @@ export function useComponentActions() {
       addCircularTower: state.addCircularTower,
       updateComponent: state.updateComponent,
       removeComponent: state.removeComponent,
-      moveComponent: state.moveComponent,
-      rotateComponent: state.rotateComponent,
       clearAllComponents: state.clearAllComponents,
       togglePlantLock: state.togglePlantLock,
       lockAllPlants: state.lockAllPlants,

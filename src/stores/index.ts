@@ -11,8 +11,6 @@ export {
   useAllComponents,
   useComponent,
   useComponentsByType,
-  usePlacedComponents,
-  useUnplacedComponents,
   useComponentCount,
   useComponentActions,
   isGardenBox,

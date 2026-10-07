@@ -22,9 +22,6 @@ export interface BaseComponentData {
   readonly sunDirection: SunDirection;
   readonly createdAt: string; // ISO date string
   readonly borderWidthInCm: number;
-  readonly positionX: number; // Position on canvas in meters
-  readonly positionY: number; // Position on canvas in meters
-  readonly rotation: number; // Rotation angle in degrees (0-360)
   readonly plants: readonly PlacedPlantData[]; // Plants placed in this component
 }
 

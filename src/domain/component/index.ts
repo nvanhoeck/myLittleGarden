@@ -3,9 +3,6 @@
  * Barrel file for all garden component domain entities and value objects
  */
 
-export { ComponentPosition } from './ComponentPosition';
-export type { ComponentPositionData } from './ComponentPosition';
-
 export { getTowerLayerDimensions, TOWER_LAYER_REDUCTION_FACTOR } from './towerLayerGeometry';
 export type { LayerDimensionsCm } from './towerLayerGeometry';
 

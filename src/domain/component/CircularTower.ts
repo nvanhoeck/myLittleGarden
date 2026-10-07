@@ -4,7 +4,6 @@
  */
 
 import type { CircularTowerData, CircularLayerDimensions, SunDirection } from '@/types';
-import { ComponentPosition } from './ComponentPosition';
 import {
   CircularTowerLayer,
   CircularCustomLayerDimensions,
@@ -42,7 +41,6 @@ export class CircularTower {
     private readonly _diameterInCm: number,
     private readonly _borderWidthInCm: number,
     private readonly _numberOfLayers: number,
-    private readonly _position: ComponentPosition,
     customLayers?: readonly CircularLayerDimensions[]
   ) {
     this._customLayers = customLayers;
@@ -55,7 +53,7 @@ export class CircularTower {
   }
 
   /**
-   * Create a new CircularTower (not placed on canvas yet)
+   * Create a new CircularTower
    */
   static create(params: CreateCircularTowerParams): CircularTower {
     return new CircularTower(
@@ -66,7 +64,6 @@ export class CircularTower {
       params.diameterInCm,
       params.borderWidthInCm,
       params.numberOfLayers,
-      ComponentPosition.atOrigin(),
       params.customLayers
     );
   }
@@ -83,11 +80,6 @@ export class CircularTower {
       data.diameterInCm,
       data.borderWidthInCm,
       data.numberOfLayers,
-      ComponentPosition.fromData({
-        positionX: data.positionX,
-        positionY: data.positionY,
-        rotation: data.rotation,
-      }),
       data.customLayers
     );
   }
@@ -122,10 +114,6 @@ export class CircularTower {
     return this._numberOfLayers;
   }
 
-  get position(): ComponentPosition {
-    return this._position;
-  }
-
   get layers(): readonly CircularTowerLayer[] {
     return this._layers;
   }
@@ -142,13 +130,6 @@ export class CircularTower {
    */
   get hasCustomLayers(): boolean {
     return this._customLayers !== undefined;
-  }
-
-  /**
-   * Check if the tower has been placed on the canvas
-   */
-  get isPlaced(): boolean {
-    return !this._position.isUnplaced;
   }
 
   /**
@@ -179,48 +160,7 @@ export class CircularTower {
     return Math.PI * Math.pow(this.radiusInCm, 2);
   }
 
-  /**
-   * Diameter in meters (for canvas positioning)
-   */
-  get diameterInMeters(): number {
-    return this._diameterInCm / 100;
-  }
-
   // ===== Behavior =====
-
-  /**
-   * Move the tower to a new position
-   */
-  moveTo(x: number, y: number): CircularTower {
-    return new CircularTower(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._diameterInCm,
-      this._borderWidthInCm,
-      this._numberOfLayers,
-      this._position.moveTo(x, y),
-      this._customLayers
-    );
-  }
-
-  /**
-   * Rotate the tower
-   */
-  rotateTo(degrees: number): CircularTower {
-    return new CircularTower(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._diameterInCm,
-      this._borderWidthInCm,
-      this._numberOfLayers,
-      this._position.rotateTo(degrees),
-      this._customLayers
-    );
-  }
 
   /**
    * Update the tower name
@@ -234,7 +174,6 @@ export class CircularTower {
       this._diameterInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position,
       this._customLayers
     );
   }
@@ -243,7 +182,6 @@ export class CircularTower {
    * Convert to storage data
    */
   toData(): CircularTowerData {
-    const positionData = this._position.toData();
     const baseData = {
       id: this._id,
       type: 'circularTower' as const,
@@ -253,9 +191,6 @@ export class CircularTower {
       diameterInCm: this._diameterInCm,
       borderWidthInCm: this._borderWidthInCm,
       numberOfLayers: this._numberOfLayers,
-      positionX: positionData.positionX,
-      positionY: positionData.positionY,
-      rotation: positionData.rotation,
       plants: [] as const,
     };
     // Only include customLayers if they exist
