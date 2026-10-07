@@ -1,4 +1,5 @@
 // Molecules - Combinations of atoms (form fields, cards, etc.)
+export { ComponentListRow } from './ComponentListRow';
 export { GardenPreview } from './GardenPreview';
 export { RelationshipIndicator } from './RelationshipIndicator';
 export { RelationshipTooltip } from './RelationshipTooltip';

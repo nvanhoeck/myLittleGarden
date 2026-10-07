@@ -36,7 +36,8 @@
     },
     "home": {
       "title": "Mijn Tuintje",
-      "emptyState": "Je tuin is leeg. Voeg componenten toe om te beginnen."
+      "emptyState": "Je tuin is leeg. Voeg componenten toe om te beginnen.",
+      "slideOf": "{{current}} van {{total}}"
     },
     "settings": {
       "title": "Instellingen",
@@ -132,6 +133,15 @@
     "rectangularTower": "Rechthoekige toren",
     "circularTower": "Ronde toren"
   },
+  "component": {
+    "open": "Openen",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "deleteTitle": "Component verwijderen?",
+    "deleteMessage": "Weet je zeker dat je '{{name}}' wilt verwijderen?",
+    "plantCount": "{{count}} plant(en)",
+    "layers": "{{count}} lagen"
+  },
   "componentCreation": {
     "addComponent": "Component toevoegen",
     "editComponent": "Component bewerken",
@@ -189,7 +199,6 @@
     "searchPlaceholder": "Zoek planten...",
     "spacing": "Plantafstand",
     "sowingSpacing": "Zaaiafstand",
-    "finalSpacing": "Eindafstand",
     "finalSpacing": "Eindafstand",
     "addToComponent": "Voeg {{count}} plant(en) toe"
   },
