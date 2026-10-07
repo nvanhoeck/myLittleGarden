@@ -39,3 +39,18 @@ export function migrateComponentState(
 
   return { components: persistedState.components as ComponentData[] };
 }
+
+/**
+ * Merge persisted state into the live store state. Zustand only runs
+ * `migrate` on a version mismatch, so this guards a current-version blob
+ * that is malformed as well. Actions on `currentState` are preserved.
+ */
+export function mergePersistedComponentState<T extends PersistedComponentState>(
+  persistedState: unknown,
+  currentState: T,
+): T {
+  return {
+    ...currentState,
+    ...migrateComponentState(persistedState, COMPONENT_STORE_VERSION),
+  };
+}

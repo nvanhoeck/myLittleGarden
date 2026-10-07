@@ -60,6 +60,8 @@ name: Home - Component slider and list
 
 # ── Swipe back to the first slide ─────────────────────────────────────
 - swipe:
+    from:
+      id: "home-component-slider"
     direction: RIGHT
     duration: 400
 - waitForAnimationToEnd
@@ -75,7 +77,7 @@ name: Home - Component slider and list
 
 # ── Open detail screen from the active slide ─────────────────────────
 - tapOn:
-    text: "Openen"
+    id: ".*-open"
 - extendedWaitUntil:
     visible:
       id: "component-detail-screen"
@@ -88,7 +90,7 @@ name: Home - Component slider and list
 
 # ── Delete with confirmation: cancel first, then confirm ─────────────
 - tapOn:
-    text: "Verwijderen"
+    id: ".*-delete"
 - assertVisible:
     text: "Component verwijderen?"
 - tapOn:
@@ -97,10 +99,9 @@ name: Home - Component slider and list
     text: "2 van 2"
 
 - tapOn:
-    text: "Verwijderen"
+    id: ".*-delete"
 - tapOn:
     text: "Verwijderen"
-    index: 1
 - waitForAnimationToEnd
 
 # One component left: no counter, first component still listed

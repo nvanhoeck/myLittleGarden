@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { migrateComponentState, COMPONENT_STORE_VERSION } from './componentStoreMigrations.ts';
+import { migrateComponentState, mergePersistedComponentState, COMPONENT_STORE_VERSION } from './componentStoreMigrations.ts';
 
 const legacyBox = {
   id: 'box-1',
@@ -62,4 +62,19 @@ test('passes current-version state through unchanged', () => {
   delete (current.components[0] as Record<string, unknown>).positionX;
   const result = migrateComponentState(current, 2);
   assert.deepEqual(result, current);
+});
+
+test('mergePersistedComponentState keeps actions and sanitizes a current-version blob', () => {
+  const addGardenBox = () => 'id';
+  const merged = mergePersistedComponentState(
+    { components: 'corrupt' },
+    { components: [{ ...legacyBox }], addGardenBox },
+  );
+  assert.deepEqual(merged.components, []);
+  assert.equal((merged as { addGardenBox: unknown }).addGardenBox, addGardenBox);
+});
+
+test('mergePersistedComponentState restores valid persisted components', () => {
+  const merged = mergePersistedComponentState({ components: [legacyBox] }, { components: [] });
+  assert.equal(merged.components.length, 1);
 });

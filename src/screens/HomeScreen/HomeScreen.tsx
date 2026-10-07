@@ -50,8 +50,9 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
     if (activeIndex !== clampedIndex) setActiveIndex(clampedIndex);
   }, [activeIndex, clampedIndex]);
 
-  // After creating a component, jump to its slide once it is in the list.
-  useEffect(() => {
+  // After creating a component, jump to its slide once the new slide has
+  // been laid out (content size change), so the native scroll is not clamped.
+  const handleSliderContentSizeChange = useCallback(() => {
     const id = pendingScrollToId.current;
     if (!id) return;
     const index = components.findIndex((c) => c.id === id);
@@ -184,6 +185,7 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={VIEWABILITY_CONFIG}
             onScrollToIndexFailed={() => undefined}
+            onContentSizeChange={handleSliderContentSizeChange}
             style={{ flexGrow: 0 }}
             testID="home-component-slider"
           />

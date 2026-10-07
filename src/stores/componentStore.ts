@@ -20,7 +20,11 @@ import {
   CircularTower,
 } from '@/domain/component';
 import { generateId } from '@/utils/idGenerator';
-import { migrateComponentState, COMPONENT_STORE_VERSION } from './migrations/componentStoreMigrations';
+import {
+  migrateComponentState,
+  mergePersistedComponentState,
+  COMPONENT_STORE_VERSION,
+} from './migrations/componentStoreMigrations';
 
 /**
  * Component store state interface
@@ -258,6 +262,8 @@ export const useComponentStore = create<ComponentState>()(
       version: COMPONENT_STORE_VERSION,
       migrate: (persistedState, version) =>
         migrateComponentState(persistedState, version) as unknown as ComponentState,
+      merge: (persistedState, currentState) =>
+        mergePersistedComponentState(persistedState, currentState),
       // Only persist the components array
       partialize: (state) => ({
         components: state.components,
