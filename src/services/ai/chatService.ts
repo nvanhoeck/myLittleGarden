@@ -33,8 +33,6 @@ export interface SendChatMessageArgs {
 const COMPACT_SNAPSHOT_STUB: GardenSnapshot = {
   snapshotVersion: GARDEN_SNAPSHOT_VERSION,
   garden: {
-    widthInMeters: 0,
-    heightInMeters: 0,
     sunDirection: null,
     springFrostDate: null,
     fallFrostDate: null,

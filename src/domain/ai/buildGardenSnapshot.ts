@@ -27,8 +27,6 @@ import {
  * Kept as a local interface so this module does not depend on the store.
  */
 export interface GardenStoreState {
-  gardenWidth: number;
-  gardenHeight: number;
   sunDirection: SunDirection | null;
   springFrostDate: Date | null;
   fallFrostDate: Date | null;
@@ -109,9 +107,6 @@ function mapComponent(component: ComponentData): ComponentSnapshot {
     name: component.name,
     type: component.type,
     sunDirection: (component.sunDirection ?? null) as SnapshotSunDirection | null,
-    positionXInMeters: component.positionX,
-    positionYInMeters: component.positionY,
-    rotation: component.rotation,
     dimensions: buildDimensions(component),
     plants: component.plants.map(mapPlant),
     createdAt: component.createdAt,
@@ -131,8 +126,6 @@ export function buildGardenSnapshot(
   return {
     snapshotVersion: GARDEN_SNAPSHOT_VERSION,
     garden: {
-      widthInMeters: garden.gardenWidth,
-      heightInMeters: garden.gardenHeight,
       sunDirection: (garden.sunDirection ?? null) as SnapshotSunDirection | null,
       springFrostDate: toIsoStringOrNull(garden.springFrostDate),
       fallFrostDate: toIsoStringOrNull(garden.fallFrostDate),

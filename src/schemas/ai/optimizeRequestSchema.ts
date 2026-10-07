@@ -34,17 +34,12 @@ const componentSnapshotSchema = z.object({
   name: z.string(),
   type: componentTypeSchema,
   sunDirection: sunDirectionSchema.nullable(),
-  positionXInMeters: z.number(),
-  positionYInMeters: z.number(),
-  rotation: z.number(),
   dimensions: componentDimensionsSnapshotSchema,
   plants: z.array(placedPlantSnapshotSchema),
   createdAt: z.string(),
 });
 
 const gardenMetadataSnapshotSchema = z.object({
-  widthInMeters: z.number(),
-  heightInMeters: z.number(),
   sunDirection: sunDirectionSchema.nullable(),
   springFrostDate: z.string().nullable(),
   fallFrostDate: z.string().nullable(),
