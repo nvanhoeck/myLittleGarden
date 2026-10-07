@@ -239,7 +239,7 @@ export function LayerOverviewModal({
               {t('componentDetail.layerOverview')}
             </Text>
             <Text style={styles.modalSubtitle}>
-              {component.name} • {numberOfLayers} {t('componentInventory.layers')}
+              {component.name} • {t('component.layers', { count: numberOfLayers })}
             </Text>
             <Pressable
               onPress={onClose}

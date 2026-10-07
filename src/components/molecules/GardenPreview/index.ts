@@ -1,1 +1,0 @@
-export { GardenPreview } from './GardenPreview';

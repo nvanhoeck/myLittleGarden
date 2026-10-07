@@ -173,27 +173,6 @@
     },
     "sunDirectionHint": "De richting waar de zon het hoogst staat, meestal het zuiden."
   },
-  "componentInventory": {
-    "title": "Componenten",
-    "empty": "Geen componenten. Druk op + om er een toe te voegen.",
-    "layers": "lagen",
-    "tapToExpand": "Tik om uit te vouwen",
-    "tapToCollapse": "Tik om in te vouwen"
-  },
-  "gardenCanvas": {
-    "scaleIndicator": "Schaal",
-    "panHint": "Sleep om te navigeren"
-  },
-  "canvas": {
-    "placementMode": "Plaatsen: {{name}}",
-    "tapToPlace": "Tik op het canvas om te plaatsen",
-    "mode": {
-      "rotate": "Roteren",
-      "move": "Verplaatsen",
-      "tapToRotate": "Tik een component om te roteren",
-      "dragToMove": "Sleep een component om te verplaatsen"
-    }
-  },
   "plantSelection": {
     "title": "Plant kiezen",
     "searchPlaceholder": "Zoek planten...",
@@ -220,30 +199,13 @@
     "topToBottom": "Boven naar onder",
     "selectLayer": "Selecteer een laag"
   },
-  "contextMenu": {
-    "viewDetails": "Bekijk details",
-    "viewDetailsDescription": "Bekijk en beheer planten in dit component",
-    "edit": "Bewerken",
-    "editDescription": "Wijzig naam, afmetingen of zonrichting",
-    "delete": "Verwijderen",
-    "deleteDescription": "Verwijder dit component permanent",
-    "deleteTitle": "Component verwijderen?",
-    "deleteMessage": "Weet je zeker dat je '{{name}}' wilt verwijderen?",
-    "returnToInventory": "Terug naar inventaris",
-    "returnToInventoryDescription": "Verplaats component terug naar inventaris"
-  },
   "accessibility": {
     "stepProgress": "Stap {{current}} van {{total}}",
     "stepCompleted": "Stap {{step}} voltooid",
     "currentStep": "Huidige stap {{step}}",
     "compassSelector": "Selecteer zonrichting",
     "dateInput": "Datum invoer",
-    "dimensionInput": "Afmeting invoer",
-    "gardenPreview": "Tuinvoorbeeld",
-    "componentSelected": "Component geselecteerd",
-    "componentNotSelected": "Component niet geselecteerd",
-    "tapToSelect": "Tik om te selecteren",
-    "longPressForOptions": "Houd ingedrukt voor opties"
+    "dimensionInput": "Afmeting invoer"
   },
   "patch": {
     "resize": "Grootte aanpassen",
