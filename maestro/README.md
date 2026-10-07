@@ -8,7 +8,7 @@ This directory contains Maestro UI test flows for the My Little Garden Android a
 
 1. **environment_setup_happy_path.yaml**
    - Tests the complete first-time user setup flow
-   - Validates both wizard steps: Frost Dates and Garden Dimensions
+   - Validates the frost dates step (garden dimensions were removed from the wizard)
    - Verifies successful navigation to Home screen
    - Uses `clearState: true` for fresh app state
 
@@ -29,6 +29,16 @@ This directory contains Maestro UI test flows for the My Little Garden Android a
    - First launch: Completes full setup flow
    - Second launch: Verifies app skips setup and goes directly to Home
    - Uses `clearState: false` on relaunch to test persistence
+
+### Home Screen Tests
+
+5. **home_slider.yaml**
+   - Creates two components and verifies they appear as slides
+   - Swipes between slides and checks the "x van y" counter
+   - Taps a list row to jump to its slide
+   - Opens the detail screen from a slide and returns
+   - Deletes a component with cancel-then-confirm
+   - Uses `clearState: false`; run `environment_setup_happy_path.yaml` first on a fresh install
 
 ## Running Tests
 
