@@ -79,9 +79,6 @@ function mapComponent(component: ComponentData): ComponentSnapshot {
     name: component.name,
     type: component.type,
     sunDirection: (component.sunDirection ?? null) as SnapshotSunDirection | null,
-    positionXInMeters: component.positionX,
-    positionYInMeters: component.positionY,
-    rotation: component.rotation,
     dimensions: buildDimensions(component),
     plants: component.plants.map(mapPlant),
     createdAt: component.createdAt,
@@ -134,8 +131,6 @@ export function buildComponentOptimizeRequest(
   const snapshot: GardenSnapshot = {
     snapshotVersion: GARDEN_SNAPSHOT_VERSION,
     garden: {
-      widthInMeters: 0,
-      heightInMeters: 0,
       sunDirection: (gardenSunDirection ?? null) as SnapshotSunDirection | null,
       springFrostDate: null,
       fallFrostDate: null,

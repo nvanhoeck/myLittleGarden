@@ -4,7 +4,6 @@
  */
 
 import type { PotData, SunDirection } from '@/types';
-import { ComponentPosition } from './ComponentPosition';
 
 /**
  * Creation parameters for a new Pot
@@ -28,12 +27,11 @@ export class Pot {
     private readonly _sunDirection: SunDirection,
     private readonly _createdAt: Date,
     private readonly _diameterInCm: number,
-    private readonly _borderWidthInCm: number,
-    private readonly _position: ComponentPosition
+    private readonly _borderWidthInCm: number
   ) {}
 
   /**
-   * Create a new Pot (not placed on canvas yet)
+   * Create a new Pot
    */
   static create(params: CreatePotParams): Pot {
     return new Pot(
@@ -42,8 +40,7 @@ export class Pot {
       params.sunDirection,
       new Date(),
       params.diameterInCm,
-      params.borderWidthInCm,
-      ComponentPosition.atOrigin()
+      params.borderWidthInCm
     );
   }
 
@@ -57,12 +54,7 @@ export class Pot {
       data.sunDirection,
       new Date(data.createdAt),
       data.diameterInCm,
-      data.borderWidthInCm,
-      ComponentPosition.fromData({
-        positionX: data.positionX,
-        positionY: data.positionY,
-        rotation: data.rotation,
-      })
+      data.borderWidthInCm
     );
   }
 
@@ -90,17 +82,6 @@ export class Pot {
 
   get borderWidthInCm(): number {
     return this._borderWidthInCm;
-  }
-
-  get position(): ComponentPosition {
-    return this._position;
-  }
-
-  /**
-   * Check if the pot has been placed on the canvas
-   */
-  get isPlaced(): boolean {
-    return !this._position.isUnplaced;
   }
 
   /**
@@ -131,44 +112,7 @@ export class Pot {
     return Math.PI * Math.pow(this.radiusInCm, 2);
   }
 
-  /**
-   * Diameter in meters (for canvas positioning)
-   */
-  get diameterInMeters(): number {
-    return this._diameterInCm / 100;
-  }
-
   // ===== Behavior =====
-
-  /**
-   * Move the pot to a new position
-   */
-  moveTo(x: number, y: number): Pot {
-    return new Pot(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._diameterInCm,
-      this._borderWidthInCm,
-      this._position.moveTo(x, y)
-    );
-  }
-
-  /**
-   * Rotate the pot (although circular, rotation matters for sun direction display)
-   */
-  rotateTo(degrees: number): Pot {
-    return new Pot(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._diameterInCm,
-      this._borderWidthInCm,
-      this._position.rotateTo(degrees)
-    );
-  }
 
   /**
    * Update the pot name
@@ -180,8 +124,7 @@ export class Pot {
       this._sunDirection,
       this._createdAt,
       this._diameterInCm,
-      this._borderWidthInCm,
-      this._position
+      this._borderWidthInCm
     );
   }
 
@@ -189,7 +132,6 @@ export class Pot {
    * Convert to storage data
    */
   toData(): PotData {
-    const positionData = this._position.toData();
     return {
       id: this._id,
       type: 'pot',
@@ -198,9 +140,6 @@ export class Pot {
       createdAt: this._createdAt.toISOString(),
       diameterInCm: this._diameterInCm,
       borderWidthInCm: this._borderWidthInCm,
-      positionX: positionData.positionX,
-      positionY: positionData.positionY,
-      rotation: positionData.rotation,
       plants: [],
     };
   }

@@ -85,8 +85,6 @@ export function useAiChat(): UseAiChatResult {
 
       const snapshot = buildGardenSnapshot(
         {
-          gardenWidth: gardenState.gardenWidth,
-          gardenHeight: gardenState.gardenHeight,
           sunDirection: gardenState.sunDirection,
           springFrostDate: gardenState.springFrostDate,
           fallFrostDate: gardenState.fallFrostDate,

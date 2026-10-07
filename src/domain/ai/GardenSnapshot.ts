@@ -6,7 +6,7 @@
  * (no Date objects, no class instances, no methods).
  */
 
-export const GARDEN_SNAPSHOT_VERSION = '1.0' as const;
+export const GARDEN_SNAPSHOT_VERSION = '2.0' as const;
 
 export type SnapshotSunDirection =
   | 'N'
@@ -61,11 +61,6 @@ export interface ComponentSnapshot {
   name: string;
   type: SnapshotComponentType;
   sunDirection: SnapshotSunDirection | null;
-  /** Position of the component within the garden, in meters. */
-  positionXInMeters: number;
-  positionYInMeters: number;
-  /** Rotation in degrees. */
-  rotation: number;
   dimensions: ComponentDimensionsSnapshot;
   plants: PlacedPlantSnapshot[];
   /** ISO 8601 timestamp of component creation. */
@@ -76,8 +71,6 @@ export interface ComponentSnapshot {
  * Garden-level metadata.
  */
 export interface GardenMetadataSnapshot {
-  widthInMeters: number;
-  heightInMeters: number;
   sunDirection: SnapshotSunDirection | null;
   /** ISO 8601 date string or null if unknown. */
   springFrostDate: string | null;

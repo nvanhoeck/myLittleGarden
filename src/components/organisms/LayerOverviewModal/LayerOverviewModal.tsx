@@ -22,6 +22,7 @@ import {
 } from '@/stores/componentStore';
 import { usePlantStore } from '@/stores/plantStore';
 import { getPlantIcon, hasPlantIcon } from '@/assets';
+import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
 
 interface LayerOverviewModalProps {
   visible: boolean;
@@ -38,8 +39,6 @@ interface LayerViewProps {
   heightCm: number;
   isCircular: boolean;
 }
-
-const LAYER_REDUCTION_FACTOR = 0.85;
 
 /**
  * Get the category icon emoji for a plant (fallback)
@@ -75,21 +74,6 @@ function PlantIconInLayer({ plantData }: { plantData: PlantData | undefined }): 
 }
 
 /**
- * Calculate layer dimensions based on layer index
- */
-function getLayerDimensions(
-  layerIndex: number,
-  baseWidth: number,
-  baseHeight: number
-): { width: number; height: number } {
-  const factor = Math.pow(LAYER_REDUCTION_FACTOR, layerIndex);
-  return {
-    width: baseWidth * factor,
-    height: baseHeight * factor,
-  };
-}
-
-/**
  * Single layer view showing plants with labels
  */
 function LayerView({
@@ -106,7 +90,7 @@ function LayerView({
   const isTopLayer = layerIndex === numberOfLayers - 1;
   const isBottomLayer = layerIndex === 0;
 
-  const layerDimensions = getLayerDimensions(layerIndex, widthCm, heightCm);
+  const layerDimensions = getTowerLayerDimensions(widthCm, heightCm, layerIndex);
 
   // Filter plants for this layer
   const layerPlants = plants.filter((p) => (p.layerIndex ?? 0) === layerIndex);
@@ -255,7 +239,7 @@ export function LayerOverviewModal({
               {t('componentDetail.layerOverview')}
             </Text>
             <Text style={styles.modalSubtitle}>
-              {component.name} • {numberOfLayers} {t('componentInventory.layers')}
+              {component.name} • {t('component.layers', { count: numberOfLayers })}
             </Text>
             <Pressable
               onPress={onClose}

@@ -4,7 +4,6 @@
  */
 
 import type { GardenBoxData, SunDirection } from '@/types';
-import { ComponentPosition } from './ComponentPosition';
 
 /**
  * Creation parameters for a new GardenBox
@@ -30,12 +29,11 @@ export class GardenBox {
     private readonly _createdAt: Date,
     private readonly _widthInCm: number,
     private readonly _lengthInCm: number,
-    private readonly _borderWidthInCm: number,
-    private readonly _position: ComponentPosition
+    private readonly _borderWidthInCm: number
   ) {}
 
   /**
-   * Create a new GardenBox (not placed on canvas yet)
+   * Create a new GardenBox
    */
   static create(params: CreateGardenBoxParams): GardenBox {
     return new GardenBox(
@@ -45,8 +43,7 @@ export class GardenBox {
       new Date(),
       params.widthInCm,
       params.lengthInCm,
-      params.borderWidthInCm,
-      ComponentPosition.atOrigin()
+      params.borderWidthInCm
     );
   }
 
@@ -61,12 +58,7 @@ export class GardenBox {
       new Date(data.createdAt),
       data.widthInCm,
       data.lengthInCm,
-      data.borderWidthInCm,
-      ComponentPosition.fromData({
-        positionX: data.positionX,
-        positionY: data.positionY,
-        rotation: data.rotation,
-      })
+      data.borderWidthInCm
     );
   }
 
@@ -100,17 +92,6 @@ export class GardenBox {
     return this._borderWidthInCm;
   }
 
-  get position(): ComponentPosition {
-    return this._position;
-  }
-
-  /**
-   * Check if the box has been placed on the canvas
-   */
-  get isPlaced(): boolean {
-    return !this._position.isUnplaced;
-  }
-
   /**
    * Calculate inner planting area (excluding borders) in cm2
    */
@@ -127,53 +108,7 @@ export class GardenBox {
     return this._widthInCm * this._lengthInCm;
   }
 
-  /**
-   * Width in meters (for canvas positioning)
-   */
-  get widthInMeters(): number {
-    return this._widthInCm / 100;
-  }
-
-  /**
-   * Length in meters (for canvas positioning)
-   */
-  get lengthInMeters(): number {
-    return this._lengthInCm / 100;
-  }
-
   // ===== Behavior =====
-
-  /**
-   * Move the box to a new position
-   */
-  moveTo(x: number, y: number): GardenBox {
-    return new GardenBox(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._widthInCm,
-      this._lengthInCm,
-      this._borderWidthInCm,
-      this._position.moveTo(x, y)
-    );
-  }
-
-  /**
-   * Rotate the box
-   */
-  rotateTo(degrees: number): GardenBox {
-    return new GardenBox(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._widthInCm,
-      this._lengthInCm,
-      this._borderWidthInCm,
-      this._position.rotateTo(degrees)
-    );
-  }
 
   /**
    * Update the box name
@@ -186,8 +121,7 @@ export class GardenBox {
       this._createdAt,
       this._widthInCm,
       this._lengthInCm,
-      this._borderWidthInCm,
-      this._position
+      this._borderWidthInCm
     );
   }
 
@@ -195,7 +129,6 @@ export class GardenBox {
    * Convert to storage data
    */
   toData(): GardenBoxData {
-    const positionData = this._position.toData();
     return {
       id: this._id,
       type: 'gardenBox',
@@ -205,9 +138,6 @@ export class GardenBox {
       widthInCm: this._widthInCm,
       lengthInCm: this._lengthInCm,
       borderWidthInCm: this._borderWidthInCm,
-      positionX: positionData.positionX,
-      positionY: positionData.positionY,
-      rotation: positionData.rotation,
       plants: [],
     };
   }

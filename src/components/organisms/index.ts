@@ -1,8 +1,6 @@
 // Organisms - Complex UI components (headers, forms, lists, etc.)
-export { GardenCanvas, CanvasGrid, ComponentRenderer, useCanvasPan } from './GardenCanvas';
 export { ComponentCreationModal, ComponentTypeSelector, ComponentForm } from './ComponentCreationModal';
-export { ComponentInventory } from './ComponentInventory';
-export { ComponentContextMenu } from './ComponentContextMenu';
+export { ComponentSlide } from './ComponentSlide';
 export { PlantPlacementCanvas } from './PlantPlacementCanvas';
 export { QuickInfoGrid } from './QuickInfoGrid';
 export { GrowingCalendar } from './GrowingCalendar';

@@ -22,6 +22,7 @@ import { TowerLayerTabs } from '@/components/molecules';
 import type { ComponentData, PlacedPlantData, PlantData } from '@/types';
 import { PLANT_CATEGORIES } from '@/types/plant.types';
 import { getPlantIcon, hasPlantIcon } from '@/assets';
+import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
 import { useOptimizeComponent } from '@/hooks/ai/useOptimizeComponent';
 import { OptimizationAlternativesModal } from '@/components/ai/OptimizationAlternativesModal';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
@@ -503,14 +504,9 @@ export function ComponentDetailScreen({
   const hasPlants = plants.length > 0;
 
   // For towers, calculate layer-specific dimensions and filter plants
-  const LAYER_REDUCTION_FACTOR = 0.85;
   const layerDimensions = useMemo(() => {
     if (!isTower) return innerDimensions;
-    const factor = Math.pow(LAYER_REDUCTION_FACTOR, selectedLayer);
-    return {
-      width: innerDimensions.width * factor,
-      height: innerDimensions.height * factor,
-    };
+    return getTowerLayerDimensions(innerDimensions.width, innerDimensions.height, selectedLayer);
   }, [isTower, innerDimensions, selectedLayer]);
 
   // Filter plants for current layer (or all for non-towers)

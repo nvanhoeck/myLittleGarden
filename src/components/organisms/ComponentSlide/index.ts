@@ -1,0 +1,1 @@
+export { ComponentSlide } from './ComponentSlide';

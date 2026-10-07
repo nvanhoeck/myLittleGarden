@@ -1,0 +1,111 @@
+appId: com.mylittlegarden.app
+name: Home - Component slider and list
+---
+# Creates two components, swipes between slides, jumps via the list,
+# opens the detail screen and deletes a component with confirmation.
+# Assumes the environment setup was completed earlier (clearState: false),
+# or run environment_setup_happy_path.yaml first.
+
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 8000
+
+# ── Create first component (garden box) ───────────────────────────────
+- tapOn:
+    id: "add-component-fab"
+- tapOn:
+    id: "home-creation-modal-type-selector-gardenBox"
+- tapOn:
+    id: "home-creation-modal-next-button"
+- tapOn:
+    id: "home-creation-modal-form-name-input"
+- inputText: "Bak Een"
+- hideKeyboard
+- tapOn:
+    id: "home-creation-modal-form-compass-direction-S"
+- tapOn:
+    id: "home-creation-modal-form-submit-button"
+- waitForAnimationToEnd
+
+- assertVisible:
+    id: "home-component-slider"
+- assertVisible:
+    text: "Bak Een"
+
+# ── Create second component (pot) ─────────────────────────────────────
+- tapOn:
+    id: "add-component-fab"
+- tapOn:
+    id: "home-creation-modal-type-selector-pot"
+- tapOn:
+    id: "home-creation-modal-next-button"
+- tapOn:
+    id: "home-creation-modal-form-name-input"
+- inputText: "Pot Twee"
+- hideKeyboard
+- tapOn:
+    id: "home-creation-modal-form-compass-direction-S"
+- tapOn:
+    id: "home-creation-modal-form-submit-button"
+- waitForAnimationToEnd
+
+# New component becomes the active slide
+- assertVisible:
+    id: "home-slider-counter"
+    text: "2 van 2"
+
+# ── Swipe back to the first slide ─────────────────────────────────────
+- swipe:
+    from:
+      id: "home-component-slider"
+    direction: RIGHT
+    duration: 400
+- waitForAnimationToEnd
+- assertVisible:
+    text: "1 van 2"
+
+# ── Jump via the list ─────────────────────────────────────────────────
+- tapOn:
+    text: "Pot Twee"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "2 van 2"
+
+# ── Open detail screen from the active slide ─────────────────────────
+- tapOn:
+    id: ".*-open"
+- extendedWaitUntil:
+    visible:
+      id: "component-detail-screen"
+    timeout: 5000
+- back
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+
+# ── Delete with confirmation: cancel first, then confirm ─────────────
+- tapOn:
+    id: ".*-delete"
+- assertVisible:
+    text: "Component verwijderen?"
+- tapOn:
+    text: "Annuleren"
+- assertVisible:
+    text: "2 van 2"
+
+- tapOn:
+    id: ".*-delete"
+- tapOn:
+    text: "Verwijderen"
+- waitForAnimationToEnd
+
+# One component left: no counter, first component still listed
+- assertNotVisible:
+    id: "home-slider-counter"
+- assertVisible:
+    text: "Bak Een"

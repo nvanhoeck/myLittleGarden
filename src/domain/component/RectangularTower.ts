@@ -4,7 +4,6 @@
  */
 
 import type { RectangularTowerData, RectangularLayerDimensions, SunDirection } from '@/types';
-import { ComponentPosition } from './ComponentPosition';
 import {
   RectangularTowerLayer,
   RectangularCustomLayerDimensions,
@@ -44,7 +43,6 @@ export class RectangularTower {
     private readonly _lengthInCm: number,
     private readonly _borderWidthInCm: number,
     private readonly _numberOfLayers: number,
-    private readonly _position: ComponentPosition,
     customLayers?: readonly RectangularLayerDimensions[]
   ) {
     this._customLayers = customLayers;
@@ -61,7 +59,7 @@ export class RectangularTower {
   }
 
   /**
-   * Create a new RectangularTower (not placed on canvas yet)
+   * Create a new RectangularTower
    */
   static create(params: CreateRectangularTowerParams): RectangularTower {
     return new RectangularTower(
@@ -73,7 +71,6 @@ export class RectangularTower {
       params.lengthInCm,
       params.borderWidthInCm,
       params.numberOfLayers,
-      ComponentPosition.atOrigin(),
       params.customLayers
     );
   }
@@ -91,11 +88,6 @@ export class RectangularTower {
       data.lengthInCm,
       data.borderWidthInCm,
       data.numberOfLayers,
-      ComponentPosition.fromData({
-        positionX: data.positionX,
-        positionY: data.positionY,
-        rotation: data.rotation,
-      }),
       data.customLayers
     );
   }
@@ -134,10 +126,6 @@ export class RectangularTower {
     return this._numberOfLayers;
   }
 
-  get position(): ComponentPosition {
-    return this._position;
-  }
-
   get layers(): readonly RectangularTowerLayer[] {
     return this._layers;
   }
@@ -154,13 +142,6 @@ export class RectangularTower {
    */
   get hasCustomLayers(): boolean {
     return this._customLayers !== undefined;
-  }
-
-  /**
-   * Check if the tower has been placed on the canvas
-   */
-  get isPlaced(): boolean {
-    return !this._position.isUnplaced;
   }
 
   /**
@@ -184,57 +165,7 @@ export class RectangularTower {
     return this._widthInCm * this._lengthInCm;
   }
 
-  /**
-   * Width in meters (for canvas positioning)
-   */
-  get widthInMeters(): number {
-    return this._widthInCm / 100;
-  }
-
-  /**
-   * Length in meters (for canvas positioning)
-   */
-  get lengthInMeters(): number {
-    return this._lengthInCm / 100;
-  }
-
   // ===== Behavior =====
-
-  /**
-   * Move the tower to a new position
-   */
-  moveTo(x: number, y: number): RectangularTower {
-    return new RectangularTower(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._widthInCm,
-      this._lengthInCm,
-      this._borderWidthInCm,
-      this._numberOfLayers,
-      this._position.moveTo(x, y),
-      this._customLayers
-    );
-  }
-
-  /**
-   * Rotate the tower
-   */
-  rotateTo(degrees: number): RectangularTower {
-    return new RectangularTower(
-      this._id,
-      this._name,
-      this._sunDirection,
-      this._createdAt,
-      this._widthInCm,
-      this._lengthInCm,
-      this._borderWidthInCm,
-      this._numberOfLayers,
-      this._position.rotateTo(degrees),
-      this._customLayers
-    );
-  }
 
   /**
    * Update the tower name
@@ -249,7 +180,6 @@ export class RectangularTower {
       this._lengthInCm,
       this._borderWidthInCm,
       this._numberOfLayers,
-      this._position,
       this._customLayers
     );
   }
@@ -258,7 +188,6 @@ export class RectangularTower {
    * Convert to storage data
    */
   toData(): RectangularTowerData {
-    const positionData = this._position.toData();
     const baseData = {
       id: this._id,
       type: 'rectangularTower' as const,
@@ -269,9 +198,6 @@ export class RectangularTower {
       lengthInCm: this._lengthInCm,
       borderWidthInCm: this._borderWidthInCm,
       numberOfLayers: this._numberOfLayers,
-      positionX: positionData.positionX,
-      positionY: positionData.positionY,
-      rotation: positionData.rotation,
       plants: [] as const,
     };
     // Only include customLayers if they exist
