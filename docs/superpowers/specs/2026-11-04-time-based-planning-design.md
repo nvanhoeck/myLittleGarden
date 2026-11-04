@@ -142,6 +142,12 @@ For the selected component, year and layer:
 - Start over (after confirmation): fixed = locked plants. Candidates = all
   unlocked placed plants plus `plantsToPlan`, each with all options.
 - Both apply the result directly via `applyPlacement`.
+- Coordinates: AutoPlacement works in the inner area (border removed, origin
+  top-left of the inner area). `PlacedPlantData.positionX/Y` are relative to the
+  full component/layer. The use case adds `borderWidthInCm` to results and
+  subtracts it from fixed plants, with a test.
+- Frost days are passed to the domain as `{ month, day }`, read with local
+  getters from the garden store's Date values.
 
 ## 4. UI
 
