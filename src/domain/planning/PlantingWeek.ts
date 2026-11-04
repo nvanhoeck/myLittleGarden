@@ -54,6 +54,11 @@ export class PlantingWeek {
     return new PlantingWeek(year, week);
   }
 
+  /** The week of the date's calendar day in the device timezone, e.g. for a stored `new Date().toISOString()` */
+  static containingLocal(date: Date): PlantingWeek {
+    return PlantingWeek.containing(new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())));
+  }
+
   /** 52 or 53: 28 December always lies in the last week of its year. */
   static weeksInYear(year: number): number {
     return PlantingWeek.containing(new Date(Date.UTC(year, 11, 28))).week;

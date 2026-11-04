@@ -9,8 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { PlantSelectionScreenProps } from '@/navigation/navigationTypes';
 import { useAllPlants, useComponent, useComponentStore } from '@/stores';
-import { generateId } from '@/utils/idGenerator';
-import type { PlantData, PlantCategory, PlacedPlantData } from '@/types';
+import type { PlantData, PlantCategory } from '@/types';
+import { PlantingWeek } from '@/domain/planning';
 import { PLANT_CATEGORIES } from '@/types/plant.types';
 import { getPlantIcon, hasPlantIcon } from '@/assets';
 
@@ -148,9 +148,12 @@ export function PlantSelectionScreen({
 }: PlantSelectionScreenProps): React.JSX.Element {
   const { t } = useTranslation();
   const { componentId, layerIndex } = route.params;
+  // The planning year becomes selectable in the Component Detail screen; until then the
+  // current planning year (the ISO year of this week, so late December can be next year)
+  const year = route.params.year ?? PlantingWeek.containingLocal(new Date()).year;
   const component = useComponent(componentId);
   const allPlants = useAllPlants();
-  const updateComponent = useComponentStore((state) => state.updateComponent);
+  const addPlantsToPlan = useComponentStore((state) => state.addPlantsToPlan);
 
   // State
   const [selectedPlant, setSelectedPlant] = useState<PlantData | null>(null);
@@ -214,89 +217,12 @@ export function PlantSelectionScreen({
   const handleAddPlants = useCallback(() => {
     if (!selectedPlant || !component) return;
 
-    // Calculate inner dimensions based on component type
-    let innerWidth: number;
-    let innerHeight: number;
-    const layerScale = layerIndex !== undefined ? Math.pow(0.85, layerIndex) : 1;
-
-    switch (component.type) {
-      case 'gardenBox':
-        innerWidth = component.widthInCm - 2 * component.borderWidthInCm;
-        innerHeight = component.lengthInCm - 2 * component.borderWidthInCm;
-        break;
-      case 'pot':
-        innerWidth = component.diameterInCm - 2 * component.borderWidthInCm;
-        innerHeight = innerWidth;
-        break;
-      case 'rectangularTower':
-        innerWidth = (component.widthInCm - 2 * component.borderWidthInCm) * layerScale;
-        innerHeight = (component.lengthInCm - 2 * component.borderWidthInCm) * layerScale;
-        break;
-      case 'circularTower':
-        innerWidth = (component.diameterInCm - 2 * component.borderWidthInCm) * layerScale;
-        innerHeight = innerWidth;
-        break;
-      default:
-        innerWidth = 100;
-        innerHeight = 100;
-    }
-
-    // Calculate center position
-    const centerX = innerWidth / 2;
-    const centerY = innerHeight / 2;
-
-    // Horizontal offset for multiple plants (2cm spacing)
-    const horizontalOffsetCm = 2;
-
-    // Calculate horizontal offsets for each plant
-    const getHorizontalOffsets = (count: number): number[] => {
-      if (count === 1) return [0];
-      const offsets: number[] = [];
-      const halfCount = Math.floor(count / 2);
-      if (count % 2 === 1) {
-        // Odd: center first, then alternate left/right
-        offsets.push(0);
-        for (let j = 1; j <= halfCount; j++) {
-          offsets.push(-j * horizontalOffsetCm);
-          offsets.push(j * horizontalOffsetCm);
-        }
-      } else {
-        // Even: alternate left/right from center
-        for (let j = 0; j < halfCount; j++) {
-          offsets.push(-(j + 0.5) * horizontalOffsetCm);
-          offsets.push((j + 0.5) * horizontalOffsetCm);
-        }
-      }
-      return offsets.slice(0, count);
-    };
-
-    const offsets = getHorizontalOffsets(quantity);
-
-    // Create placed plant instances
-    const newPlants: PlacedPlantData[] = [];
-    const existingPlants = component.plants || [];
-
-    for (let i = 0; i < quantity; i++) {
-      newPlants.push({
-        id: generateId(),
-        plantId: selectedPlant.id,
-        // Place in center with horizontal offset
-        positionX: centerX + offsets[i],
-        positionY: centerY,
-        placedAt: new Date().toISOString(),
-        // Include layer index for towers (undefined for non-towers)
-        layerIndex: layerIndex,
-      });
-    }
-
-    // Update component with new plants
-    updateComponent(componentId, {
-      plants: [...existingPlants, ...newPlants],
-    });
+    // Plants go to the "to plan" list; auto-placement puts them in the component
+    addPlantsToPlan(componentId, selectedPlant.id, quantity, year, layerIndex);
 
     // Navigate back to component detail
     navigation.goBack();
-  }, [selectedPlant, component, quantity, componentId, updateComponent, navigation, layerIndex]);
+  }, [selectedPlant, component, quantity, componentId, addPlantsToPlan, navigation, year, layerIndex]);
 
   if (!component) {
     return (

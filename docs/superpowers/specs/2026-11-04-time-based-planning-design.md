@@ -126,7 +126,11 @@ mid-range device. Week occupancy uses one bitmask per cell (53 weeks fit in two 
 - Store actions:
   - `addPlantsToPlan(componentId, plantId, quantity, year, layerIndex?)`
   - `removePlantToPlan(componentId, id)`
-  - `applyPlacement(componentId, result, consumedToPlanIds)`: placed
+  - (Implemented differently: the domain use case returns the new `plants` and
+  `plantsToPlan` arrays and the Rearrange / Start over store actions save them;
+  there is no separate `applyPlacement` action. Placed plants without any
+  period option are kept as they are.)
+- Original idea, `applyPlacement(componentId, result, consumedToPlanIds)`: placed
     candidates become `PlacedPlantData` (keep id; `placedAt` = now for new
     ones), placed ones that came from the list leave `plantsToPlan`, and
     previously placed unlocked plants that end up unplaced move back to
@@ -142,12 +146,11 @@ For the selected component, year and layer:
 - Start over (after confirmation): fixed = locked plants. Candidates = all
   unlocked placed plants plus `plantsToPlan`, each with all options.
 - Both apply the result directly via `applyPlacement`.
-- Coordinates: AutoPlacement works in the inner area (border removed, origin
-  top-left of the inner area). `PlacedPlantData.positionX/Y` are relative to the
-  full component/layer. The use case adds `borderWidthInCm` to results and
-  subtracts it from fixed plants, with a test.
-- Frost days are passed to the domain as `{ month, day }`, read with local
-  getters from the garden store's Date values.
+- Coordinates: AutoPlacement and `PlacedPlantData.positionX/Y` share one frame:
+  the top-left of the inner area (border removed; for towers the layer of the
+  inner dimensions), exactly like `PlantPlacementCanvas`. No conversion needed.
+- Frost days are passed to the domain as `{ month, day }`, parsed from
+  `environmentStore.lastSpringFrost` ('YYYY-MM-DD'), which the wizard writes.
 
 ## 4. UI
 

@@ -5,7 +5,7 @@
 
 export { PlantingWeek } from './PlantingWeek';
 
-export { GrowingPeriod } from './GrowingPeriod';
+export { GrowingPeriod, frostDayOf } from './GrowingPeriod';
 export type { FrostDay, GrowingPeriodData, PlanningContext, PlantingMethod, PlantTiming } from './GrowingPeriod';
 
 export { periodOptionsFor } from './GrowingPeriodOptions';
@@ -30,3 +30,8 @@ export type {
   UnplacedCandidate,
   UnplacedReason,
 } from './AutoPlacement';
+
+export { plantingAreaOf, rearrangePlanting, startPlantingOver } from './ComponentPlanning';
+export type { ComponentPlanningInput, ComponentPlanningOutcome } from './ComponentPlanning';
+
+export { hasAnythingToPlan, plantsGrowingIn, plantsInScope, plantsToPlanIn, timeZonesOf } from './PlanningQueries';

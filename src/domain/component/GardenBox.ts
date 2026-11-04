@@ -139,6 +139,7 @@ export class GardenBox {
       lengthInCm: this._lengthInCm,
       borderWidthInCm: this._borderWidthInCm,
       plants: [],
+      plantsToPlan: [],
     };
   }
 }

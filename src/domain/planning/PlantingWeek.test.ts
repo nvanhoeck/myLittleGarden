@@ -71,6 +71,14 @@ describe('PlantingWeek', () => {
     assert.deepEqual([earlier.year, earlier.week], [2026, 53]);
   });
 
+  test('given a moment on a local calendar day, the local week is the week of that local day', () => {
+    // Sunday 3 May 2026, 23:30 local time: still week 18 in every timezone
+    const week = PlantingWeek.containingLocal(new Date(2026, 4, 3, 23, 30));
+    assert.deepEqual([week.year, week.week], [2026, 18]);
+    const monday = PlantingWeek.containingLocal(new Date(2026, 4, 4, 0, 15));
+    assert.deepEqual([monday.year, monday.week], [2026, 19]);
+  });
+
   test('given a date late in the day, ignores the local timezone and uses the UTC calendar day', () => {
     const week = PlantingWeek.containing(new Date('2026-05-03T23:30:00.000Z'));
     assert.deepEqual([week.year, week.week], [2026, 18]);

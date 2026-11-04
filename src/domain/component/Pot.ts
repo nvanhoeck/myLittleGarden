@@ -141,6 +141,7 @@ export class Pot {
       diameterInCm: this._diameterInCm,
       borderWidthInCm: this._borderWidthInCm,
       plants: [],
+      plantsToPlan: [],
     };
   }
 }

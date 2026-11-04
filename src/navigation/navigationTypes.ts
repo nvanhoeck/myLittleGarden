@@ -9,7 +9,7 @@ export type RootStackParamList = {
   Home: undefined;
   Settings: undefined;
   ComponentDetail: { componentId: string };
-  PlantSelection: { componentId: string; layerIndex?: number };
+  PlantSelection: { componentId: string; layerIndex?: number; year?: number };
   PlantDetails: { plantId: string };
   AiChat: undefined;
 };

@@ -1,20 +1,30 @@
 import type { PlantData } from '../../types/plant.types.ts';
+import type { GrowingPeriodData, PlantingMethod } from '../../types/planning.types.ts';
 import { PlantingWeek } from './PlantingWeek.ts';
 
-export type PlantingMethod = 'transplant' | 'directSow';
-
-export interface GrowingPeriodData {
-  readonly year: number;
-  readonly startWeek: number;
-  readonly endWeek: number;
-  readonly method: PlantingMethod;
-}
+export type { GrowingPeriodData, PlantingMethod };
 
 /** A day in the year without a year, such as the garden's frost dates */
 export interface FrostDay {
   /** 1-12 */
   readonly month: number;
   readonly day: number;
+}
+
+/**
+ * Reads the frost day from a stored frost date ('YYYY-MM-DD', as the
+ * environment store keeps it). Only the digits are used, so no timezone can
+ * shift the day. Returns null when there is no valid date.
+ */
+export function frostDayOf(isoDate: string | null): FrostDay | null {
+  const match = isoDate === null ? null : /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (match === null) {
+    return null;
+  }
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  // Day 0 of the next month is the last day of this one
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth ? { month, day } : null;
 }
 
 /** The garden's frost days applied to the year being planned */
@@ -99,9 +109,19 @@ export class GrowingPeriod implements GrowingPeriodData {
     if (start.year !== context.year) {
       return null;
     }
+    return GrowingPeriod.startingAt(start, method, harvestDays);
+  }
 
-    const endWeek = Math.min(start.week + Math.ceil(harvestDays / DAYS_PER_WEEK), PlantingWeek.weeksInYear(context.year));
-    return GrowingPeriod.create({ year: context.year, startWeek: start.week, endWeek, method });
+  /**
+   * The period from a start week until harvest: start + ceil(harvestDays / 7),
+   * capped at the last week of the year. Without a valid harvest time the
+   * period lasts until the end of the year.
+   */
+  static startingAt(start: PlantingWeek, method: PlantingMethod, harvestDays: number | undefined): GrowingPeriod {
+    const lastWeek = PlantingWeek.weeksInYear(start.year);
+    const hasHarvestTime = harvestDays !== undefined && Number.isFinite(harvestDays) && harvestDays > 0;
+    const endWeek = hasHarvestTime ? Math.min(start.week + Math.ceil(harvestDays / DAYS_PER_WEEK), lastWeek) : lastWeek;
+    return GrowingPeriod.create({ year: start.year, startWeek: start.week, endWeek, method });
   }
 
   /** Number of weeks two periods share (0 when they do not overlap); works on stored data too */

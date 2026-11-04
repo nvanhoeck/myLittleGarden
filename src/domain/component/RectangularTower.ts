@@ -199,6 +199,7 @@ export class RectangularTower {
       borderWidthInCm: this._borderWidthInCm,
       numberOfLayers: this._numberOfLayers,
       plants: [] as const,
+      plantsToPlan: [] as const,
     };
     // Only include customLayers if they exist
     if (this._customLayers) {

@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GrowingPeriod } from './GrowingPeriod.ts';
+import { GrowingPeriod, frostDayOf } from './GrowingPeriod.ts';
 import { PlantingWeek } from './PlantingWeek.ts';
 import type { FrostDay, PlanningContext, PlantTiming } from './GrowingPeriod.ts';
 
@@ -18,6 +18,26 @@ const tomato: PlantTiming = {
 
 const period = (startWeek: number, endWeek: number, year = 2026): GrowingPeriod =>
   GrowingPeriod.create({ year, startWeek, endWeek, method: 'transplant' });
+
+describe('frostDayOf', () => {
+  test('given a stored frost date, takes its month and day without any timezone shift', () => {
+    assert.deepEqual(frostDayOf('2025-04-15'), { month: 4, day: 15 });
+    assert.deepEqual(frostDayOf('2024-02-29'), { month: 2, day: 29 });
+  });
+
+  test('given no date or something that is not YYYY-MM-DD, there is no frost day', () => {
+    assert.equal(frostDayOf(null), null);
+    assert.equal(frostDayOf('2025-04-15T22:00:00.000Z'), null);
+    assert.equal(frostDayOf('15/04/2025'), null);
+    assert.equal(frostDayOf('2025-13-01'), null);
+  });
+
+  test('given a day that does not exist in that month, there is no frost day', () => {
+    assert.equal(frostDayOf('2026-02-31'), null);
+    assert.equal(frostDayOf('2025-02-29'), null);
+    assert.equal(frostDayOf('2026-04-31'), null);
+  });
+});
 
 describe('GrowingPeriod', () => {
   test('given a start and end week, knows its length and which weeks it includes', () => {
@@ -123,6 +143,16 @@ describe('GrowingPeriod', () => {
       const p = GrowingPeriod.fromCatalog({ ...tomato, daysToHarvest: { min: 0, max } }, 'transplant', context());
       assert.equal(p, null, `max ${max}`);
     }
+  });
+
+  test('given a start week and a harvest time, ends that many whole weeks later, capped at the year end', () => {
+    assert.equal(GrowingPeriod.startingAt(PlantingWeek.of(2026, 19), 'transplant', 70).endWeek, 29);
+    assert.equal(GrowingPeriod.startingAt(PlantingWeek.of(2026, 45), 'transplant', 70).endWeek, 53);
+  });
+
+  test('given a start week without a valid harvest time, lasts until the end of the year', () => {
+    assert.equal(GrowingPeriod.startingAt(PlantingWeek.of(2025, 19), 'transplant', undefined).endWeek, 52);
+    assert.equal(GrowingPeriod.startingAt(PlantingWeek.of(2026, 19), 'directSow', 0).endWeek, 53);
   });
 
   test('given stored data, restores an equal period', () => {
