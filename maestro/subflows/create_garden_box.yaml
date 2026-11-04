@@ -1,0 +1,27 @@
+appId: com.mylittlegarden.app
+---
+# Shared: creates a garden box on the home screen and opens its detail screen.
+- tapOn:
+    id: "add-component-fab"
+- tapOn:
+    id: "home-creation-modal-type-selector-gardenBox"
+- tapOn:
+    id: "home-creation-modal-next-button"
+- tapOn:
+    id: "home-creation-modal-form-name-input"
+- inputText: "Bak Planning"
+- hideKeyboard
+- tapOn:
+    id: "home-creation-modal-form-compass-direction-S"
+- tapOn:
+    id: "home-creation-modal-form-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-component-slider"
+    timeout: 8000
+- tapOn:
+    id: ".*-open"
+- extendedWaitUntil:
+    visible:
+      id: "component-detail-screen"
+    timeout: 5000

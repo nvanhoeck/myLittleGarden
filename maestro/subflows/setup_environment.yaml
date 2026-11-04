@@ -1,0 +1,35 @@
+appId: com.mylittlegarden.app
+---
+# Shared: fresh install -> frost dates (picker defaults) -> home screen.
+# The planning flows never hardcode a week; they pick weeks and zones
+# through their accessibility labels, so the frost dates do not matter.
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "environment-setup-screen"
+    timeout: 10000
+- tapOn:
+    id: "spring-frost-input-button"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+- waitForAnimationToEnd
+- tapOn:
+    id: "fall-frost-input-button"
+- extendedWaitUntil:
+    visible:
+      text: "OK"
+    timeout: 3000
+- tapOn:
+    text: "OK"
+- waitForAnimationToEnd
+- tapOn:
+    id: "complete-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 8000

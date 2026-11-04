@@ -1,0 +1,63 @@
+appId: com.mylittlegarden.app
+name: Planning - Start over with confirmation
+---
+- runFlow: subflows/prepare_planning_component.yaml
+- tapOn:
+    id: "planning-rearrange"
+- extendedWaitUntil:
+    visible:
+      id: "planning-snackbar"
+    timeout: 10000
+
+# Remember the "Te plannen (n)" title, escaped for use as a regex
+- copyTextFrom:
+    text: "Te plannen \\(\\d+\\)"
+- evalScript: ${output.toPlanTitle = maestro.copiedText.replace(/[()]/g, '\\$&')}
+
+# Show a week with plants so the layout can be compared before and after
+- runFlow: subflows/select_zone_with_plants.yaml
+- assertVisible:
+    id: "planning-footprint-.*"
+
+# Let the rearrange snackbar (4s) expire, so a new one can only come from start over
+- extendedWaitUntil:
+    notVisible:
+      id: "planning-snackbar"
+    timeout: 8000
+
+# ── Cancel keeps the layout and runs nothing ──────────────────────────
+- tapOn:
+    id: "planning-start-over"
+- extendedWaitUntil:
+    visible:
+      text: "Opnieuw beginnen\\?"
+    timeout: 3000
+- assertVisible:
+    text: "Alle niet-vergrendelde planten worden opnieuw ingedeeld voor \\d{4}\\. Vergrendelde planten blijven staan\\."
+- tapOn:
+    text: "Annuleren"
+- assertNotVisible:
+    text: "Opnieuw beginnen\\?"
+- assertNotVisible:
+    id: "planning-snackbar"
+- assertVisible:
+    text: ${output.toPlanTitle}
+- assertVisible:
+    id: "planning-footprint-.*"
+
+# ── Confirm runs the placement and shows the result ───────────────────
+- tapOn:
+    id: "planning-start-over"
+- extendedWaitUntil:
+    visible:
+      text: "Opnieuw beginnen\\?"
+    timeout: 3000
+# The bar button and the dialog button share a text: use the dialog's positive button id
+- tapOn:
+    id: "android:id/button1"
+- extendedWaitUntil:
+    visible:
+      id: "planning-snackbar"
+    timeout: 10000
+- assertVisible:
+    text: "Alles geplaatst \\(\\d+\\)|\\d+ geplaatst, \\d+ (past|passen) niet|Niets kon worden geplaatst"
