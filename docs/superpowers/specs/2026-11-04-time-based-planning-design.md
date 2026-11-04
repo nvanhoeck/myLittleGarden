@@ -54,7 +54,7 @@ both weeks inclusive and in the same year.
 - Derived from the catalog:
   - start = ISO week of `lastSpringFrost(year) + transplantWeeks` (or `directSowWeeks`) weeks
   - transplant end = start + ceil(`daysToHarvest.max` / 7) weeks
-  - direct sow end = start + ceil((`germinationDays.max` + `daysToHarvest.max`) / 7) weeks
+  - direct sow end = start + ceil(`daysToHarvest.max` / 7) weeks (seed-catalog convention counts from sowing; verified by the plant specialist)
   - end is capped at the last week of the year; a start outside the year is not an option.
 - The frost date is the garden's spring frost day and month applied to the planning year.
 
@@ -188,6 +188,17 @@ Each slice ends with user validation (CLAUDE.md workflow).
 3. **UI**: year bar, week strip, zone band, footprint canvas filtered by week,
    "Te plannen" list, actions, Plant Selection change, i18n.
 4. **Maestro** flows: add plants to plan → Rearrange → browse weeks/zones → Start over.
+5. **Harvest window** (user decision B): `daysToHarvest` is the time to the first
+   harvest, so it understates how long repeat-harvest crops occupy the bed.
+   - New catalog field `harvestWindow`: `{ kind: 'once' }` | `{ kind: 'weeks', weeks }` | `{ kind: 'untilFrost' }`.
+     Optional in the schema, defaulting to `once`.
+   - GrowingPeriod end = start + ceil(daysToHarvest.max / 7) + the window weeks.
+     `untilFrost` ends in the week of the garden's first fall frost in that year;
+     if harvest begins after that, there is no extra time.
+   - The plant specialist fills in the field for every plant in `plants.json`
+     (verified with 3 sources). Values: once for single-harvest crops,
+     4-8 weeks for repeat picking, untilFrost for tomato, pepper and aubergine.
+   - Existing placed plants keep their stored period; new runs use the new formula.
 
 ## Open point for the plant specialist
 
