@@ -22,6 +22,7 @@ const plant = (id: string, fields: Partial<PlantData>): PlantData =>
 const catalog: Record<string, PlantData> = {
   sla: plant('sla', {}),
   tarwe: plant('tarwe', { plantingStyle: 'patch', spacingRadiusCm: 10 }),
+  wortel: plant('wortel', { plantingStyle: 'thinning', spacingRadiusCm: 5, sowingSpacingCm: 8 }),
 };
 
 // 130 x 70 box with a 5 cm border: the inner area is 120 x 60
@@ -132,6 +133,23 @@ describe('rearrangePlanting', () => {
       [outcome.plants[0].patchWidthInCm, outcome.plants[0].patchHeightInCm, outcome.plants[0].patchRotationDeg],
       [20, 20, 0],
     );
+  });
+
+  test('given a thinning plant to plan, the new placed plant gets the patch size it was planned with, like a patch', () => {
+    const outcome = rearrangePlanting(input(box({ plantsToPlan: [toPlan('w', { plantId: 'wortel' })] })));
+    assert.deepEqual(
+      [outcome.plants[0].patchWidthInCm, outcome.plants[0].patchHeightInCm, outcome.plants[0].patchRotationDeg],
+      [16, 16, 0],
+    );
+  });
+
+  test('reports how many plants the run placed and how many did not fit', () => {
+    // Eight 30 cm squares fit in the 120 x 60 area and all period options overlap, so the ninth does not
+    const items = Array.from({ length: 9 }, (_, index) => toPlan(`p${index}`));
+    const outcome = rearrangePlanting(input(box({ plantsToPlan: items })));
+    assert.deepEqual(outcome.counts, { placed: outcome.plants.length, unplaced: outcome.unplaced.length });
+    assert.equal(outcome.counts.placed + outcome.counts.unplaced, 9);
+    assert.ok(outcome.counts.unplaced > 0);
   });
 
   test('given an unlocked placed plant, it may move but keeps its current period', () => {

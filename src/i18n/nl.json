@@ -184,20 +184,94 @@
   "componentDetail": {
     "notFound": "Component niet gevonden",
     "noPlants": "Tik op + om planten toe te voegen",
-    "plants": "Planten",
     "addPlant": "Plant toevoegen",
     "emptyPlantsMessage": "Nog geen planten geplaatst. Voeg planten toe om je component te vullen.",
     "unknownPlant": "Onbekende plant",
-    "outerSize": "Buitenmaat",
-    "innerSize": "Binnenmaat",
     "sunDirection": "Zon",
-    "sunAt": "Zon op",
     "layers": "Lagen",
     "layer": "Laag",
     "layerOverview": "Laag overzicht",
     "emptyLayer": "Geen planten op deze laag",
     "topToBottom": "Boven naar onder",
-    "selectLayer": "Selecteer een laag"
+    "selectLayer": "Selecteer een laag",
+    "sizeSubtitle": "{{outerWidth}} x {{outerLength}} cm · binnen {{innerWidth}} x {{innerLength}} cm"
+  },
+  "planning": {
+    "year": {
+      "previous": "Vorig jaar",
+      "next": "Volgend jaar"
+    },
+    "week": {
+      "label": "W{{week}}",
+      "current": "nu",
+      "range": "{{start}} tot {{end}}",
+      "caption": "W{{week}} · {{start}} – {{end}}",
+      "a11y_one": "Week {{week}}, {{range}}, {{count}} plant",
+      "a11y_other": "Week {{week}}, {{range}}, {{count}} planten",
+      "selected": "geselecteerd"
+    },
+    "month": {
+      "short": {
+        "1": "jan", "2": "feb", "3": "mrt", "4": "apr", "5": "mei", "6": "jun",
+        "7": "jul", "8": "aug", "9": "sep", "10": "okt", "11": "nov", "12": "dec"
+      },
+      "long": {
+        "1": "januari", "2": "februari", "3": "maart", "4": "april", "5": "mei", "6": "juni",
+        "7": "juli", "8": "augustus", "9": "september", "10": "oktober", "11": "november", "12": "december"
+      }
+    },
+    "zone": {
+      "plants_one": "{{count}} plant",
+      "plants_other": "{{count}} planten",
+      "empty": "leeg",
+      "caption_one": "W{{start}} - W{{end}} · {{count}} plant",
+      "caption_other": "W{{start}} - W{{end}} · {{count}} planten",
+      "a11y_one": "Zone week {{start}} tot {{end}}, {{count}} plant",
+      "a11y_other": "Zone week {{start}} tot {{end}}, {{count}} planten"
+    },
+    "toPlan": {
+      "title": "Te plannen ({{count}})",
+      "notYetPlanned": "Nog niet ingepland",
+      "empty": "Alles is ingepland",
+      "emptyHint": "Tik op + om planten toe te voegen",
+      "remove": "{{name}} verwijderen uit te plannen lijst",
+      "removeConfirm": "{{name}} verwijderen?"
+    },
+    "reason": {
+      "noSpace": "Geen plaats in week {{start}}-{{end}}",
+      "noSpaceAnyWeek": "Geen plaats",
+      "noPlantingWindow": "Geen plantperiode bekend"
+    },
+    "actions": {
+      "rearrange": "Herschikken",
+      "startOver": "Opnieuw beginnen"
+    },
+    "startOver": {
+      "title": "Opnieuw beginnen?",
+      "message": "Alle niet-vergrendelde planten worden opnieuw ingedeeld voor {{year}}. Vergrendelde planten blijven staan."
+    },
+    "result": {
+      "placed_one": "{{placed}} geplaatst, {{count}} past niet",
+      "placed_other": "{{placed}} geplaatst, {{count}} passen niet",
+      "allPlaced": "Alles geplaatst ({{count}})",
+      "nonePlaced": "Niets kon worden geplaatst",
+      "view": "Bekijk"
+    },
+    "conflict": {
+      "warning": "Overlap met een andere plant in deze week"
+    },
+    "outOfBounds": {
+      "patch": "Vak steekt buiten de randen.",
+      "plant": "Te dicht bij de rand. Minimale afstand: {{spacing}} cm."
+    },
+    "viewMode": {
+      "canvas": "Canvas",
+      "list": "Lijst"
+    },
+    "hint": {
+      "edit": "Sleep planten om te verplaatsen • Tik om te vergrendelen/verwijderen",
+      "view": "Druk op ✏️ Bewerken om planten te verplaatsen"
+    }
   },
   "accessibility": {
     "stepProgress": "Stap {{current}} van {{total}}",

@@ -1,6 +1,14 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { hasAnythingToPlan, plantsGrowingIn, plantsInScope, plantsToPlanIn, timeZonesOf } from './PlanningQueries.ts';
+import {
+  hasAnythingToPlan,
+  plannedYearsOf,
+  plantsGrowingIn,
+  plantsInScope,
+  plantsSharingWeeksWith,
+  plantsToPlanIn,
+  timeZonesOf,
+} from './PlanningQueries.ts';
 import { PlantingWeek } from './PlantingWeek.ts';
 import type { GardenBoxData } from '../../types/component.types.ts';
 import type { PlacedPlantData } from '../../types/plant.types.ts';
@@ -95,5 +103,29 @@ describe('hasAnythingToPlan', () => {
   test('given an unlocked plant or a plant to plan in the year, there is something to plan', () => {
     assert.equal(hasAnythingToPlan(box([placed('loose', 2026, 10, 20)]), 2026), true);
     assert.equal(hasAnythingToPlan(box([], [toPlan('a', 2026)]), 2026), true);
+  });
+});
+
+describe('plannedYearsOf', () => {
+  test('gives every year with placed plants or plants to plan, sorted and once each', () => {
+    const component = box(
+      [placed('a', 2026, 10, 20), placed('b', 2024, 10, 20), placed('c', 2026, 30, 40, { layerIndex: 1 })],
+      [toPlan('x', 2027), toPlan('y', 2024)],
+    );
+    assert.deepEqual(plannedYearsOf(component), [2024, 2026, 2027]);
+  });
+});
+
+describe('plantsSharingWeeksWith', () => {
+  test('gives the other plants on the layer that are in the ground during a week of the given plants', () => {
+    const scope = placed('scope', 2026, 18, 24);
+    const component = box([
+      scope,
+      placed('before', 2026, 10, 17),
+      placed('overlapping', 2026, 24, 30),
+      placed('upstairs', 2026, 18, 24, { layerIndex: 1 }),
+      placed('last-year', 2025, 18, 24),
+    ]);
+    assert.deepEqual(ids(plantsSharingWeeksWith(component, [scope])), ['overlapping']);
   });
 });

@@ -10,8 +10,18 @@ export type { FrostDay, GrowingPeriodData, PlanningContext, PlantingMethod, Plan
 
 export { periodOptionsFor } from './GrowingPeriodOptions';
 
-export { PlantFootprint, boundsOverlap, footprintsConflict } from './PlantFootprint';
-export type { Bounds, PatchShape, PositionedFootprint } from './PlantFootprint';
+export {
+  PlantFootprint,
+  boundsOverlap,
+  conflictingPlantIds,
+  footprintOf,
+  footprintsConflict,
+  minimumPatchSideCm,
+} from './PlantFootprint';
+export type { Bounds, FootprintTraits, PatchFields, PatchShape, PositionedFootprint } from './PlantFootprint';
+
+export { fitsInArea, plantsOutsideArea } from './PlantingArea';
+export type { PlantingArea } from './PlantingArea';
 
 export { calculateTimeZones } from './TimeZone';
 export type { PlantInTime, TimeZone } from './TimeZone';
@@ -26,12 +36,19 @@ export type {
   PlacementCandidate,
   PlacementRequest,
   PlacementResult,
-  PlantingArea,
   UnplacedCandidate,
   UnplacedReason,
 } from './AutoPlacement';
 
 export { plantingAreaOf, rearrangePlanting, startPlantingOver } from './ComponentPlanning';
-export type { ComponentPlanningInput, ComponentPlanningOutcome } from './ComponentPlanning';
+export type { ComponentPlanningInput, ComponentPlanningOutcome, PlanningRunCounts } from './ComponentPlanning';
 
-export { hasAnythingToPlan, plantsGrowingIn, plantsInScope, plantsToPlanIn, timeZonesOf } from './PlanningQueries';
+export {
+  hasAnythingToPlan,
+  plannedYearsOf,
+  plantsGrowingIn,
+  plantsInScope,
+  plantsSharingWeeksWith,
+  plantsToPlanIn,
+  timeZonesOf,
+} from './PlanningQueries';

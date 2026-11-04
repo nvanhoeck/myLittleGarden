@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAiOptimizeComponentStore } from '@/stores/ai/aiOptimizeComponentStore';
 import { buildComponentOptimizeRequest } from '@/domain/ai/buildComponentOptimizeRequest';
@@ -23,18 +23,40 @@ interface UseOptimizeComponentResult {
   selectedIndex: number;
   error: string | null;
   setSelectedIndex: (index: number) => void;
+  /**
+   * Asks the AI to optimize the scope's plants only (the plants growing in the
+   * displayed week). Its obstacles are sent as locked plants, so the AI does
+   * not put plants on them; the other plants of the component are not sent.
+   */
   requestOptimization: (
     component: ComponentData,
+    scope: OptimizeScope,
     getPlantById: (id: string) => PlantData | undefined,
     gardenSunDirection: string | null,
     objective?: Objective,
   ) => Promise<void>;
+  /** Moves the given plants to the selected alternative's positions; never their periods */
   applyAlternative: (
     component: ComponentData,
     componentId: string,
     updateComponent: (id: string, updates: { plants: PlacedPlantData[] }) => void,
+    movablePlantIds: ReadonlySet<string>,
   ) => void;
+  /** Forgets the result; a request still running is ignored when it returns */
   reset: () => void;
+}
+
+/** What an optimization works on */
+export interface OptimizeScope {
+  /** The plants the AI may move */
+  readonly plants: readonly PlacedPlantData[];
+  /** Plants in the ground during the same weeks, which the AI must keep clear of */
+  readonly obstacles: readonly PlacedPlantData[];
+}
+
+/** The plants sent to the AI: the scope's plants plus its obstacles as locked plants */
+export function plantsForOptimization(scope: OptimizeScope): PlacedPlantData[] {
+  return [...scope.plants, ...scope.obstacles.map((plant) => ({ ...plant, locked: true }))];
 }
 
 export function useOptimizeComponent(): UseOptimizeComponentResult {
@@ -47,7 +69,14 @@ export function useOptimizeComponent(): UseOptimizeComponentResult {
   const setSuccess = useAiOptimizeComponentStore((s) => s.setSuccess);
   const setError = useAiOptimizeComponentStore((s) => s.setError);
   const setSelectedIndex = useAiOptimizeComponentStore((s) => s.setSelectedIndex);
-  const reset = useAiOptimizeComponentStore((s) => s.reset);
+  const resetStore = useAiOptimizeComponentStore((s) => s.reset);
+  // Only the latest request may report back
+  const requestId = useRef(0);
+
+  const reset = useCallback(() => {
+    requestId.current += 1;
+    resetStore();
+  }, [resetStore]);
 
   const translateError = useCallback(
     (e: unknown): string => {
@@ -67,14 +96,16 @@ export function useOptimizeComponent(): UseOptimizeComponentResult {
   const requestOptimization = useCallback(
     async (
       component: ComponentData,
+      scope: OptimizeScope,
       getPlantById: (id: string) => PlantData | undefined,
       gardenSunDirection: string | null,
       objective: Objective = 'balanced',
     ): Promise<void> => {
+      const id = ++requestId.current;
       setLoading();
       try {
         const request = buildComponentOptimizeRequest(
-          component,
+          { ...component, plants: plantsForOptimization(scope) },
           getPlantById,
           gardenSunDirection,
           objective,
@@ -82,10 +113,10 @@ export function useOptimizeComponent(): UseOptimizeComponentResult {
         const response = await withRetry(() =>
           optimizeComponentService.requestOptimization(request),
         );
-        setSuccess(response.alternatives);
+        if (id === requestId.current) setSuccess(response.alternatives);
       } catch (e) {
         console.error('mylittlegarden: requestOptimization failed', e);
-        setError(translateError(e));
+        if (id === requestId.current) setError(translateError(e));
       }
     },
     [setLoading, setSuccess, setError, translateError],
@@ -96,13 +127,17 @@ export function useOptimizeComponent(): UseOptimizeComponentResult {
       component: ComponentData,
       componentId: string,
       updateComponent: (id: string, updates: { plants: PlacedPlantData[] }) => void,
+      movablePlantIds: ReadonlySet<string>,
     ): void => {
       const current = useAiOptimizeComponentStore.getState();
       const selected = current.alternatives?.[current.selectedIndex];
       if (!selected) return;
 
+      // Obstacles were sent as locked plants: they never move
       const positionMap = new Map(
-        selected.positions.map((pos) => [pos.plantInstanceId, pos]),
+        selected.positions
+          .filter((pos) => movablePlantIds.has(pos.plantInstanceId))
+          .map((pos) => [pos.plantInstanceId, pos]),
       );
 
       const updatedPlants: PlacedPlantData[] = component.plants.map((plant) => {

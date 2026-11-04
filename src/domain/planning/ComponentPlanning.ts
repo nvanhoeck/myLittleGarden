@@ -7,7 +7,8 @@ import type { FixedPlant, PlacementCandidate, PlacementResult, PlantingArea, Unp
 import { GrowingPeriod } from './GrowingPeriod.ts';
 import type { FrostDay } from './GrowingPeriod.ts';
 import { periodOptionsFor } from './GrowingPeriodOptions.ts';
-import { PlantFootprint } from './PlantFootprint.ts';
+import { footprintOf } from './PlantFootprint.ts';
+import type { PatchFields, PlantFootprint } from './PlantFootprint.ts';
 import { plantsInScope, plantsToPlanIn } from './PlanningQueries.ts';
 import { relationsFromCatalog } from './PlantRelations.ts';
 
@@ -39,13 +40,14 @@ export interface ComponentPlanningOutcome {
   readonly plantsToPlan: PlantToPlanData[];
   /** Why candidates were not placed, for the "to plan" list */
   readonly unplaced: readonly UnplacedCandidate[];
+  /** How many plants the run placed and how many did not fit, for the result message */
+  readonly counts: PlanningRunCounts;
 }
 
-/** Patch size fields, shared by placed plants and plants to plan */
-type PatchFields = Pick<PlacedPlantData, 'patchWidthInCm' | 'patchHeightInCm' | 'patchRotationDeg'>;
-
-/** Spacing the canvas assumes for plants missing from the catalog */
-const DEFAULT_SPACING_RADIUS_CM = 15;
+export interface PlanningRunCounts {
+  readonly placed: number;
+  readonly unplaced: number;
+}
 
 /** Rearrange: placed plants keep their period and may only move; the list gets all options */
 export function rearrangePlanting(input: ComponentPlanningInput): ComponentPlanningOutcome {
@@ -196,13 +198,15 @@ function applyPlacement(
     plants: [...plantsThatStay, ...plantsFromList],
     plantsToPlan: [...component.plantsToPlan.filter((item) => !placements.has(item.id)), ...backToList],
     unplaced: result.unplaced,
+    counts: { placed: result.placed.length, unplaced: result.unplaced.length },
   };
 }
 
 /** A patch keeps the size it had; a new patch is drawn at the size it was planned with */
 function patchOfNewPlant(plant: PlantData | undefined, item: PlantToPlanData, footprint: PlantFootprint | undefined): PatchFields {
   const kept = patchFieldsOf(item);
-  if (Object.keys(kept).length > 0 || plant?.plantingStyle !== 'patch' || footprint === undefined) {
+  const sownOverArea = plant?.plantingStyle === 'patch' || plant?.plantingStyle === 'thinning';
+  if (Object.keys(kept).length > 0 || !sownOverArea || footprint === undefined) {
     return kept;
   }
   return { patchWidthInCm: footprint.widthCm, patchHeightInCm: footprint.lengthCm, patchRotationDeg: 0 };
@@ -224,15 +228,4 @@ function currentPeriodOf(plant: PlacedPlantData): GrowingPeriod[] {
   } catch {
     return [];
   }
-}
-
-function footprintOf(plant: PlantData | undefined, patchFields: PatchFields): PlantFootprint {
-  const known = plant !== undefined && plant.spacingRadiusCm > 0
-    ? plant
-    : { spacingRadiusCm: DEFAULT_SPACING_RADIUS_CM, plantingStyle: 'individual' as const };
-  const { patchWidthInCm, patchHeightInCm, patchRotationDeg } = patchFields;
-  const patch = patchWidthInCm !== undefined && patchHeightInCm !== undefined
-    ? { widthCm: patchWidthInCm, heightCm: patchHeightInCm, rotationDeg: patchRotationDeg ?? 0 }
-    : undefined;
-  return PlantFootprint.forPlant(known, patch);
 }

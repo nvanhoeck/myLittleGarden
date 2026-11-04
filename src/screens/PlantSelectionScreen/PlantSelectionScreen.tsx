@@ -148,8 +148,8 @@ export function PlantSelectionScreen({
 }: PlantSelectionScreenProps): React.JSX.Element {
   const { t } = useTranslation();
   const { componentId, layerIndex } = route.params;
-  // The planning year becomes selectable in the Component Detail screen; until then the
-  // current planning year (the ISO year of this week, so late December can be next year)
+  // The year selected in the Component Detail screen; without one, the current planning
+  // year (the ISO year of this week, so late December can be next year)
   const year = route.params.year ?? PlantingWeek.containingLocal(new Date()).year;
   const component = useComponent(componentId);
   const allPlants = useAllPlants();

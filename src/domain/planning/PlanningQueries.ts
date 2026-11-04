@@ -39,6 +39,33 @@ export function plantsToPlanIn(component: ComponentData, year: number, layerInde
   return component.plantsToPlan.filter((item) => item.year === year && onLayer(item.layerIndex, layerIndex));
 }
 
+/** Every year with placed plants or plants to plan, sorted, each once */
+export function plannedYearsOf(component: ComponentData): number[] {
+  const years = new Set([
+    ...component.plants.map((plant) => plant.growingPeriod.year),
+    ...component.plantsToPlan.map((item) => item.year),
+  ]);
+  return [...years].sort((a, b) => a - b);
+}
+
+/**
+ * The other placed plants on the layer that are in the ground during at
+ * least one week of the given plants, e.g. obstacles for an optimization of those plants
+ */
+export function plantsSharingWeeksWith(
+  component: ComponentData,
+  plants: readonly PlacedPlantData[],
+  layerIndex?: number,
+): PlacedPlantData[] {
+  const ids = new Set(plants.map((plant) => plant.id));
+  return component.plants.filter(
+    (other) =>
+      !ids.has(other.id) &&
+      onLayer(other.layerIndex, layerIndex) &&
+      plants.some((plant) => GrowingPeriod.sharedWeeks(plant.growingPeriod, other.growingPeriod) > 0),
+  );
+}
+
 /** Whether Rearrange or Start over has anything to work with: a plant to plan or an unlocked placed plant */
 export function hasAnythingToPlan(component: ComponentData, year: number, layerIndex?: number): boolean {
   return (

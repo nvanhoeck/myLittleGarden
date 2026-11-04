@@ -1,7 +1,11 @@
 import { GrowingPeriod } from './GrowingPeriod.ts';
 import { boundsOverlap } from './PlantFootprint.ts';
 import type { Bounds, PlantFootprint } from './PlantFootprint.ts';
+import { fitsInArea } from './PlantingArea.ts';
+import type { PlantingArea } from './PlantingArea.ts';
 import type { PlantRelation, PlantRelations } from './PlantRelations.ts';
+
+export type { PlantingArea };
 
 /**
  * Auto-placement: greedily places plants so that as many as possible fit in
@@ -9,11 +13,6 @@ import type { PlantRelation, PlantRelations } from './PlantRelations.ts';
  * apart. Pure and deterministic: the same request always gives the same
  * result, whatever the order of the candidates.
  */
-
-/** Inner dimensions of a component or tower layer (border already subtracted) */
-export type PlantingArea =
-  | { readonly shape: 'rectangle'; readonly widthCm: number; readonly lengthCm: number }
-  | { readonly shape: 'circle'; readonly diameterCm: number };
 
 /** A plant that stays where it is (e.g. a locked plant) */
 export interface FixedPlant {
@@ -217,7 +216,7 @@ function findBestSpot(
       const column = boundsInTime.filter((b) => left < b.right && b.left < left + widthCm);
       for (const top of tops) {
         const bounds: Bounds = { left, top, right: left + widthCm, bottom: top + lengthCm };
-        if (column.some((b) => boundsOverlap(bounds, b)) || !fitsInArea(area, bounds)) {
+        if (column.some((b) => boundsOverlap(bounds, b)) || !fitsInArea(area, candidate.footprint, left + widthCm / 2, top + lengthCm / 2)) {
           continue;
         }
         const corner: Corner = { left, top, score: scoringGain(bounds, scoring) };
@@ -313,18 +312,6 @@ function areaWidth(area: PlantingArea): number {
 
 function areaLength(area: PlantingArea): number {
   return area.shape === 'circle' ? area.diameterCm : area.lengthCm;
-}
-
-/** Rectangles are already inside by construction; in a circle all four corners must be inside */
-function fitsInArea(area: PlantingArea, bounds: Bounds): boolean {
-  if (area.shape === 'rectangle') {
-    return true;
-  }
-  const radius = area.diameterCm / 2;
-  // The farthest corner decides
-  const dx = Math.max(Math.abs(bounds.left - radius), Math.abs(bounds.right - radius));
-  const dy = Math.max(Math.abs(bounds.top - radius), Math.abs(bounds.bottom - radius));
-  return dx * dx + dy * dy <= radius * radius + EPSILON;
 }
 
 function windowOf(options: readonly GrowingPeriod[]): { startWeek: number; endWeek: number } {

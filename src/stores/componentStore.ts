@@ -88,10 +88,10 @@ interface ComponentState {
   // Actions - Planning
   addPlantsToPlan: (componentId: string, plantId: string, quantity: number, year: number, layerIndex?: number) => void;
   removePlantToPlan: (componentId: string, plantToPlanId: string) => void;
-  /** Rearrange: auto-places the plants of a year/layer; placed plants keep their period */
-  rearrangePlanting: (componentId: string, year: number, layerIndex?: number) => void;
-  /** Start over: auto-places the plants of a year/layer from scratch; locked plants stay */
-  startPlantingOver: (componentId: string, year: number, layerIndex?: number) => void;
+  /** Rearrange: auto-places the plants of a year/layer; placed plants keep their period. Null when the component is gone. */
+  rearrangePlanting: (componentId: string, year: number, layerIndex?: number) => Planning.PlanningRunCounts | null;
+  /** Start over: auto-places the plants of a year/layer from scratch; locked plants stay. Null when the component is gone. */
+  startPlantingOver: (componentId: string, year: number, layerIndex?: number) => Planning.PlanningRunCounts | null;
 
   // Selectors
   getComponentById: (id: string) => ComponentData | undefined;
@@ -317,19 +317,21 @@ export const useComponentStore = create<ComponentState>()(
       // Auto-place a year/layer keeping the periods of placed plants
       rearrangePlanting: (componentId, year, layerIndex) => {
         const component = get().getComponentById(componentId);
-        if (!component) return;
+        if (!component) return null;
         const outcome = Planning.rearrangePlanting(planningInputFor(component, year, layerIndex));
         set((state) => ({ components: withOutcome(state.components, componentId, outcome) }));
         usePlanningStore.getState().setLastRun({ componentId, year, layerIndex }, outcome.unplaced);
+        return outcome.counts;
       },
 
       // Auto-place a year/layer from scratch; locked plants stay
       startPlantingOver: (componentId, year, layerIndex) => {
         const component = get().getComponentById(componentId);
-        if (!component) return;
+        if (!component) return null;
         const outcome = Planning.startPlantingOver(planningInputFor(component, year, layerIndex));
         set((state) => ({ components: withOutcome(state.components, componentId, outcome) }));
         usePlanningStore.getState().setLastRun({ componentId, year, layerIndex }, outcome.unplaced);
+        return outcome.counts;
       },
 
       // Get a component by ID
