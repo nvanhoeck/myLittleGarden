@@ -6,6 +6,7 @@ import { useComponentStore } from '@/stores/componentStore';
 import { usePlantStore } from '@/stores/plantStore';
 import type { PlantSpecSnapshot } from '@/domain/ai/GardenSnapshot';
 import { buildGardenSnapshot } from '@/domain/ai/buildGardenSnapshot';
+import { plantDistanceCm } from '@/domain/planning';
 import { chatService } from '@/services/ai/chatService';
 import type { ChatHistoryMessage } from '@/services/ai/chatService';
 import {
@@ -73,7 +74,7 @@ export function useAiChat(): UseAiChatResult {
           plantId: plant.id,
           name: plant.nameNl,
           sunRequirement: plant.sun === 'full' ? 'fullSun' : plant.sun === 'partial' ? 'partialShade' : 'fullShade',
-          spacingInCm: plant.spacingRadiusCm,
+          spacingInCm: plantDistanceCm(plant),
           heightInCm: null,
           waterNeeds: plant.water === 'moderate' ? 'medium' : plant.water,
           frostTolerant: plant.frostTolerance !== 'tender',

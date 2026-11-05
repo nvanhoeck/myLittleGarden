@@ -8,6 +8,7 @@
 
 import type { ComponentData } from '@/types/component.types';
 import type { PlantData, PlacedPlantData } from '@/types/plant.types';
+import { plantDistanceCm } from '@/domain/planning';
 import {
   GARDEN_SNAPSHOT_VERSION,
   type ComponentDimensionsSnapshot,
@@ -105,7 +106,7 @@ function mapPlantSpec(plant: PlantData): PlantSpecSnapshot {
     plantId: plant.id,
     name: plant.nameNl,
     sunRequirement: mapSunRequirement(plant.sun),
-    spacingInCm: plant.spacingRadiusCm,
+    spacingInCm: plantDistanceCm(plant),
     heightInCm: null,
     waterNeeds: mapWaterNeeds(plant.water),
     frostTolerant: plant.frostTolerance !== 'tender',
