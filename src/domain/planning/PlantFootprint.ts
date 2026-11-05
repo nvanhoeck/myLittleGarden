@@ -25,7 +25,7 @@ export interface PositionedFootprint {
 /** The catalog fields that decide a plant's footprint */
 export type FootprintTraits = Pick<PlantData, 'spacingRadiusCm' | 'plantingStyle'> & Partial<Pick<PlantData, 'sowingSpacingCm'>>;
 
-/** Patch size fields, shared by placed plants and plants to plan */
+/** Patch size fields of a placed plant */
 export type PatchFields = Pick<PlacedPlantData, 'patchWidthInCm' | 'patchHeightInCm' | 'patchRotationDeg'>;
 
 /** Spacing the canvas assumes for plants missing from the catalog */

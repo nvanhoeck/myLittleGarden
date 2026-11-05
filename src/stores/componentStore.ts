@@ -31,6 +31,7 @@ import { usePlantStore } from './plantStore';
 import { useEnvironmentStore } from './environmentStore';
 import { usePlanningStore } from './planningStore';
 import { seasonsOfYear } from './planningContext';
+import { shouldReconcile } from './reconcilePolicy';
 
 /**
  * Component store state interface
@@ -414,7 +415,7 @@ export function isTower(
 // date to another reconciles: the first date, or the stored date loading at app
 // start (null to date), must not outdate the seasons.
 useEnvironmentStore.subscribe((state, previous) => {
-  if (previous.lastSpringFrost !== null && state.lastSpringFrost !== null && state.lastSpringFrost !== previous.lastSpringFrost) {
+  if (shouldReconcile(previous.lastSpringFrost, state.lastSpringFrost)) {
     useComponentStore.getState().reconcilePlannings();
   }
 });
