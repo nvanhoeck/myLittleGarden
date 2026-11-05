@@ -1,0 +1,35 @@
+appId: com.mylittlegarden.app
+---
+# Shared: on the component detail screen, "+" -> pick Tomaat -> quantity 3
+# -> add -> back on the detail screen.
+- tapOn:
+    id: "add-plant-button"
+- extendedWaitUntil:
+    visible:
+      id: "plant-selection-screen"
+    timeout: 5000
+- tapOn:
+    id: "plant-search-input"
+- inputText: "Tomaat"
+- hideKeyboard
+- tapOn:
+    id: "plant-tile-tomaat"
+- extendedWaitUntil:
+    visible:
+      id: "add-plants-button"
+    timeout: 3000
+# Quantity 1 -> 3, asserting each step
+- tapOn:
+    text: "\\+"
+- assertVisible:
+    text: "Voeg 2 plant\\(en\\) toe"
+- tapOn:
+    text: "\\+"
+- assertVisible:
+    text: "Voeg 3 plant\\(en\\) toe"
+- tapOn:
+    id: "add-plants-button"
+- extendedWaitUntil:
+    visible:
+      id: "component-detail-screen"
+    timeout: 5000

@@ -4,6 +4,8 @@
  */
 
 import {z} from 'zod';
+import type {GrowingPeriodData, PlantToPlanData} from '../types/planning.types';
+import {PlantingWeek} from '../domain/planning/PlantingWeek.ts';
 
 /**
  * Sun requirement schema
@@ -152,6 +154,49 @@ export const plantDatabaseSchema = z.object({
 export type PlantDatabaseType = z.infer<typeof plantDatabaseSchema>;
 
 /**
+ * Growing period schema: ISO weeks within one year, end not before start
+ */
+const isoWeekSchema = z.number().int().min(1).max(53);
+
+export const growingPeriodSchema = z
+    .object({
+        year: z.number().int(),
+        startWeek: isoWeekSchema,
+        endWeek: isoWeekSchema,
+        method: z.enum(['transplant', 'directSow']),
+    })
+    .refine((period) => period.endWeek >= period.startWeek, {
+        message: 'Groeiperiode eindigt voor ze begint',
+        path: ['endWeek'],
+    })
+    .refine((period) => period.endWeek <= PlantingWeek.weeksInYear(period.year), {
+        message: 'Dit jaar heeft geen week 53',
+        path: ['endWeek'],
+    }) satisfies z.ZodType<GrowingPeriodData>;
+export type GrowingPeriodDataType = z.infer<typeof growingPeriodSchema>;
+
+/**
+ * Patch size fields, shared by placed plants and plants to plan
+ */
+const patchShapeFields = {
+    patchWidthInCm: z.number().positive().optional(),
+    patchHeightInCm: z.number().positive().optional(),
+    patchRotationDeg: z.number().min(0).max(359).optional(),
+};
+
+/**
+ * Plant waiting to be auto-placed in a component
+ */
+export const plantToPlanDataSchema = z.object({
+    id: z.string().min(1),
+    plantId: z.string().min(1),
+    year: z.number().int(),
+    layerIndex: z.number().int().min(0).optional(),
+    ...patchShapeFields,
+}) satisfies z.ZodType<PlantToPlanData>;
+export type PlantToPlanDataType = z.infer<typeof plantToPlanDataSchema>;
+
+/**
  * Placed plant instance schema
  */
 export const placedPlantDataSchema = z.object({
@@ -161,9 +206,8 @@ export const placedPlantDataSchema = z.object({
     positionY: z.number(),
     placedAt: z.string().datetime(),
     locked: z.boolean().optional().default(false),
-  patchWidthInCm: z.number().positive().optional(),
-  patchHeightInCm: z.number().positive().optional(),
-  patchRotationDeg: z.number().min(0).max(359).optional(),
+    growingPeriod: growingPeriodSchema,
+    ...patchShapeFields,
 });
 export type PlacedPlantDataType = z.infer<typeof placedPlantDataSchema>;
 

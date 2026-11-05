@@ -1,7 +1,11 @@
 /**
  * PlantPlacementCanvas
  * Interactive canvas for placing and arranging plants within a component.
+ * Individual plants render as their footprint rectangle (the space they claim).
  * Patch plants (plantingStyle === 'patch') render as resizable, rotatable rectangles.
+ * The parent passes the footprints and the conflicting plants (overlapping
+ * footprints in a shared week); a conflict is a warning and never blocks a drag.
+ * Dragging only changes a plant's position.
  *
  * Patch resize/rotate mode:
  *   Enter via patchEditPlantId prop (set by parent when user taps a patch row in edit mode).
@@ -12,6 +16,7 @@
 import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {Animated, GestureResponderEvent, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {useTranslation} from 'react-i18next';
 import type {ComponentData, PlacedPlantData, PlantData} from '@/types';
 import {PLANT_CATEGORIES} from '@/types/plant.types';
 import {isCircularTower, isGardenBox, isPot, isRectangularTower,} from '@/stores/componentStore';
@@ -20,11 +25,28 @@ import {calculatePlantRelationships, type PlantRelationship,} from '@/utils/comp
 import {RelationshipIndicator} from '@/components/molecules/RelationshipIndicator';
 import {RelationshipTooltip} from '@/components/molecules/RelationshipTooltip';
 import {getPlantIcon, hasPlantIcon} from '@/assets';
+import {minimumPatchSideCm} from '@/domain/planning';
+
+/**
+ * Footprint of a plant in cm (the domain's PlantFootprint): the axis-aligned
+ * rectangle centred on its position, and the outline a patch is drawn with
+ */
+export interface CanvasFootprint {
+    readonly widthCm: number;
+    readonly lengthCm: number;
+    readonly outline: { readonly widthCm: number; readonly heightCm: number; readonly rotationDeg: number };
+}
 
 interface PlantPlacementCanvasProps {
     component: ComponentData;
     plants?: readonly PlacedPlantData[];
     layerDimensions?: { width: number; height: number };
+    /** Footprint per placed-plant instance id, for every plant (a plant without one is not drawn) */
+    footprints: ReadonlyMap<string, CanvasFootprint>;
+    /** Placed-plant instance ids whose footprint overlaps another one in a shared week */
+    conflictIds: ReadonlySet<string>;
+    /** Placed-plant instance ids whose footprint does not lie inside the area */
+    outOfBoundsIds: ReadonlySet<string>;
     onPlantPositionChange: (plantId: string, x: number, y: number) => void;
     onPlantPress?: (plant: PlacedPlantData) => void;
     onPlantLongPress?: (plant: PlacedPlantData) => void;
@@ -52,11 +74,10 @@ interface DraggablePlantProps {
     onPositionChange: (plantId: string, x: number, y: number) => void;
     onPress?: () => void;
     onLongPress?: () => void;
-    hasSpacingOverlap: boolean;
-    hasInnerCollision: boolean;
+    footprint: CanvasFootprint;
+    hasConflict: boolean;
     isSelected: boolean;
     onSelect: () => void;
-    showSpacingRadius: boolean;
     showPlantName: boolean;
     isPatch: boolean;
     isThinning: boolean;
@@ -84,8 +105,14 @@ function getInnerDimensions(component: ComponentData): { width: number; height: 
     return {width: 100, height: 100};
 }
 
-const PLANT_INNER_RADIUS_CM = 5;
 const PLANT_IMAGE_SIZE = 28;
+/** Footprint size thresholds (shorter side, in dp) from the UX brief */
+const FOOTPRINT_NAME_MIN_PX = 44;
+const FOOTPRINT_ICON_MIN_PX = 20;
+const FOOTPRINT_BADGE_MIN_PX = 12;
+const MIN_TOUCH_TARGET_PX = 48;
+/** Inset of the "!" badge from the footprint's top-right corner, inside its bounds so Android delivers the tap */
+const BADGE_INSET_PX = 2;
 
 function getCategoryIconEmoji(plantData: PlantData | undefined): string {
     if (!plantData) return '🌱';
@@ -93,103 +120,22 @@ function getCategoryIconEmoji(plantData: PlantData | undefined): string {
     return categoryInfo?.icon ?? '🌱';
 }
 
-function PlantIconInCanvas({plantData}: { plantData: PlantData | undefined }): React.JSX.Element {
+function PlantIconInCanvas({plantData, size = PLANT_IMAGE_SIZE}: {
+    plantData: PlantData | undefined;
+    size?: number;
+}): React.JSX.Element {
     if (!plantData) return <Text style={styles.plantEmoji}>🌱</Text>;
     const plantIcon = getPlantIcon(plantData.id);
     const hasIcon = hasPlantIcon(plantData.id);
     if (hasIcon && plantIcon) {
-        return <Image source={plantIcon} style={styles.plantImage} resizeMode="cover" />;
+        return <Image source={plantIcon} style={[styles.plantImage, {width: size, height: size, borderRadius: size / 2}]} resizeMode="cover" />;
     }
     return <Text style={styles.plantEmoji}>{getCategoryIconEmoji(plantData)}</Text>;
 }
 
 /**
- * Returns center (cx, cy), half-dimensions (hw, hh) and rotation in radians for a rect plant.
- */
-function getRectDims(
-    plant: PlacedPlantData,
-    plantData: PlantData | undefined,
-): [number, number, number, number, number] {
-    const spacingCm = plantData?.sowingSpacingCm ?? plantData?.spacingRadiusCm ?? 15;
-    const minCm = spacingCm * 2;
-    const wCm = Math.max(minCm, plant.patchWidthInCm ?? minCm);
-    const hCm = Math.max(minCm, plant.patchHeightInCm ?? minCm);
-    const rotRad = ((plant.patchRotationDeg ?? 0) * Math.PI) / 180;
-    return [plant.positionX, plant.positionY, wCm / 2, hCm / 2, rotRad];
-}
-
-/**
- * Distance from point (px, py) to nearest point on a rotated rectangle boundary.
- * Returns 0 if the point is inside the rectangle.
- */
-function distPointToRotatedRect(
-    ptX: number, ptY: number,
-    cx: number, cy: number,
-    hw: number, hh: number,
-    rotRad: number,
-): number {
-    const dx = ptX - cx;
-    const dy = ptY - cy;
-    const localX = dx * Math.cos(rotRad) + dy * Math.sin(rotRad);
-    const localY = -dx * Math.sin(rotRad) + dy * Math.cos(rotRad);
-    const clampedX = Math.max(-hw, Math.min(hw, localX));
-    const clampedY = Math.max(-hh, Math.min(hh, localY));
-    if (localX === clampedX && localY === clampedY) return 0;
-    const ddx = localX - clampedX;
-    const ddy = localY - clampedY;
-    return Math.sqrt(ddx * ddx + ddy * ddy);
-}
-
-/**
- * Approximate minimum distance between two rotated rectangles.
- * Probes 8 representative points (corners + edge midpoints) of each rectangle.
- * Returns 0 if the rectangles overlap.
- */
-function distRectToRect(
-    cx1: number, cy1: number, hw1: number, hh1: number, rot1: number,
-    cx2: number, cy2: number, hw2: number, hh2: number, rot2: number,
-): number {
-    const cos1 = Math.cos(rot1); const sin1 = Math.sin(rot1);
-    const cos2 = Math.cos(rot2); const sin2 = Math.sin(rot2);
-    const probes1: Array<[number, number]> = [
-        [hw1, 0], [-hw1, 0], [0, hh1], [0, -hh1],
-        [hw1, hh1], [hw1, -hh1], [-hw1, hh1], [-hw1, -hh1],
-    ];
-    const probes2: Array<[number, number]> = [
-        [hw2, 0], [-hw2, 0], [0, hh2], [0, -hh2],
-        [hw2, hh2], [hw2, -hh2], [-hw2, hh2], [-hw2, -hh2],
-    ];
-    let minDist = Infinity;
-    for (const [lx, ly] of probes1) {
-        const wx = cx1 + lx * cos1 - ly * sin1;
-        const wy = cy1 + lx * sin1 + ly * cos1;
-        const d = distPointToRotatedRect(wx, wy, cx2, cy2, hw2, hh2, rot2);
-        if (d < minDist) minDist = d;
-    }
-    for (const [lx, ly] of probes2) {
-        const wx = cx2 + lx * cos2 - ly * sin2;
-        const wy = cy2 + lx * sin2 + ly * cos2;
-        const d = distPointToRotatedRect(wx, wy, cx1, cy1, hw1, hh1, rot1);
-        if (d < minDist) minDist = d;
-    }
-    return minDist === Infinity ? 0 : minDist;
-}
-
-function checkInnerCollision(
-    plant1: PlacedPlantData,
-    plant1IsRect: boolean,
-    plant2: PlacedPlantData,
-    plant2IsRect: boolean,
-): boolean {
-    if (plant1IsRect || plant2IsRect) return false;
-    const dx = plant1.positionX - plant2.positionX;
-    const dy = plant1.positionY - plant2.positionY;
-    return Math.sqrt(dx * dx + dy * dy) < PLANT_INNER_RADIUS_CM * 2;
-}
-
-/**
  * Draggable plant.
- * Individual plants: long-press to drag.
+ * Individual plants: their footprint rectangle; long-press to drag.
  * Patch plants: resizable rotatable rectangle.
  *   Handles appear ONLY when isInPatchEditMode = true.
  *   While in patch edit mode, draggingEnabled is false (set by parent), so the
@@ -204,11 +150,10 @@ function DraggablePlant({
     onPositionChange,
     onPress,
     onLongPress,
-    hasSpacingOverlap,
-    hasInnerCollision,
+    footprint,
+    hasConflict,
     isSelected,
     onSelect,
-    showSpacingRadius,
     showPlantName,
     isPatch,
     isThinning,
@@ -220,36 +165,39 @@ function DraggablePlant({
     onPatchDimensionsChange,
 }: DraggablePlantProps): React.JSX.Element {
 
-    const plantBodyRadiusPx = PLANT_INNER_RADIUS_CM * scale;
-    const plantSizePx = Math.max(24, plantBodyRadiusPx * 2);
+    // Individual plants are drawn as their footprint rectangle
+    const footprintWidthPx = footprint.widthCm * scale;
+    const footprintHeightPx = footprint.lengthCm * scale;
+    const footprintMinSidePx = Math.min(footprintWidthPx, footprintHeightPx);
 
-    const minPatchCm = (plantData?.sowingSpacingCm ?? plantData?.spacingRadiusCm ?? 15) * 2;
-    const minPatchPx = minPatchCm * scale;
+    // Patches are drawn with the domain's outline; resizing stops at the domain's minimum side
+    const {outline} = footprint;
+    const minPatchPx = (plantData ? minimumPatchSideCm(plantData) : 0) * scale;
 
     const [localPatchWidthPx, setLocalPatchWidthPx] = useState(() =>
-        isPatch ? Math.max(minPatchPx, (plant.patchWidthInCm ?? minPatchCm) * scale) : plantSizePx
+        isPatch ? outline.widthCm * scale : footprintWidthPx
     );
     const [localPatchHeightPx, setLocalPatchHeightPx] = useState(() =>
-        isPatch ? Math.max(minPatchPx, (plant.patchHeightInCm ?? minPatchCm) * scale) : plantSizePx
+        isPatch ? outline.heightCm * scale : footprintHeightPx
     );
     const [localPatchRotDeg, setLocalPatchRotDeg] = useState(
-        isPatch ? (plant.patchRotationDeg ?? 0) : 0
+        isPatch ? outline.rotationDeg : 0
     );
 
     // Sync with persisted values when they change (e.g. AI optimization applied)
     useEffect(() => {
         if (!isPatch) return;
-        setLocalPatchWidthPx(Math.max(minPatchPx, (plant.patchWidthInCm ?? minPatchCm) * scale));
-        setLocalPatchHeightPx(Math.max(minPatchPx, (plant.patchHeightInCm ?? minPatchCm) * scale));
-        setLocalPatchRotDeg(plant.patchRotationDeg ?? 0);
+        setLocalPatchWidthPx(outline.widthCm * scale);
+        setLocalPatchHeightPx(outline.heightCm * scale);
+        setLocalPatchRotDeg(outline.rotationDeg);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [plant.patchWidthInCm, plant.patchHeightInCm, plant.patchRotationDeg]);
+    }, [outline.widthCm, outline.heightCm, outline.rotationDeg]);
 
     // Rescale pixel dimensions when zoom changes
     useEffect(() => {
         if (!isPatch) return;
-        setLocalPatchWidthPx(Math.max(minPatchPx, (plant.patchWidthInCm ?? minPatchCm) * scale));
-        setLocalPatchHeightPx(Math.max(minPatchPx, (plant.patchHeightInCm ?? minPatchCm) * scale));
+        setLocalPatchWidthPx(outline.widthCm * scale);
+        setLocalPatchHeightPx(outline.heightCm * scale);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [scale]);
 
@@ -263,15 +211,17 @@ function DraggablePlant({
     localPatchRotDegRef.current = localPatchRotDeg;
     minPatchPxRef.current = minPatchPx;
 
-    // Container sizing: patch uses bounding box of rotated rectangle + handle clearance
-    const patchBounding = isPatch
+    // Container sizing: patch uses bounding box of rotated rectangle + handle clearance;
+    // an individual plant's container is its footprint rectangle
+    const containerSize = isPatch
         ? Math.ceil(Math.sqrt(
               localPatchWidthPx * localPatchWidthPx +
               localPatchHeightPx * localPatchHeightPx
           )) + 32
-        : plantSizePx;
-    const containerSize = patchBounding;
-    const positionOffset = containerSize / 2;
+        : 0;
+    const containerW = isPatch ? containerSize : footprintWidthPx;
+    const containerH = isPatch ? containerSize : footprintHeightPx;
+    const positionOffset = {x: containerW / 2, y: containerH / 2};
 
     const [isDragging, setIsDragging] = useState(false);
 
@@ -279,7 +229,7 @@ function DraggablePlant({
     const scaleRef = useRef(scale);
     const containerWidthRef = useRef(containerWidth);
     const containerHeightRef = useRef(containerHeight);
-    const plantSizePxRef = useRef(plantSizePx);
+    const footprintHalfPxRef = useRef({x: footprintWidthPx / 2, y: footprintHeightPx / 2});
     const positionOffsetRef = useRef(positionOffset);
     const onPositionChangeRef = useRef(onPositionChange);
     const onLongPressRef = useRef(onLongPress);
@@ -293,7 +243,7 @@ function DraggablePlant({
         scaleRef.current = scale;
         containerWidthRef.current = containerWidth;
         containerHeightRef.current = containerHeight;
-        plantSizePxRef.current = plantSizePx;
+        footprintHalfPxRef.current = {x: footprintWidthPx / 2, y: footprintHeightPx / 2};
         positionOffsetRef.current = positionOffset;
         onPositionChangeRef.current = onPositionChange;
         onLongPressRef.current = onLongPress;
@@ -301,13 +251,13 @@ function DraggablePlant({
         draggingEnabledRef.current = draggingEnabled;
         isLockedRef.current = isLocked;
         isPatchRef.current = isPatch;
-    }, [plant, scale, containerWidth, containerHeight, plantSizePx, positionOffset,
+    }, [plant, scale, containerWidth, containerHeight, footprintWidthPx, footprintHeightPx, positionOffset,
         onPositionChange, onLongPress, onSelect, draggingEnabled, isLocked, isPatch]);
 
     const pan = useRef(
         new Animated.ValueXY({
-            x: plant.positionX * scale - positionOffset,
-            y: plant.positionY * scale - positionOffset,
+            x: plant.positionX * scale - positionOffset.x,
+            y: plant.positionY * scale - positionOffset.y,
         })
     ).current;
     const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -360,8 +310,9 @@ function DraggablePlant({
                     clampHalfX = hw * Math.abs(Math.cos(rotRad)) + hh * Math.abs(Math.sin(rotRad));
                     clampHalfY = hw * Math.abs(Math.sin(rotRad)) + hh * Math.abs(Math.cos(rotRad));
                 } else {
-                    clampHalfX = plantSizePxRef.current / 2;
-                    clampHalfY = plantSizePxRef.current / 2;
+                    // The footprint stays inside the area
+                    clampHalfX = footprintHalfPxRef.current.x;
+                    clampHalfY = footprintHalfPxRef.current.y;
                 }
                 // Guard: prevent impossible range when patch is larger than container
                 const safeHalfX = Math.min(clampHalfX, currentContainerWidth / 2);
@@ -382,7 +333,7 @@ function DraggablePlant({
                     )
                 );
                 currentPosition.current = {x: newX, y: newY};
-                pan.setValue({x: newX - currentPositionOffset, y: newY - currentPositionOffset});
+                pan.setValue({x: newX - currentPositionOffset.x, y: newY - currentPositionOffset.y});
             },
             onPanResponderRelease: () => {
                 if (longPressTimer.current) {
@@ -419,10 +370,10 @@ function DraggablePlant({
             currentPosition.current = {x: storedX, y: storedY};
         }
         pan.setValue({
-            x: currentPosition.current.x - positionOffset,
-            y: currentPosition.current.y - positionOffset,
+            x: currentPosition.current.x - positionOffset.x,
+            y: currentPosition.current.y - positionOffset.y,
         });
-    }, [plant.positionX, plant.positionY, scale, positionOffset, isDragging, pan]);
+    }, [plant.positionX, plant.positionY, scale, positionOffset.x, positionOffset.y, isDragging, pan]);
 
     // ─── Patch resize / rotate responders ────────────────────────────────────
     // These only activate when isInPatchEditMode = true.
@@ -558,12 +509,19 @@ function DraggablePlant({
     const patchLeft = (containerSize - localPatchWidthPx) / 2;
     const patchTop = (containerSize - localPatchHeightPx) / 2;
 
-    const showWarningIcon =
-        showSpacingRadius && (hasSpacingOverlap || hasWallProximityWarning) && !hasInnerCollision;
+    // Tiny footprints get no badges; a conflict always shows "!" so colour is never the only signal
+    const showBadges = isPatch || footprintMinSidePx >= FOOTPRINT_BADGE_MIN_PX;
+    const showWarningIcon = showBadges && (hasConflict || hasWallProximityWarning);
+    const showNameInside = !isPatch && footprintMinSidePx >= FOOTPRINT_NAME_MIN_PX;
+    const hitSlopX = Math.max(0, (MIN_TOUCH_TARGET_PX - containerW) / 2);
+    const hitSlopY = Math.max(0, (MIN_TOUCH_TARGET_PX - containerH) / 2);
 
     return (
         <Animated.View
             {...panResponder.panHandlers}
+            hitSlop={{left: hitSlopX, right: hitSlopX, top: hitSlopY, bottom: hitSlopY}}
+            testID={`planning-footprint-${plant.id}`}
+            accessibilityLabel={plantData?.nameNl}
             style={[
                 styles.plantContainer,
                 {
@@ -572,8 +530,8 @@ function DraggablePlant({
                         {translateY: pan.y},
                         {scale: scaleAnim},
                     ],
-                    width: containerSize,
-                    height: containerSize,
+                    width: containerW,
+                    height: containerH,
                     zIndex: isDragging ? 100 : isSelected ? 50 : 1,
                 },
             ]}
@@ -603,7 +561,7 @@ function DraggablePlant({
                                 width: localPatchWidthPx,
                                 height: localPatchHeightPx,
                                 transform: [{rotate: localPatchRotDeg + 'deg'}],
-                                backgroundColor: hasInnerCollision ? '#dc2626' : isThinning ? '#78350f' : '#92400e',
+                                backgroundColor: hasConflict ? '#dc2626' : isThinning ? '#78350f' : '#92400e',
                                 borderColor: isInPatchEditMode ? '#ffffff' : isThinning ? '#f97316' : '#d97706',
                                 opacity: isInPatchEditMode ? 1 : 0.85,
                             },
@@ -657,21 +615,25 @@ function DraggablePlant({
                     </View>
                 </>
             ) : (
-                /* Individual plant */
+                /* Individual plant: its footprint rectangle */
                 <View
                     style={[
-                        styles.plantIcon,
+                        styles.footprintRect,
                         {
-                            width: plantSizePx,
-                            height: plantSizePx,
-                            borderRadius: plantSizePx / 2,
-                            backgroundColor: hasInnerCollision ? '#dc2626' : '#16a34a',
-                            borderWidth: isSelected ? 2 : 0,
-                            borderColor: isSelected ? '#ffffff' : 'transparent',
+                            width: footprintWidthPx,
+                            height: footprintHeightPx,
+                            backgroundColor: hasConflict ? '#dc2626' : 'rgba(0, 83, 42, 0.85)',
+                            borderWidth: isSelected || hasConflict ? 2 : 1.5,
+                            borderColor: isSelected ? '#ffffff' : hasConflict ? '#FFB4AB' : isLocked ? '#BFC9C2' : '#5DB075',
                         },
                     ]}
                 >
-                    <PlantIconInCanvas plantData={plantData} />
+                    {footprintMinSidePx >= FOOTPRINT_ICON_MIN_PX && (
+                        <PlantIconInCanvas plantData={plantData} size={Math.min(PLANT_IMAGE_SIZE, footprintMinSidePx - 6)} />
+                    )}
+                    {showNameInside && plantData && (
+                        <Text style={styles.footprintName} numberOfLines={1}>{plantData.nameNl}</Text>
+                    )}
                 </View>
             )}
 
@@ -682,8 +644,8 @@ function DraggablePlant({
                     onStartShouldSetResponder={() => true}
                     style={{
                         position: 'absolute',
-                        right: isPatch ? Math.max(0, patchLeft - 6) : -10,
-                        top: isPatch ? Math.max(0, patchTop - 6) : -10,
+                        right: isPatch ? Math.max(0, patchLeft - 6) : BADGE_INSET_PX,
+                        top: isPatch ? Math.max(0, patchTop - 6) : BADGE_INSET_PX,
                         width: 22,
                         height: 22,
                         borderRadius: 11,
@@ -700,7 +662,7 @@ function DraggablePlant({
             )}
 
             {/* Lock badge */}
-            {isLocked && (
+            {isLocked && showBadges && (
                 <View
                     pointerEvents="none"
                     style={{
@@ -722,13 +684,13 @@ function DraggablePlant({
                 </View>
             )}
 
-            {/* Plant name label */}
-            {(isSelected || showPlantName) && plantData && (
+            {/* Plant name label, unless the footprint already shows the name */}
+            {(isSelected || showPlantName) && !showNameInside && plantData && (
                 <View
                     style={[
                         styles.plantLabelWrapper,
                         {
-                            top: containerSize / 2 + (isPatch ? localPatchHeightPx / 2 : plantSizePx / 2) + 4,
+                            top: isPatch ? containerSize / 2 + localPatchHeightPx / 2 + 4 : footprintHeightPx + 4,
                         },
                     ]}
                     pointerEvents="none"
@@ -754,6 +716,9 @@ export function PlantPlacementCanvas({
     component,
     plants: filteredPlants,
     layerDimensions,
+    footprints,
+    conflictIds,
+    outOfBoundsIds,
     onPlantPositionChange,
     onPlantPress,
     onPlantLongPress,
@@ -768,12 +733,12 @@ export function PlantPlacementCanvas({
     onPatchEditConfirm,
     onPatchEditCancel,
 }: PlantPlacementCanvasProps): React.JSX.Element {
+    const {t} = useTranslation();
     const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
     const [canvasSize, setCanvasSize] = useState({width: 0, height: 0});
     const [selectedRelationship, setSelectedRelationship] = useState<PlantRelationship | null>(null);
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1.0);
-    const [showSpacingRadius, setShowSpacingRadius] = useState(false);
     const [showPlantNames, setShowPlantNames] = useState(false);
     const [showRelationships, setShowRelationships] = useState(false);
     const [activeWarningPlantId, setActiveWarningPlantId] = useState<string | null>(null);
@@ -809,11 +774,6 @@ export function PlantPlacementCanvas({
         setZoomLevel((prev) => Math.max(prev - ZOOM_STEP, MIN_ZOOM));
     }, []);
 
-    const handleToggleSpacingRadius = useCallback(() => {
-        onActionPress?.();
-        setShowSpacingRadius((prev) => !prev);
-    }, [onActionPress]);
-
     const handleTogglePlantNames = useCallback(() => {
         onActionPress?.();
         setShowPlantNames((prev) => !prev);
@@ -836,96 +796,7 @@ export function PlantPlacementCanvas({
         }
     }, [zoomLevel, containerWidth, containerHeight, canvasSize.width, canvasSize.height, needsScrolling, patchEditPlantId]);
 
-    // ─── Collision detection ──────────────────────────────────────────────────
-
-    const {spacingOverlaps, innerCollisions, wallProximityViolations} = useMemo(() => {
-        const spacingOverlaps = new Map<string, boolean>();
-        const innerCollisions = new Map<string, boolean>();
-        const wallProximityViolations = new Map<string, boolean>();
-
-        plants.forEach((plant1) => {
-            const plant1Data = getPlantById(plant1.plantId);
-            const plant1Spacing = plant1Data?.spacingRadiusCm ?? 15;
-            const plant1IsPatch = plant1Data?.plantingStyle === 'patch' || plant1Data?.plantingStyle === 'thinning';
-
-            plants.forEach((plant2) => {
-                if (plant1.id === plant2.id) return;
-                const plant2Data = getPlantById(plant2.plantId);
-                const plant2Spacing = plant2Data?.spacingRadiusCm ?? 15;
-                const plant2IsPatch = plant2Data?.plantingStyle === 'patch' || plant2Data?.plantingStyle === 'thinning';
-
-                let gap: number;
-                if (!plant1IsPatch && !plant2IsPatch) {
-                    // ind-ind: center-to-center distance
-                    const dx = plant1.positionX - plant2.positionX;
-                    const dy = plant1.positionY - plant2.positionY;
-                    gap = Math.sqrt(dx * dx + dy * dy);
-                } else if (plant1IsPatch && !plant2IsPatch) {
-                    // rect-ind: distance from individual center to rect boundary
-                    const [rcx, rcy, rhw, rhh, rrot] = getRectDims(plant1, plant1Data);
-                    gap = distPointToRotatedRect(plant2.positionX, plant2.positionY, rcx, rcy, rhw, rhh, rrot);
-                } else if (!plant1IsPatch && plant2IsPatch) {
-                    // ind-rect: distance from individual center to rect boundary
-                    const [rcx, rcy, rhw, rhh, rrot] = getRectDims(plant2, plant2Data);
-                    gap = distPointToRotatedRect(plant1.positionX, plant1.positionY, rcx, rcy, rhw, rhh, rrot);
-                } else {
-                    // rect-rect: boundary-to-boundary distance
-                    const [cx1, cy1, hw1, hh1, rr1] = getRectDims(plant1, plant1Data);
-                    const [cx2, cy2, hw2, hh2, rr2] = getRectDims(plant2, plant2Data);
-                    gap = distRectToRect(cx1, cy1, hw1, hh1, rr1, cx2, cy2, hw2, hh2, rr2);
-                }
-                if (gap < plant1Spacing) spacingOverlaps.set(plant1.id, true);
-                if (gap < plant2Spacing) spacingOverlaps.set(plant2.id, true);
-
-                if (checkInnerCollision(plant1, plant1IsPatch, plant2, plant2IsPatch)) {
-                    innerCollisions.set(plant1.id, true);
-                    innerCollisions.set(plant2.id, true);
-                }
-            });
-        });
-
-        plants.forEach((plant) => {
-            const plantData = getPlantById(plant.plantId);
-            const isPatchPlant = plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning';
-
-            if (isPatchPlant) {
-                const spacingCm = plantData?.sowingSpacingCm ?? plantData?.spacingRadiusCm ?? 15;
-                const minCm = spacingCm * 2;
-                const wCm = Math.max(minCm, plant.patchWidthInCm ?? minCm);
-                const hCm = Math.max(minCm, plant.patchHeightInCm ?? minCm);
-                const rotRad = ((plant.patchRotationDeg ?? 0) * Math.PI) / 180;
-                const cx = plant.positionX;
-                const cy = plant.positionY;
-                const hw = wCm / 2;
-                const hh = hCm / 2;
-                const corners: [number, number][] = [
-                    [hw, hh], [hw, -hh], [-hw, hh], [-hw, -hh],
-                ];
-                const centerOutOfBounds =
-                    cx < 0 || cx > innerDimensions.width || cy < 0 || cy > innerDimensions.height;
-                const cornersOutOfBounds = corners.some(([lx, ly]) => {
-                    const px = cx + lx * Math.cos(rotRad) - ly * Math.sin(rotRad);
-                    const py = cy + lx * Math.sin(rotRad) + ly * Math.cos(rotRad);
-                    return px < 0 || px > innerDimensions.width || py < 0 || py > innerDimensions.height;
-                });
-                if (centerOutOfBounds || cornersOutOfBounds) wallProximityViolations.set(plant.id, true);
-            } else {
-                const spacing = plantData?.spacingRadiusCm ?? 15;
-                const x = plant.positionX;
-                const y = plant.positionY;
-                if (
-                    x < spacing ||
-                    x > innerDimensions.width - spacing ||
-                    y < spacing ||
-                    y > innerDimensions.height - spacing
-                ) {
-                    wallProximityViolations.set(plant.id, true);
-                }
-            }
-        });
-
-        return {spacingOverlaps, innerCollisions, wallProximityViolations};
-    }, [plants, getPlantById, innerDimensions]);
+    // Conflicts and wall violations come from the parent (conflictIds, outOfBoundsIds)
 
     const plantRelationships = useMemo(
         () => calculatePlantRelationships(plants, getPlantById),
@@ -960,20 +831,17 @@ export function PlantPlacementCanvas({
     const contentPaddingY = needsScrolling ? 16 : Math.max(16, (canvasSize.height - containerHeight) / 2);
 
     const warningTooltip = (() => {
-        if (!activeWarningPlantId || !showSpacingRadius) return null;
+        if (!activeWarningPlantId) return null;
         const plant = plants.find((p) => p.id === activeWarningPlantId);
         if (!plant) return null;
         const plantData = getPlantById(plant.plantId);
         const isRectPlant = plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning';
         const spacingCm = plantData?.spacingRadiusCm ?? 15;
-        const hasSpacing = spacingOverlaps.get(plant.id) ?? false;
-        const text = isRectPlant
-            ? hasSpacing
-                ? 'Te dicht bij een andere plant of vak. Minimale afstand: ' + spacingCm + 'cm.'
-                : 'Vak steekt buiten de randen.'
-            : hasSpacing
-                ? 'Afstand moet ' + spacingCm + 'cm zijn.'
-                : 'Te dicht bij de rand. Minimale afstand: ' + spacingCm + 'cm.';
+        const text = conflictIds.has(plant.id)
+            ? t('planning.conflict.warning')
+            : isRectPlant
+                ? t('planning.outOfBounds.patch')
+                : t('planning.outOfBounds.plant', {spacing: spacingCm});
         const px = contentPaddingX + plant.positionX * scale - scrollOffsetX;
         const py = contentPaddingY + plant.positionY * scale - scrollOffsetY;
         return {px, py, text};
@@ -1030,6 +898,8 @@ export function PlantPlacementCanvas({
                                         ))}
 
                                         {plants.map((plant) => {
+                                            const footprint = footprints.get(plant.id);
+                                            if (!footprint) return null;
                                             const plantData = getPlantById(plant.plantId);
                                             const isPatchPlant = plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning';
                                             const isThinningPlant = plantData?.plantingStyle === 'thinning';
@@ -1044,12 +914,11 @@ export function PlantPlacementCanvas({
                                                     onPositionChange={onPlantPositionChange}
                                                     onPress={onPlantPress ? () => onPlantPress(plant) : undefined}
                                                     onLongPress={onPlantLongPress ? () => onPlantLongPress(plant) : undefined}
-                                                    hasSpacingOverlap={spacingOverlaps.get(plant.id) ?? false}
-                                                    hasInnerCollision={innerCollisions.get(plant.id) ?? false}
-                                                    hasWallProximityWarning={wallProximityViolations.get(plant.id) ?? false}
+                                                    footprint={footprint}
+                                                    hasConflict={conflictIds.has(plant.id)}
+                                                    hasWallProximityWarning={outOfBoundsIds.has(plant.id)}
                                                     isSelected={selectedPlantId === plant.id}
                                                     onSelect={() => setSelectedPlantId(plant.id)}
-                                                    showSpacingRadius={showSpacingRadius}
                                                     showPlantName={showPlantNames}
                                                     isPatch={isPatchPlant}
                                                     isThinning={isThinningPlant}
@@ -1159,10 +1028,6 @@ export function PlantPlacementCanvas({
 
             <View style={styles.toggleContainer}>
                 <View style={styles.toggleRow}>
-                    <Pressable style={styles.toggleButton} onPress={handleToggleSpacingRadius}>
-                        <Text style={styles.spacingToggleIcon}>{showSpacingRadius ? '◉' : '○'}</Text>
-                        <Text style={styles.spacingToggleText}>Afstand</Text>
-                    </Pressable>
                     <Pressable style={styles.toggleButton} onPress={handleTogglePlantNames}>
                         <Text style={styles.spacingToggleIcon}>{showPlantNames ? '◉' : '○'}</Text>
                         <Text style={styles.spacingToggleText}>Namen</Text>
@@ -1219,16 +1084,14 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     plantContainer: {position: 'absolute', alignItems: 'center', justifyContent: 'center'},
-    spacingCircle: {position: 'absolute', borderStyle: 'dashed'},
-    plantIcon: {
+    footprintRect: {
+        borderRadius: 4,
+        borderStyle: 'solid',
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        elevation: 4,
+        overflow: 'hidden',
     },
+    footprintName: {color: '#E2E3DD', fontSize: 10, fontWeight: '500', marginTop: 2, paddingHorizontal: 2},
     patchRect: {
         position: 'absolute',
         borderRadius: 4,

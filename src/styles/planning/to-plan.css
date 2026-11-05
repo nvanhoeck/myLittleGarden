@@ -1,0 +1,84 @@
+/*
+ * Time planning: the "Te plannen" accordion above the action bar.
+ *
+ * Like src/styles/ai/chat.css, these classes document the visual contract;
+ * the components apply the same utility classes via className.
+ */
+
+/*
+ * Wraps the content it overlays; header 48 high at the bottom. The expanded
+ * body overlays the bottom of the content (max 40% height) and stays inside
+ * the wrapper, because Android drops touches outside a parent's bounds.
+ */
+.to-plan-accordion {
+  @apply flex-1;
+}
+
+.to-plan-accordion__content {
+  @apply flex-1;
+}
+
+.to-plan-accordion__header {
+  @apply flex-row items-center h-12 px-4 border-t border-gray-800 bg-background;
+}
+
+.to-plan-accordion__title {
+  @apply flex-1 text-title-small text-on-surface;
+}
+
+.to-plan-accordion__chevron {
+  @apply text-on-surface-variant text-base;
+}
+
+.to-plan-accordion__body {
+  @apply absolute left-0 right-0 bottom-0 bg-background border-t border-gray-800 rounded-t-xl;
+}
+
+.to-plan-accordion__empty {
+  @apply items-center py-6 px-4;
+}
+
+.to-plan-accordion__empty-icon {
+  @apply text-3xl mb-2;
+}
+
+.to-plan-accordion__empty-title {
+  @apply text-title-small text-on-surface;
+}
+
+.to-plan-accordion__empty-hint {
+  @apply text-body-small text-on-surface-variant mt-1;
+}
+
+/* One row per plant: icon, name, ×count, reason, remove */
+.to-plan-row {
+  @apply flex-row items-center min-h-[56px] pl-4;
+}
+
+.to-plan-row__icon {
+  @apply w-8 h-8 items-center justify-center mr-3;
+}
+
+.to-plan-row__name {
+  @apply text-body-medium text-on-surface;
+}
+
+.to-plan-row__count {
+  @apply text-body-medium text-on-surface-variant;
+}
+
+.to-plan-row__reason {
+  @apply text-body-small text-warning;
+}
+
+.to-plan-row__reason--muted {
+  @apply text-outline;
+}
+
+.to-plan-row__remove {
+  @apply w-12 h-12 items-center justify-center;
+}
+
+.to-plan-row__remove-text {
+  @apply text-on-surface-variant text-lg;
+}

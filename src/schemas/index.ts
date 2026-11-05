@@ -36,6 +36,8 @@ export {
   plantDataSchema,
   plantDatabaseSchema,
   placedPlantDataSchema,
+  growingPeriodSchema,
+  plantToPlanDataSchema,
   validatePlantData,
   safeValidatePlantData,
   validatePlantDatabase,
@@ -56,4 +58,6 @@ export type {
   PlantDataType,
   PlantDatabaseType,
   PlacedPlantDataType,
+  GrowingPeriodDataType,
+  PlantToPlanDataType,
 } from './plantSchema';

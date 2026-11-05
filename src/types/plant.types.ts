@@ -4,6 +4,8 @@
  * companion relationships, and growing calendar data.
  */
 
+import type { GrowingPeriodData } from './planning.types';
+
 /**
  * Growth habit of the plant
  * - upright: grows vertically, compact footprint (most vegetables)
@@ -161,6 +163,7 @@ export interface PlacedPlantData {
     readonly placedAt: string; // ISO date string
     readonly layerIndex?: number; // Layer index for towers (0 = bottom layer), undefined for non-towers
     readonly locked?: boolean; // True when plant position is pinned and cannot be moved by drag or AI optimization
+    readonly growingPeriod: GrowingPeriodData; // Weeks the plant occupies its spot
   // Patch-only fields — undefined for individual plants
   readonly patchWidthInCm?: number;
   readonly patchHeightInCm?: number;

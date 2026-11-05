@@ -1,0 +1,10 @@
+appId: com.mylittlegarden.app
+---
+# Shared: fresh app -> garden box -> 3 tomatoes in "Te plannen (3)".
+- runFlow: setup_environment.yaml
+- runFlow: create_garden_box.yaml
+- runFlow: add_plants_to_plan.yaml
+- extendedWaitUntil:
+    visible:
+      text: "Te plannen \\(3\\)"
+    timeout: 5000

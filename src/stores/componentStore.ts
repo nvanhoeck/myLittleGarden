@@ -19,12 +19,19 @@ import {
   RectangularTower,
   CircularTower,
 } from '@/domain/component';
+import * as Planning from '@/domain/planning';
 import { generateId } from '@/utils/idGenerator';
 import {
   migrateComponentState,
   mergePersistedComponentState,
   COMPONENT_STORE_VERSION,
+  type PlantCatalogLookup,
 } from './migrations/componentStoreMigrations';
+import { usePlantStore } from './plantStore';
+import { useEnvironmentStore } from './environmentStore';
+import { usePlanningStore } from './planningStore';
+
+const catalogLookup: PlantCatalogLookup = (plantId) => usePlantStore.getState().getPlantById(plantId);
 
 /**
  * Component store state interface
@@ -78,9 +85,42 @@ interface ComponentState {
     patchRotationDeg: number,
   ) => void;
 
+  // Actions - Planning
+  addPlantsToPlan: (componentId: string, plantId: string, quantity: number, year: number, layerIndex?: number) => void;
+  removePlantToPlan: (componentId: string, plantToPlanId: string) => void;
+  /** Rearrange: auto-places the plants of a year/layer; placed plants keep their period. Null when the component is gone. */
+  rearrangePlanting: (componentId: string, year: number, layerIndex?: number) => Planning.PlanningRunCounts | null;
+  /** Start over: auto-places the plants of a year/layer from scratch; locked plants stay. Null when the component is gone. */
+  startPlantingOver: (componentId: string, year: number, layerIndex?: number) => Planning.PlanningRunCounts | null;
+
   // Selectors
   getComponentById: (id: string) => ComponentData | undefined;
   getComponentsByType: (type: ComponentType) => ComponentData[];
+}
+
+/**
+ * What the planning use cases need besides the component: the plant catalog,
+ * the garden's last spring frost day and the current time.
+ */
+function planningInputFor(component: ComponentData, year: number, layerIndex?: number): Planning.ComponentPlanningInput {
+  return {
+    component,
+    year,
+    layerIndex,
+    plantOf: (plantId) => usePlantStore.getState().getPlantById(plantId),
+    lastSpringFrost: Planning.frostDayOf(useEnvironmentStore.getState().lastSpringFrost),
+    now: new Date(),
+  };
+}
+
+function withOutcome(
+  components: ComponentData[],
+  componentId: string,
+  outcome: Planning.ComponentPlanningOutcome,
+): ComponentData[] {
+  return components.map((comp) =>
+    comp.id === componentId ? { ...comp, plants: outcome.plants, plantsToPlan: outcome.plantsToPlan } : comp
+  );
 }
 
 /**
@@ -181,6 +221,7 @@ export const useComponentStore = create<ComponentState>()(
         set((state) => ({
           components: state.components.filter((comp) => comp.id !== id),
         }));
+        usePlanningStore.getState().forgetComponent(id);
       },
 
       // Clear all components
@@ -246,6 +287,53 @@ export const useComponentStore = create<ComponentState>()(
         }));
       },
 
+      // Add plants to the "to plan" list of a component for a year (and tower layer)
+      addPlantsToPlan: (componentId, plantId, quantity, year, layerIndex) => {
+        const added = Array.from({ length: Math.max(0, Math.floor(quantity)) }, () => ({
+          id: generateId(),
+          plantId,
+          year,
+          ...(layerIndex !== undefined ? { layerIndex } : {}),
+        }));
+        set((state) => ({
+          components: state.components.map((comp) =>
+            comp.id === componentId ? { ...comp, plantsToPlan: [...comp.plantsToPlan, ...added] } : comp
+          ),
+        }));
+      },
+
+      // Remove one plant from the "to plan" list
+      removePlantToPlan: (componentId, plantToPlanId) => {
+        set((state) => ({
+          components: state.components.map((comp) =>
+            comp.id === componentId
+              ? { ...comp, plantsToPlan: comp.plantsToPlan.filter((p) => p.id !== plantToPlanId) }
+              : comp
+          ),
+        }));
+        usePlanningStore.getState().forgetPlantToPlan(componentId, plantToPlanId);
+      },
+
+      // Auto-place a year/layer keeping the periods of placed plants
+      rearrangePlanting: (componentId, year, layerIndex) => {
+        const component = get().getComponentById(componentId);
+        if (!component) return null;
+        const outcome = Planning.rearrangePlanting(planningInputFor(component, year, layerIndex));
+        set((state) => ({ components: withOutcome(state.components, componentId, outcome) }));
+        usePlanningStore.getState().setLastRun({ componentId, year, layerIndex }, outcome.unplaced);
+        return outcome.counts;
+      },
+
+      // Auto-place a year/layer from scratch; locked plants stay
+      startPlantingOver: (componentId, year, layerIndex) => {
+        const component = get().getComponentById(componentId);
+        if (!component) return null;
+        const outcome = Planning.startPlantingOver(planningInputFor(component, year, layerIndex));
+        set((state) => ({ components: withOutcome(state.components, componentId, outcome) }));
+        usePlanningStore.getState().setLastRun({ componentId, year, layerIndex }, outcome.unplaced);
+        return outcome.counts;
+      },
+
       // Get a component by ID
       getComponentById: (id) => {
         return get().components.find((comp) => comp.id === id);
@@ -261,9 +349,9 @@ export const useComponentStore = create<ComponentState>()(
       storage: createJSONStorage(() => AsyncStorage as StateStorage),
       version: COMPONENT_STORE_VERSION,
       migrate: (persistedState, version) =>
-        migrateComponentState(persistedState, version) as unknown as ComponentState,
+        migrateComponentState(persistedState, version, catalogLookup) as unknown as ComponentState,
       merge: (persistedState, currentState) =>
-        mergePersistedComponentState(persistedState, currentState),
+        mergePersistedComponentState(persistedState, currentState, catalogLookup),
       // Only persist the components array
       partialize: (state) => ({
         components: state.components,
@@ -324,6 +412,10 @@ export function useComponentActions() {
       lockAllPlants: state.lockAllPlants,
       unlockAllPlants: state.unlockAllPlants,
       updatePatchDimensions: state.updatePatchDimensions,
+      addPlantsToPlan: state.addPlantsToPlan,
+      removePlantToPlan: state.removePlantToPlan,
+      rearrangePlanting: state.rearrangePlanting,
+      startPlantingOver: state.startPlantingOver,
     }))
   );
 }

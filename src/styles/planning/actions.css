@@ -1,0 +1,52 @@
+/*
+ * Time planning: action bar, its buttons and the result snackbar.
+ *
+ * Like src/styles/ai/chat.css, these classes document the visual contract;
+ * the components apply the same utility classes via className.
+ */
+
+/* Bottom bar 56 high: [Herschikken] [Opnieuw beginnen] */
+.planning-action-bar {
+  @apply flex-row items-center h-14 px-4 gap-3 border-t border-gray-800 bg-background;
+}
+
+.planning-button {
+  @apply flex-1 flex-row h-10 items-center justify-center rounded-full;
+}
+
+.planning-button--tonal {
+  @apply bg-primary-container;
+}
+
+.planning-button--danger {
+  @apply border border-outline;
+}
+
+.planning-button--disabled {
+  @apply opacity-40;
+}
+
+.planning-button__label {
+  @apply text-label-large text-on-primary-container;
+}
+
+.planning-button__label--danger {
+  @apply text-error;
+}
+
+/* Snackbar above the "Te plannen" header, shown for 4 s; stays inside its container for touches */
+.snackbar {
+  @apply absolute left-4 right-4 bottom-14 flex-row items-center min-h-[48px] px-4 rounded-lg bg-on-surface;
+}
+
+.snackbar__message {
+  @apply flex-1 text-body-medium text-background;
+}
+
+.snackbar__action {
+  @apply h-12 px-3 items-center justify-center;
+}
+
+.snackbar__action-text {
+  @apply text-label-large text-primary-container;
+}

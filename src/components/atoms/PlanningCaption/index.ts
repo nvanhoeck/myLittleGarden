@@ -1,0 +1,1 @@
+export { PlanningCaption } from './PlanningCaption';

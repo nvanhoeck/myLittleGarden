@@ -6,6 +6,7 @@
 
 import type { SunDirection } from './environment.types';
 import type { PlacedPlantData } from './plant.types';
+import type { PlantToPlanData } from './planning.types';
 
 /**
  * Types of garden components available
@@ -23,6 +24,7 @@ export interface BaseComponentData {
   readonly createdAt: string; // ISO date string
   readonly borderWidthInCm: number;
   readonly plants: readonly PlacedPlantData[]; // Plants placed in this component
+  readonly plantsToPlan: readonly PlantToPlanData[]; // Plants waiting for auto-placement
 }
 
 /**

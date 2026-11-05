@@ -1,10 +1,10 @@
 ﻿/**
  * ComponentDetailScreen
- * Zoomed view of a component for viewing and placing plants
+ * Zoomed view of a component for viewing and placing plants, week by week
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, Pressable, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ComponentDetailScreenProps } from '@/navigation/navigationTypes';
@@ -17,16 +17,28 @@ import {
   isRectangularTower,
   isCircularTower,
 } from '@/stores/componentStore';
-import { PlantPlacementCanvas, LayerOverviewModal } from '@/components/organisms';
-import { TowerLayerTabs } from '@/components/molecules';
+import {
+  PlantPlacementCanvas,
+  LayerOverviewModal,
+  WeekTimeline,
+  ToPlanAccordion,
+  PlanningActionBar,
+} from '@/components/organisms';
+import { TowerLayerTabs, YearBar, ViewModeToggle } from '@/components/molecules';
+import type { ViewMode } from '@/components/molecules';
+import { PlanningCaption, Snackbar } from '@/components/atoms';
 import type { ComponentData, PlacedPlantData, PlantData } from '@/types';
-import { PLANT_CATEGORIES } from '@/types/plant.types';
-import { getPlantIcon, hasPlantIcon } from '@/assets';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
-import { useOptimizeComponent } from '@/hooks/ai/useOptimizeComponent';
+import { plantsForOptimization, useOptimizeComponent } from '@/hooks/ai/useOptimizeComponent';
+import type { OptimizeScope } from '@/hooks/ai/useOptimizeComponent';
+import { plantsSharingWeeksWith } from '@/domain/planning';
 import { OptimizationAlternativesModal } from '@/components/ai/OptimizationAlternativesModal';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
 import { useAiOptimizeComponentStore } from '@/stores/ai/aiOptimizeComponentStore';
+import { PlacedPlantItem } from './PlacedPlantItem';
+import { CanvasEditActions } from './CanvasEditActions';
+import { usePlanningTimeline } from './usePlanningTimeline';
+import { usePlanningActions } from './usePlanningActions';
 
 /**
  * Get component dimensions in cm
@@ -60,135 +72,7 @@ function getInnerDimensions(component: ComponentData): { width: number; height: 
 }
 
 /**
- * Get component type label
- */
-function getComponentTypeLabel(component: ComponentData, t: (key: string) => string): string {
-  return t(`components.${component.type}`);
-}
-
-/**
- * Get component color
- */
-function getComponentColor(component: ComponentData): string {
-  switch (component.type) {
-    case 'gardenBox':
-      return '#8B4513';
-    case 'pot':
-      return '#CD853F';
-    case 'rectangularTower':
-      return '#A0522D';
-    case 'circularTower':
-      return '#D2691E';
-    default:
-      return '#808080';
-  }
-}
-
-/**
- * Get the category icon emoji for a plant (fallback)
- */
-function getCategoryIconEmoji(plantData: PlantData | undefined): string {
-  if (!plantData) return '🌱';
-  const categoryInfo = PLANT_CATEGORIES.find((cat) => cat.key === plantData.category);
-  return categoryInfo?.icon ?? '🌱';
-}
-
-/**
- * Plant icon display component - shows image or emoji fallback
- */
-function PlantIconDisplay({ plantData }: { plantData: PlantData | undefined }): React.JSX.Element {
-  if (!plantData) {
-    return <Text className="text-lg">🌱</Text>;
-  }
-
-  const plantIcon = getPlantIcon(plantData.id);
-  const hasIcon = hasPlantIcon(plantData.id);
-
-  if (hasIcon && plantIcon) {
-    return (
-      <Image
-        source={plantIcon}
-        style={{ width: 28, height: 28 }}
-        resizeMode="contain"
-      />
-    );
-  }
-
-  return <Text className="text-lg">{getCategoryIconEmoji(plantData)}</Text>;
-}
-
-/**
- * Component to render a placed plant in the list
- */
-function PlacedPlantItem({
-  plant,
-  plantData,
-  onPress,
-  onDelete,
-  isEditMode,
-  onResizePatch,
-}: {
-  plant: PlacedPlantData;
-  plantData: PlantData | undefined;
-  onPress: () => void;
-  onDelete: () => void;
-  isEditMode?: boolean;
-  onResizePatch?: () => void;
-}): React.JSX.Element {
-  const plantName = plantData?.nameNl ?? 'Onbekende plant';
-  const spacingRadius = plantData?.spacingRadiusCm ?? 15;
-  const isPatch = plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning';
-  const isThinning = plantData?.plantingStyle === 'thinning';
-
-  return (
-    <View className="flex-row items-center bg-green-900/40 rounded-lg mb-2 overflow-hidden">
-      <Pressable
-        onPress={onPress}
-        className="flex-row items-center flex-1 p-3"
-        android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
-      >
-        <View className={`w-10 h-10 ${isThinning ? 'rounded-md bg-orange-900' : isPatch ? 'rounded-md bg-amber-900' : 'rounded-full bg-green-700'} items-center justify-center mr-3`}>
-          <PlantIconDisplay plantData={plantData} />
-        </View>
-        <View className="flex-1">
-          <Text className="text-white font-medium">{plantName}</Text>
-          <Text className={`text-xs ${isThinning ? 'text-orange-400' : isPatch ? 'text-amber-400' : 'text-green-400'}`}>
-            {isPatch
-              ? (() => {
-                  const minCm = spacingRadius * 2;
-                  const wCm = Math.round(plant.patchWidthInCm ?? minCm);
-                  const hCm = Math.round(plant.patchHeightInCm ?? minCm);
-                  const rot = plant.patchRotationDeg ?? 0;
-                  const rotStr = rot > 0 ? ' • ' + rot + '° gedraaid' : '';
-                  return plant.positionX.toFixed(0) + 'cm, ' + plant.positionY.toFixed(0) + 'cm • ' + wCm + ' x ' + hCm + ' cm' + rotStr;
-                })()
-              : plant.positionX.toFixed(0) + 'cm, ' + plant.positionY.toFixed(0) + 'cm • ' + spacingRadius + 'cm afstand'
-            }
-          </Text>
-        </View>
-      </Pressable>
-      {isEditMode && isPatch && onResizePatch && (
-        <Pressable
-          onPress={onResizePatch}
-          className="px-4 py-3 bg-purple-900/40"
-          android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
-        >
-          <Text className="text-purple-300 text-lg">⤢</Text>
-        </Pressable>
-      )}
-      <Pressable
-        onPress={onDelete}
-        className="px-4 py-3 bg-red-900/40"
-        android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
-      >
-        <Text className="text-red-400 text-lg">🗑️</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-/**
- * ComponentDetailScreen - shows a component and its plants
+ * ComponentDetailScreen - shows a component and the plants growing in the selected week
  */
 export function ComponentDetailScreen({
   navigation,
@@ -207,7 +91,7 @@ export function ComponentDetailScreen({
       updatePatchDimensions: state.updatePatchDimensions,
     }))
   );
-  const [viewMode, setViewMode] = useState<'canvas' | 'list'>('canvas');
+  const [viewMode, setViewMode] = useState<ViewMode>('canvas');
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showLayerOverview, setShowLayerOverview] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -219,6 +103,47 @@ export function ComponentDetailScreen({
   const [showOptimizeModal, setShowOptimizeModal] = useState(false);
   const [selectedPlantInstance, setSelectedPlantInstance] = useState<{ id: string; name: string } | null>(null);
 
+  // Check if component is a tower
+  const isTower = component
+    ? isRectangularTower(component) || isCircularTower(component)
+    : false;
+  const numberOfLayers = useMemo(() => {
+    if (!component) return 1;
+    if (isRectangularTower(component)) return component.numberOfLayers;
+    if (isCircularTower(component)) return component.numberOfLayers;
+    return 1;
+  }, [component]);
+  // Planning works per tower layer; components without layers have none
+  const planningLayer = isTower ? selectedLayer : undefined;
+
+  const planning = usePlanningTimeline(component, planningLayer);
+  const planningActions = usePlanningActions(component, planning.year, planningLayer);
+  const visiblePlants = planning.visiblePlants;
+  const hasVisiblePlants = visiblePlants.length > 0;
+
+  // For towers, the layer-specific dimensions
+  const innerDimensions = useMemo(
+    () => (component ? getInnerDimensions(component) : { width: 0, height: 0 }),
+    [component],
+  );
+  const layerDimensions = useMemo(() => {
+    if (!isTower) return innerDimensions;
+    return getTowerLayerDimensions(innerDimensions.width, innerDimensions.height, selectedLayer);
+  }, [isTower, innerDimensions, selectedLayer]);
+
+  // A selection or patch edit of a plant that is no longer drawn (other week,
+  // zone, year or layer, or moved by a planning run) is dropped
+  useEffect(() => {
+    const visibleIds = new Set(visiblePlants.map((plant) => plant.id));
+    if (selectedPlantInstance && !visibleIds.has(selectedPlantInstance.id)) {
+      setSelectedPlantInstance(null);
+    }
+    if (patchEditPlantId && !visibleIds.has(patchEditPlantId)) {
+      setPatchEditPlantId(null);
+      setPatchEditOriginalDimensions(null);
+    }
+  }, [visiblePlants, selectedPlantInstance, patchEditPlantId]);
+
   const {
     status: optimizeStatus,
     alternatives,
@@ -228,6 +153,20 @@ export function ComponentDetailScreen({
     applyAlternative,
     reset: resetOptimization,
   } = useOptimizeComponent();
+
+  // The AI optimizes what was in the ground in the displayed week when it was asked
+  const [optimizeScope, setOptimizeScope] = useState<OptimizeScope | null>(null);
+  const optimizeComponent = useMemo(
+    () => (component && optimizeScope ? { ...component, plants: plantsForOptimization(optimizeScope) } : undefined),
+    [component, optimizeScope],
+  );
+
+  // Another week, year or layer makes an optimization (running or done) stale
+  useEffect(() => {
+    resetOptimization();
+    setOptimizeScope(null);
+    setShowOptimizeModal(false);
+  }, [planning.year, planning.displayedWeek, planningLayer, resetOptimization]);
 
   // Build plant data map keyed by placed-plant instance ID for the optimization modal
   const plantDataMap = useMemo(() => {
@@ -263,17 +202,6 @@ export function ComponentDetailScreen({
       resetOptimization();
     };
   }, [resetOptimization]);
-
-  // Check if component is a tower
-  const isTower = component
-    ? isRectangularTower(component) || isCircularTower(component)
-    : false;
-  const numberOfLayers = useMemo(() => {
-    if (!component) return 1;
-    if (isRectangularTower(component)) return component.numberOfLayers;
-    if (isCircularTower(component)) return component.numberOfLayers;
-    return 1;
-  }, [component]);
 
   const handlePatchDimensionsChange = useCallback(
     (plantInstanceId: string, widthInCm: number, heightInCm: number, rotationDeg: number) => {
@@ -330,29 +258,40 @@ export function ComponentDetailScreen({
   const handleAddPlant = useCallback(() => {
     navigation.navigate('PlantSelection', {
       componentId,
-      layerIndex: isTower ? selectedLayer : undefined,
+      layerIndex: planningLayer,
+      year: planning.year,
     });
-  }, [navigation, componentId, isTower, selectedLayer]);
+  }, [navigation, componentId, planningLayer, planning.year]);
 
   const handleOptimize = useCallback(async () => {
-    if (!component || component.plants.length === 0) return;
-    await requestOptimization(component, getPlantById, null);
-  }, [component, getPlantById, requestOptimization]);
+    if (!component || visiblePlants.length === 0) return;
+    // Plants sharing weeks with the visible ones are obstacles, so no overlap appears in other weeks
+    const scope: OptimizeScope = {
+      plants: visiblePlants,
+      obstacles: plantsSharingWeeksWith(component, visiblePlants, planningLayer),
+    };
+    setOptimizeScope(scope);
+    await requestOptimization(component, scope, getPlantById, null);
+  }, [component, visiblePlants, planningLayer, getPlantById, requestOptimization]);
 
   const handleApplyOptimization = useCallback(() => {
-    if (!component) return;
+    if (!component || !optimizeScope) return;
+    // Applied to the whole component: only the optimized plants move, and only in position
     applyAlternative(
       component,
       componentId,
       (id, updates) => updateComponent(id, updates as Partial<ComponentData>),
+      new Set(optimizeScope.plants.map((plant) => plant.id)),
     );
     resetOptimization();
+    setOptimizeScope(null);
     setShowOptimizeModal(false);
     setCanvasKey((k) => k + 1);
-  }, [component, componentId, applyAlternative, updateComponent, resetOptimization]);
+  }, [component, componentId, optimizeScope, applyAlternative, updateComponent, resetOptimization]);
 
   const handleCloseOptimizeModal = useCallback(() => {
     setShowOptimizeModal(false);
+    setOptimizeScope(null);
     resetOptimization();
   }, [resetOptimization]);
 
@@ -403,6 +342,7 @@ export function ComponentDetailScreen({
     [navigation]
   );
 
+  // A drag changes the position only, never the growing period
   const handlePlantPositionChange = useCallback(
     (plantInstanceId: string, x: number, y: number) => {
       if (!component) return;
@@ -499,30 +439,24 @@ export function ComponentDetailScreen({
   }
 
   const dimensions = getComponentDimensions(component);
-  const innerDimensions = getInnerDimensions(component);
-  const plants = component.plants || [];
-  const hasPlants = plants.length > 0;
-
-  // For towers, calculate layer-specific dimensions and filter plants
-  const layerDimensions = useMemo(() => {
-    if (!isTower) return innerDimensions;
-    return getTowerLayerDimensions(innerDimensions.width, innerDimensions.height, selectedLayer);
-  }, [isTower, innerDimensions, selectedLayer]);
-
-  // Filter plants for current layer (or all for non-towers)
-  const visiblePlants = useMemo(() => {
-    if (!isTower) return plants;
-    return plants.filter((p) => (p.layerIndex ?? 0) === selectedLayer);
-  }, [plants, isTower, selectedLayer]);
+  const selectedPlant = selectedPlantInstance ? visiblePlants.find((p) => p.id === selectedPlantInstance.id) : undefined;
+  const selectedPlantData = selectedPlant ? getPlantById(selectedPlant.plantId) : undefined;
+  const isSelectedPatch = selectedPlantData?.plantingStyle === 'patch' || selectedPlantData?.plantingStyle === 'thinning';
+  // Tiny footprints have no room for a name, so the caption names the selected plant
+  const caption = selectedPlant && selectedPlantInstance
+    ? `${planning.timeline.caption} · ${selectedPlantInstance.name}`
+    : planning.timeline.caption;
 
   return (
     <SafeAreaView className="flex-1 bg-background" testID="component-detail-screen">
       {/* Header */}
-      <View className="flex-row items-center px-4 h-16 border-b border-gray-800">
+      <View className="flex-row items-center px-4 h-14 border-b border-gray-800">
         <Pressable
           onPress={handleBack}
           className="w-10 h-10 items-center justify-center rounded-full mr-2"
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
         >
           <Text className="text-white text-2xl">←</Text>
         </Pressable>
@@ -530,8 +464,13 @@ export function ComponentDetailScreen({
           <Text className="text-white text-lg font-semibold" numberOfLines={1}>
             {component.name}
           </Text>
-          <Text className="text-gray-400 text-sm">
-            {getComponentTypeLabel(component, t)} • {t('componentDetail.sunAt')} {component.sunDirection}
+          <Text className="text-gray-400 text-xs" numberOfLines={1}>
+            {t('componentDetail.sizeSubtitle', {
+              outerWidth: dimensions.width,
+              outerLength: dimensions.height,
+              innerWidth: innerDimensions.width,
+              innerLength: innerDimensions.height,
+            })}
           </Text>
         </View>
         <Pressable
@@ -546,9 +485,9 @@ export function ComponentDetailScreen({
         </Pressable>
         <Pressable
           onPress={handleOptimize}
-          disabled={!hasPlants || optimizeStatus === 'loading'}
+          disabled={!hasVisiblePlants || optimizeStatus === 'loading'}
           className={`w-10 h-10 rounded-full items-center justify-center mr-2 ${
-            hasPlants ? 'bg-purple-600' : 'bg-gray-700'
+            hasVisiblePlants ? 'bg-purple-600' : 'bg-gray-700'
           }`}
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
           testID="optimize-placement-button"
@@ -566,178 +505,180 @@ export function ComponentDetailScreen({
           className="bg-green-600 w-10 h-10 rounded-full items-center justify-center"
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
           testID="add-plant-button"
+          accessibilityLabel={t('componentDetail.addPlant')}
+          accessibilityRole="button"
         >
           <Text className="text-white text-xl font-bold">+</Text>
         </Pressable>
       </View>
 
-      {/* Info bar */}
-      <View className="flex-row px-4 py-2 border-b border-gray-800 bg-gray-900/50">
-        <View className="flex-1 items-center">
-          <Text className="text-gray-400 text-xs">{t('componentDetail.outerSize')}</Text>
-          <Text className="text-white text-sm">
-            {dimensions.width} x {dimensions.height} cm
-          </Text>
-        </View>
-        <View className="flex-1 items-center">
-          <Text className="text-gray-400 text-xs">{t('componentDetail.innerSize')}</Text>
-          <Text className="text-white text-sm">
-            {innerDimensions.width} x {innerDimensions.height} cm
-          </Text>
-        </View>
-        <View className="flex-1 items-center">
-          <Text className="text-gray-400 text-xs">{t('componentDetail.plants')}</Text>
-          <Text className="text-white text-sm">{plants.length}</Text>
-        </View>
+      {/* Year bar with the Canvas / Lijst toggle */}
+      <View className="flex-row items-center h-10 px-2 border-b border-gray-800">
+        <YearBar
+          year={planning.year}
+          onPrev={planning.goToPreviousYear}
+          onNext={planning.goToNextYear}
+          canPrev={planning.canGoToPreviousYear}
+          canNext={planning.canGoToNextYear}
+          previousLabel={t('planning.year.previous')}
+          nextLabel={t('planning.year.next')}
+        />
+        <ViewModeToggle
+          value={viewMode}
+          onChange={setViewMode}
+          canvasLabel={t('planning.viewMode.canvas')}
+          listLabel={t('planning.viewMode.list')}
+        />
       </View>
 
-      {/* View toggle */}
-      <View className="flex-row px-4 py-2 border-b border-gray-800">
-        <Pressable
-          onPress={() => setViewMode('canvas')}
-          className={`flex-1 py-2 rounded-lg mr-1 items-center ${
-            viewMode === 'canvas' ? 'bg-green-600' : 'bg-gray-800'
-          }`}
-        >
-          <Text className={viewMode === 'canvas' ? 'text-white font-medium' : 'text-gray-400'}>
-            🗺️ Canvas
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setViewMode('list')}
-          className={`flex-1 py-2 rounded-lg ml-1 items-center ${
-            viewMode === 'list' ? 'bg-green-600' : 'bg-gray-800'
-          }`}
-        >
-          <Text className={viewMode === 'list' ? 'text-white font-medium' : 'text-gray-400'}>
-            📋 Lijst
-          </Text>
-        </Pressable>
-      </View>
+      <WeekTimeline
+        weeks={planning.timeline.weeks}
+        zones={planning.timeline.zones}
+        selection={planning.timeline.selection}
+        currentLabel={t('planning.week.current')}
+        onSelectWeek={planning.selectWeek}
+        onSelectZone={planning.selectZone}
+      />
 
-      {/* Tower layer tabs */}
+      {/* Tower layer tabs with the layer size */}
       {isTower && (
-        <View className="border-b border-gray-800 bg-gray-900/30">
-          <TowerLayerTabs
-            numberOfLayers={numberOfLayers}
-            selectedLayer={selectedLayer}
-            onLayerSelect={handleLayerSelect}
-            onOverviewPress={handleOverviewPress}
-          />
-          <Text className="text-center text-gray-500 text-xs pb-2">
+        <View className="flex-row items-center border-b border-gray-800 bg-gray-900/30">
+          <View className="flex-1">
+            <TowerLayerTabs
+              numberOfLayers={numberOfLayers}
+              selectedLayer={selectedLayer}
+              onLayerSelect={handleLayerSelect}
+              onOverviewPress={handleOverviewPress}
+            />
+          </View>
+          <Text className="text-gray-500 text-xs pr-4">
             {t('componentDetail.layer')} {selectedLayer + 1}: {layerDimensions.width.toFixed(0)} x {layerDimensions.height.toFixed(0)} cm
           </Text>
         </View>
       )}
 
-      {/* Canvas or List view */}
-      {viewMode === 'canvas' ? (
-        <View className="flex-1 p-4">
-          <PlantPlacementCanvas
-            key={canvasKey}
-            component={component}
-            plants={visiblePlants}
-            layerDimensions={isTower ? layerDimensions : undefined}
-            onPlantPositionChange={handlePlantPositionChange}
-            onPlantPress={(plant) => handlePlantPress(plant.plantId)}
-            onPlantLongPress={handleCanvasPlantTap}
-            isEditMode={isEditMode}
-            onToggleEditMode={handleToggleEditMode}
-            onBackgroundPress={() => setSelectedPlantInstance(null)}
-            onLockAll={() => lockAllPlants(componentId)}
-            onUnlockAll={() => unlockAllPlants(componentId)}
-            onActionPress={() => setSelectedPlantInstance(null)}
-            onPatchDimensionsChange={handlePatchDimensionsChange}
-            patchEditPlantId={patchEditPlantId}
-            onPatchEditConfirm={handleConfirmPatchEdit}
-            onPatchEditCancel={handleCancelPatchEdit}
-          />
-          {visiblePlants.length > 0 && (
-            <Text className="text-gray-500 text-xs text-center mt-2">
-              {isEditMode
-                ? 'Sleep planten om te verplaatsen • Tik om te vergrendelen/verwijderen'
-                : 'Druk op ✏️ Bewerken om planten te verplaatsen'}
-            </Text>
-          )}
-          {isEditMode && (() => {
-            const selPlant = selectedPlantInstance ? visiblePlants.find((p) => p.id === selectedPlantInstance.id) : null;
-            const selPlantData = selPlant ? getPlantById(selPlant.plantId) : null;
-            const isLocked = selPlant?.locked ?? false;
-            const isSelPatch = selPlantData?.plantingStyle === 'patch' || selPlantData?.plantingStyle === 'thinning';
-            const hasSelection = selectedPlantInstance != null;
-            const canResize = hasSelection && isSelPatch && selPlant != null;
-            return (
-              <View className="flex-row mt-2 gap-3">
-                <Pressable
-                  onPress={canResize ? () => { handleEnterPatchEditMode(selPlant); setSelectedPlantInstance(null); } : undefined}
-                  disabled={!canResize}
-                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border ${canResize ? 'bg-purple-900/60 border-purple-700' : 'bg-gray-900/20 border-gray-800 opacity-30'}`}
-                  android_ripple={canResize ? { color: 'rgba(255,255,255,0.1)' } : undefined}
-                >
-                  <Text className={`font-medium ${canResize ? 'text-purple-300' : 'text-gray-600'}`}>⧂ Formaat</Text>
-                </Pressable>
-                <Pressable
-                  onPress={hasSelection ? handleDeleteSelectedPlant : undefined}
-                  disabled={!hasSelection}
-                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border ${hasSelection ? 'bg-red-900/60 border-red-700' : 'bg-gray-900/20 border-gray-800 opacity-30'}`}
-                  android_ripple={hasSelection ? { color: 'rgba(255,255,255,0.1)' } : undefined}
-                >
-                  <Text className={`font-medium ${hasSelection ? 'text-red-300' : 'text-gray-600'}`}>🗑️ Verwijderen</Text>
-                </Pressable>
-                <Pressable
-                  onPress={hasSelection ? handleToggleLockSelected : undefined}
-                  disabled={!hasSelection}
-                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg border ${hasSelection ? 'bg-gray-800 border-gray-600' : 'bg-gray-900/20 border-gray-800 opacity-30'}`}
-                  android_ripple={hasSelection ? { color: 'rgba(255,255,255,0.1)' } : undefined}
-                >
-                  <Text className={`font-medium ${hasSelection ? 'text-white' : 'text-gray-600'}`}>{isLocked ? '🔓 Ontgrendelen' : '🔒 Vergrendelen'}</Text>
-                </Pressable>
-              </View>
-            );
-          })()}
-        </View>
-      ) : (
-        <View className="flex-1 p-4">
-          {visiblePlants.length === 0 ? (
-            <View className="flex-1 items-center justify-center">
-              <Text className="text-4xl mb-2">🌱</Text>
-              <Text className="text-gray-400 text-center">
-                {isTower
-                  ? t('componentDetail.emptyLayer')
-                  : t('componentDetail.emptyPlantsMessage')}
-              </Text>
-              <Pressable
-                onPress={handleAddPlant}
-                className="mt-4 bg-green-600 px-6 py-3 rounded-lg"
-              >
-                <Text className="text-white font-medium">{t('componentDetail.addPlant')}</Text>
-              </Pressable>
+      <View className="flex-1">
+        <ToPlanAccordion
+          groups={planningActions.toPlanGroups}
+          expanded={planningActions.isToPlanExpanded}
+          title={t('planning.toPlan.title', { count: planningActions.toPlanCount })}
+          emptyTitle={t('planning.toPlan.empty')}
+          emptyHint={t('planning.toPlan.emptyHint')}
+          onToggle={planningActions.toggleToPlan}
+          onRemove={planningActions.removeToPlan}
+        >
+          <PlanningCaption text={caption} />
+
+          {/* Canvas or List view */}
+          {viewMode === 'canvas' ? (
+            <View className="flex-1 p-2">
+              <PlantPlacementCanvas
+                key={canvasKey}
+                component={component}
+                plants={visiblePlants}
+                layerDimensions={isTower ? layerDimensions : undefined}
+                footprints={planning.footprints}
+                conflictIds={planning.conflictIds}
+                outOfBoundsIds={planning.outOfBoundsIds}
+                onPlantPositionChange={handlePlantPositionChange}
+                onPlantPress={(plant) => handlePlantPress(plant.plantId)}
+                onPlantLongPress={handleCanvasPlantTap}
+                isEditMode={isEditMode}
+                onToggleEditMode={handleToggleEditMode}
+                onBackgroundPress={() => setSelectedPlantInstance(null)}
+                onLockAll={() => lockAllPlants(componentId)}
+                onUnlockAll={() => unlockAllPlants(componentId)}
+                onActionPress={() => setSelectedPlantInstance(null)}
+                onPatchDimensionsChange={handlePatchDimensionsChange}
+                patchEditPlantId={patchEditPlantId}
+                onPatchEditConfirm={handleConfirmPatchEdit}
+                onPatchEditCancel={handleCancelPatchEdit}
+              />
+              {/* Hint as an overlay on the canvas */}
+              {hasVisiblePlants && (
+                <View pointerEvents="none" className="absolute top-3 left-0 right-0 items-center">
+                  <Text className="text-gray-400 text-xs text-center bg-black/50 px-2 py-0.5 rounded">
+                    {isEditMode ? t('planning.hint.edit') : t('planning.hint.view')}
+                  </Text>
+                </View>
+              )}
+              {isEditMode && (
+                <CanvasEditActions
+                  hasSelection={selectedPlant != null}
+                  canResize={selectedPlant != null && isSelectedPatch}
+                  isLocked={selectedPlant?.locked ?? false}
+                  onResize={() => {
+                    if (!selectedPlant) return;
+                    handleEnterPatchEditMode(selectedPlant);
+                    setSelectedPlantInstance(null);
+                  }}
+                  onDelete={handleDeleteSelectedPlant}
+                  onToggleLock={handleToggleLockSelected}
+                />
+              )}
             </View>
           ) : (
-            <ScrollView className="flex-1" showsVerticalScrollIndicator>
-              {visiblePlants.map((plant) => {
-                const plantData = getPlantById(plant.plantId);
-                return (
-                  <PlacedPlantItem
-                    key={plant.id}
-                    plant={plant}
-                    plantData={plantData}
-                    onPress={() => handlePlantPress(plant.plantId)}
-                    onDelete={() =>
-                      handleDeletePlant(
-                        plant.id,
-                        plantData?.nameNl ?? t('componentDetail.unknownPlant')
-                      )
-                    }
-                    isEditMode={isEditMode}
-                    onResizePatch={plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning' ? () => handleEnterPatchEditMode(plant) : undefined}
-                  />
-                );
-              })}
-            </ScrollView>
+            <View className="flex-1 p-4">
+              {!hasVisiblePlants ? (
+                <View className="flex-1 items-center justify-center">
+                  <Text className="text-4xl mb-2">🌱</Text>
+                  <Text className="text-gray-400 text-center">
+                    {isTower
+                      ? t('componentDetail.emptyLayer')
+                      : t('componentDetail.emptyPlantsMessage')}
+                  </Text>
+                  <Pressable
+                    onPress={handleAddPlant}
+                    className="mt-4 bg-green-600 px-6 py-3 rounded-lg"
+                  >
+                    <Text className="text-white font-medium">{t('componentDetail.addPlant')}</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <ScrollView className="flex-1" showsVerticalScrollIndicator>
+                  {visiblePlants.map((plant) => {
+                    const plantData = getPlantById(plant.plantId);
+                    return (
+                      <PlacedPlantItem
+                        key={plant.id}
+                        plant={plant}
+                        plantData={plantData}
+                        onPress={() => handlePlantPress(plant.plantId)}
+                        onDelete={() =>
+                          handleDeletePlant(
+                            plant.id,
+                            plantData?.nameNl ?? t('componentDetail.unknownPlant')
+                          )
+                        }
+                        isEditMode={isEditMode}
+                        onResizePatch={plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning' ? () => handleEnterPatchEditMode(plant) : undefined}
+                      />
+                    );
+                  })}
+                </ScrollView>
+              )}
+            </View>
           )}
-        </View>
-      )}
+        </ToPlanAccordion>
+
+        <Snackbar
+          visible={planningActions.result !== null}
+          message={planningActions.result?.message ?? ''}
+          actionLabel={planningActions.result?.showViewAction ? t('planning.result.view') : undefined}
+          onAction={planningActions.viewResult}
+          testID="planning-snackbar"
+        />
+      </View>
+
+      <PlanningActionBar
+        canRearrange={planningActions.canPlan}
+        canStartOver={planningActions.canPlan}
+        running={planningActions.running}
+        rearrangeLabel={t('planning.actions.rearrange')}
+        startOverLabel={t('planning.actions.startOver')}
+        onRearrange={planningActions.rearrange}
+        onStartOver={planningActions.startOver}
+      />
 
       {/* Layer overview modal for towers */}
       {isTower && (
@@ -748,14 +689,14 @@ export function ComponentDetailScreen({
         />
       )}
 
-      {/* Optimization alternatives modal */}
-      {showOptimizeModal && alternatives && alternatives.length > 0 && (
+      {/* Optimization alternatives modal: the optimized plants and their (locked) obstacles */}
+      {showOptimizeModal && optimizeComponent && alternatives && alternatives.length > 0 && (
         <OptimizationAlternativesModal
           visible={showOptimizeModal}
           onClose={handleCloseOptimizeModal}
           onApply={handleApplyOptimization}
           onAiFeedback={handleOptimizeAiFeedback}
-          component={component}
+          component={optimizeComponent}
           alternatives={alternatives}
           selectedIndex={optimizeSelectedIndex}
           onSelectIndex={setOptimizeSelectedIndex}

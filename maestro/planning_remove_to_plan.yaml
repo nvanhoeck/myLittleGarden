@@ -1,0 +1,60 @@
+appId: com.mylittlegarden.app
+name: Planning - Remove from "Te plannen" with confirmation
+---
+- runFlow: subflows/prepare_planning_component.yaml
+
+- tapOn:
+    id: "planning-to-plan-header"
+- extendedWaitUntil:
+    visible:
+      id: "planning-to-plan-row-tomaat"
+    timeout: 3000
+
+# ── Cancel: the count stays ───────────────────────────────────────────
+- tapOn:
+    id: "planning-to-plan-remove-tomaat"
+- extendedWaitUntil:
+    visible:
+      text: "Tomaat verwijderen\\?"
+    timeout: 3000
+- tapOn:
+    text: "Annuleren"
+- assertVisible:
+    text: "Te plannen \\(3\\)"
+
+# ── Confirm: one item is removed per tap ──────────────────────────────
+# The dialog title and its button are both "Verwijderen": use the positive button id
+- tapOn:
+    id: "planning-to-plan-remove-tomaat"
+- extendedWaitUntil:
+    visible:
+      text: "Tomaat verwijderen\\?"
+    timeout: 3000
+- tapOn:
+    id: "android:id/button1"
+- extendedWaitUntil:
+    visible:
+      text: "Te plannen \\(2\\)"
+    timeout: 3000
+- assertVisible:
+    text: "Tomaat ×2"
+
+# ── Remove the rest: empty state ──────────────────────────────────────
+- repeat:
+    times: 2
+    commands:
+      - tapOn:
+          id: "planning-to-plan-remove-tomaat"
+      - extendedWaitUntil:
+          visible:
+            text: "Tomaat verwijderen\\?"
+          timeout: 3000
+      - tapOn:
+          id: "android:id/button1"
+      - waitForAnimationToEnd
+- assertVisible:
+    text: "Te plannen \\(0\\)"
+- assertVisible:
+    text: "Alles is ingepland"
+- assertVisible:
+    text: "Tik op \\+ om planten toe te voegen"

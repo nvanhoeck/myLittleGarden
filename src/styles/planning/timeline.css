@@ -1,0 +1,159 @@
+/*
+ * Time planning: year bar, week strip and zone band (Component Detail screen).
+ *
+ * Like src/styles/ai/chat.css, these classes document the visual contract;
+ * NativeWind is consumed via the className prop, so the components apply the
+ * same utility classes listed in the @apply directives below.
+ *
+ * Tokens (tailwind.config.js): primary #5DB075, on-primary #003919,
+ * primary-container #00532A, surface-variant #3F4945, outline #899389.
+ */
+
+/* Year bar: ‹ 2026 › on the left, view mode toggle on the right (40 high) */
+.year-bar {
+  @apply flex-row items-center h-10 px-2 border-b border-gray-800;
+}
+
+.year-bar__arrow {
+  @apply w-10 h-10 items-center justify-center;
+}
+
+.year-bar__arrow--disabled {
+  @apply opacity-40;
+}
+
+.year-bar__arrow-text {
+  @apply text-on-surface text-title-large;
+}
+
+.year-bar__year {
+  @apply text-on-surface text-title-medium px-2;
+}
+
+/* Canvas / Lijst segmented control */
+.view-mode-toggle {
+  @apply flex-row ml-auto rounded-full border border-outline overflow-hidden;
+}
+
+.view-mode-toggle__option {
+  @apply px-3 py-1;
+}
+
+.view-mode-toggle__option--selected {
+  @apply bg-primary-container;
+}
+
+.view-mode-toggle__label {
+  @apply text-label-medium text-on-surface-variant;
+}
+
+.view-mode-toggle__label--selected {
+  @apply text-on-primary-container;
+}
+
+/* Week strip + zone band, one horizontal scroll */
+.week-timeline {
+  @apply border-b border-gray-800;
+}
+
+.week-timeline__scroll {
+  @apply flex-col;
+}
+
+/* 48 high: the 28 high band plus touch room below it (not over the week slots) */
+.week-timeline__band {
+  @apply flex-row h-12;
+}
+
+/* Week slot: 72 x 52 */
+.week-slot {
+  @apply w-[72px] h-[52px] items-center justify-center border-b-2 border-transparent;
+}
+
+.week-slot--in-zone {
+  @apply bg-primary-container/60 border-primary;
+}
+
+.week-slot--selected {
+  @apply bg-primary;
+}
+
+/* Current week: a 1dp ring inside the slot, so it combines with the other states */
+.week-slot--current .week-slot__ring {
+  @apply absolute inset-1 border border-outline rounded-md;
+}
+
+/* Empty week: the labels at 60% */
+.week-slot--empty .week-slot__labels {
+  @apply opacity-60;
+}
+
+.week-slot__week {
+  @apply text-label-large text-on-surface-variant;
+}
+
+.week-slot__week--selected {
+  @apply text-on-primary;
+}
+
+.week-slot__date {
+  @apply text-label-small text-on-surface-variant;
+}
+
+.week-slot__date--selected {
+  @apply text-on-primary;
+}
+
+.week-slot__dot {
+  @apply absolute bottom-1 w-1.5 h-1.5 rounded-full bg-primary;
+}
+
+.week-slot__dot--selected {
+  @apply bg-on-primary;
+}
+
+.week-slot__now {
+  @apply absolute top-0.5 right-1 text-[9px] text-outline;
+}
+
+/* Zone segment: weeks * 72 wide, a 48 high touch target with the 28 high band at its top */
+.zone-segment {
+  @apply h-12;
+}
+
+.zone-segment__band {
+  @apply h-7 items-center justify-center border-t-2 border-transparent;
+}
+
+.zone-segment--tone-a {
+  @apply bg-surface-variant;
+}
+
+.zone-segment--tone-b {
+  @apply bg-primary-container/60;
+}
+
+.zone-segment--marked {
+  @apply border-t-primary/50;
+}
+
+.zone-segment--selected {
+  @apply border-2 border-primary;
+}
+
+.zone-segment__label {
+  @apply text-label-small text-on-surface;
+}
+
+.zone-segment__label--empty {
+  @apply text-outline;
+}
+
+/* Caption chip above the canvas */
+.planning-caption {
+  @apply self-center mt-2 px-3 py-1 rounded-full bg-surface-variant;
+}
+
+.planning-caption__text {
+  @apply text-label-medium text-on-surface;
+}
