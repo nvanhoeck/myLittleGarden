@@ -189,8 +189,33 @@ describe('reconciled', () => {
     assert.equal(planning.statusOf('summer'), 'outdated');
   });
 
-  test('given nothing misplaced, it gives the same planning', () => {
-    const planning = withPlants('tomaat').applyPlacement('spring', [placement('t1', 'tomaat')]);
+  test('given a planning without planned seasons, it gives the same planning', () => {
+    const planning = withPlants('tomaat');
     assert.equal(planning.reconciled(), planning);
+  });
+
+  test('outdates every planned season that holds plants', () => {
+    const planned = withPlants('tomaat').applyPlacement('spring', [placement('t1', 'tomaat')]);
+    const reconciled = planned.reconciled();
+    assert.equal(reconciled.statusOf('spring'), 'outdated');
+    assert.equal(reconciled.statusOf('summer'), 'notPlanned');
+  });
+
+  test('a plant that gained a calendar outdates its now planned start season', () => {
+    const newSeasonsOf = (plantId: string): readonly Season[] => (plantId === 'knoflook' ? ['spring'] : []);
+    // Stored while knoflook had no calendar, so spring was planned without it
+    const stored = Planning.from(
+      {
+        plants: ['knoflook'],
+        seasons: {
+          spring: { ratios: {}, placements: [], status: 'planned' },
+          summer: { ratios: {}, placements: [], status: 'notPlanned' },
+          autumn: { ratios: {}, placements: [], status: 'notPlanned' },
+          winter: { ratios: {}, placements: [], status: 'notPlanned' },
+        },
+      },
+      newSeasonsOf,
+    );
+    assert.equal(stored.reconciled().statusOf('spring'), 'outdated');
   });
 });

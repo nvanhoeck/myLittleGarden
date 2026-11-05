@@ -184,7 +184,9 @@ export class Planning {
    * After the plants' seasons changed (a new frost date): a ratio kept under
    * a season that is no longer the plant's start season moves to the new
    * start season, its placements there are dropped, and the seasons
-   * involved become outdated. Returns this planning when nothing moved.
+   * involved become outdated. Afterwards every planned season that holds
+   * plants becomes outdated too, because its plants' seasons may have moved.
+   * Returns this planning when nothing changes.
    */
   reconciled(): Planning {
     let next: Planning = this;
@@ -208,6 +210,9 @@ export class Planning {
         }
         next = next.markedOutdated([season, ...seasonsAfter(season), ...this.seasonsOf(plantId)]);
       }
+    }
+    for (const plantId of this.data.plants) {
+      next = next.markedOutdated(this.seasonsOf(plantId));
     }
     return next;
   }
