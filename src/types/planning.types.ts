@@ -34,3 +34,9 @@ export interface PlantToPlanData {
   readonly patchHeightInCm?: number;
   readonly patchRotationDeg?: number;
 }
+
+/**
+ * Meteorological season of a planning year: spring (Mar-May), summer
+ * (Jun-Aug), autumn (Sep-Nov), winter (Dec-Feb of the next calendar year)
+ */
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter';

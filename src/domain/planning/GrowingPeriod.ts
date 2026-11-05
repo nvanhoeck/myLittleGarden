@@ -1,31 +1,12 @@
 import type { PlantData } from '../../types/plant.types.ts';
 import type { GrowingPeriodData, PlantingMethod } from '../../types/planning.types.ts';
 import { PlantingWeek } from './PlantingWeek.ts';
+import { frostDateIn, frostDayOf } from './PlantCalendar.ts';
+import type { FrostDay } from './PlantCalendar.ts';
 
 export type { GrowingPeriodData, PlantingMethod };
-
-/** A day in the year without a year, such as the garden's frost dates */
-export interface FrostDay {
-  /** 1-12 */
-  readonly month: number;
-  readonly day: number;
-}
-
-/**
- * Reads the frost day from a stored frost date ('YYYY-MM-DD', as the
- * environment store keeps it). Only the digits are used, so no timezone can
- * shift the day. Returns null when there is no valid date.
- */
-export function frostDayOf(isoDate: string | null): FrostDay | null {
-  const match = isoDate === null ? null : /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
-  if (match === null) {
-    return null;
-  }
-  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
-  // Day 0 of the next month is the last day of this one
-  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  return month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth ? { month, day } : null;
-}
+export { frostDayOf };
+export type { FrostDay };
 
 /** The garden's frost days applied to the year being planned */
 export interface PlanningContext {
@@ -39,19 +20,6 @@ export interface PlanningContext {
 export type PlantTiming = Pick<PlantData, 'transplantWeeks' | 'directSowWeeks' | 'daysToHarvest'>;
 
 const DAYS_PER_WEEK = 7;
-
-/**
- * The frost day as a UTC date in the given year. A day that does not exist
- * in that month (29 February in a non-leap year) becomes its last day.
- * @throws Error when the month is not 1-12
- */
-function frostDateIn(year: number, frostDay: FrostDay): Date {
-  if (!Number.isInteger(frostDay.month) || frostDay.month < 1 || frostDay.month > 12) {
-    throw new Error(`Ongeldige maand ${frostDay.month}`);
-  }
-  const daysInMonth = new Date(Date.UTC(year, frostDay.month, 0)).getUTCDate();
-  return new Date(Date.UTC(year, frostDay.month - 1, Math.min(Math.max(1, frostDay.day), daysInMonth)));
-}
 
 /**
  * GrowingPeriod is a value object for the weeks a plant occupies its spot:
