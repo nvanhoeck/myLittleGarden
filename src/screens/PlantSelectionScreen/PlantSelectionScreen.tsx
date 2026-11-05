@@ -10,7 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { PlantSelectionScreenProps } from '@/navigation/navigationTypes';
 import { useAllPlants, useComponent, useComponentStore } from '@/stores';
 import type { PlantData, PlantCategory } from '@/types';
-import { PlantingWeek, plantDistanceCm } from '@/domain/planning';
+import { plantDistanceCm } from '@/domain/planning';
+import { usePlanning } from '@/stores/planningContext';
 import { PLANT_CATEGORIES } from '@/types/plant.types';
 import { getPlantIcon, hasPlantIcon } from '@/assets';
 
@@ -48,14 +49,17 @@ function PlantIconDisplay({ plant }: { plant: PlantData }): React.JSX.Element {
 function PlantTile({
   plant,
   isSelected,
+  inPlanning,
   onPress,
   onLongPress,
 }: {
   plant: PlantData;
   isSelected: boolean;
+  inPlanning: boolean;
   onPress: () => void;
   onLongPress: () => void;
 }): React.JSX.Element {
+  const { t } = useTranslation();
   return (
     <Pressable
       onPress={onPress}
@@ -67,8 +71,10 @@ function PlantTile({
       `}
       style={{ minWidth: 100, maxWidth: 120 }}
       android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+      accessibilityState={{ selected: isSelected }}
       testID={`plant-tile-${plant.id}`}
     >
+      {isSelected && <Text className="absolute top-1 right-2 text-white">✓</Text>}
       <View className="mb-1">
         <PlantIconDisplay plant={plant} />
       </View>
@@ -79,7 +85,9 @@ function PlantTile({
         {plant.nameNl}
       </Text>
       <Text className={`text-xs ${isSelected ? 'text-green-200' : 'text-gray-400'}`}>
-        {plant.plantingStyle === "patch" ? (plant.sowingSpacingCm ?? plantDistanceCm(plant)) : plantDistanceCm(plant)}cm
+        {inPlanning
+          ? t('plantSelection.alreadyInPlanning')
+          : `${plant.plantingStyle === "patch" ? (plant.sowingSpacingCm ?? plantDistanceCm(plant)) : plantDistanceCm(plant)}cm`}
       </Text>
     </Pressable>
   );
@@ -91,7 +99,8 @@ function PlantTile({
 function CategorySection({
   category,
   plants,
-  selectedPlantId,
+  selectedIds,
+  inPlanningIds,
   onSelectPlant,
   onPlantLongPress,
   isExpanded,
@@ -99,7 +108,8 @@ function CategorySection({
 }: {
   category: { key: PlantCategory; labelNl: string; icon: string };
   plants: PlantData[];
-  selectedPlantId: string | null;
+  selectedIds: ReadonlySet<string>;
+  inPlanningIds: ReadonlySet<string>;
   onSelectPlant: (plant: PlantData) => void;
   onPlantLongPress: (plant: PlantData) => void;
   isExpanded: boolean;
@@ -128,7 +138,8 @@ function CategorySection({
             <PlantTile
               key={plant.id}
               plant={plant}
-              isSelected={selectedPlantId === plant.id}
+              isSelected={selectedIds.has(plant.id)}
+              inPlanning={inPlanningIds.has(plant.id)}
               onPress={() => onSelectPlant(plant)}
               onLongPress={() => onPlantLongPress(plant)}
             />
@@ -147,17 +158,18 @@ export function PlantSelectionScreen({
   route,
 }: PlantSelectionScreenProps): React.JSX.Element {
   const { t } = useTranslation();
-  const { componentId, layerIndex } = route.params;
-  // The year selected in the Component Detail screen; without one, the current planning
-  // year (the ISO year of this week, so late December can be next year)
-  const year = route.params.year ?? PlantingWeek.containingLocal(new Date()).year;
+  const { componentId, year } = route.params;
   const component = useComponent(componentId);
+  const planning = usePlanning(component, year);
   const allPlants = useAllPlants();
-  const addPlantsToPlan = useComponentStore((state) => state.addPlantsToPlan);
+  const addPlantsToPlanning = useComponentStore((state) => state.addPlantsToPlanning);
+
+  // Plants already in the planning start selected and stay so
+  const inPlanning = useMemo(() => new Set(planning?.plants ?? []), [planning]);
+  const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
+  const selectedIds = useMemo(() => new Set([...inPlanning, ...picked]), [inPlanning, picked]);
 
   // State
-  const [selectedPlant, setSelectedPlant] = useState<PlantData | null>(null);
-  const [quantity, setQuantity] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<PlantCategory>>(
     new Set(['fruit', 'kruiden'])
@@ -189,10 +201,18 @@ export function PlantSelectionScreen({
     navigation.goBack();
   }, [navigation]);
 
-  const handleSelectPlant = useCallback((plant: PlantData) => {
-    setSelectedPlant(plant);
-    setQuantity(1);
-  }, []);
+  const handleSelectPlant = useCallback(
+    (plant: PlantData) => {
+      if (inPlanning.has(plant.id)) return;
+      setPicked((current) => {
+        const next = new Set(current);
+        if (next.has(plant.id)) next.delete(plant.id);
+        else next.add(plant.id);
+        return next;
+      });
+    },
+    [inPlanning],
+  );
 
   const handleToggleCategory = useCallback((category: PlantCategory) => {
     setExpandedCategories((prev) => {
@@ -210,19 +230,11 @@ export function PlantSelectionScreen({
     navigation.navigate('PlantDetails', { plantId: plant.id });
   }, [navigation]);
 
-  const handleQuantityChange = useCallback((delta: number) => {
-    setQuantity((prev) => Math.max(1, Math.min(10, prev + delta)));
-  }, []);
-
   const handleAddPlants = useCallback(() => {
-    if (!selectedPlant || !component) return;
-
-    // Plants go to the "to plan" list; auto-placement puts them in the component
-    addPlantsToPlan(componentId, selectedPlant.id, quantity, year, layerIndex);
-
-    // Navigate back to component detail
+    if (picked.size === 0) return;
+    addPlantsToPlanning(componentId, year, [...picked]);
     navigation.goBack();
-  }, [selectedPlant, component, quantity, componentId, addPlantsToPlan, navigation, year, layerIndex]);
+  }, [picked, addPlantsToPlanning, componentId, year, navigation]);
 
   if (!component) {
     return (
@@ -276,7 +288,8 @@ export function PlantSelectionScreen({
             <CategorySection
               category={category}
               plants={plants}
-              selectedPlantId={selectedPlant?.id ?? null}
+              selectedIds={selectedIds}
+              inPlanningIds={inPlanning}
               onSelectPlant={handleSelectPlant}
               onPlantLongPress={handlePlantLongPress}
               isExpanded={expandedCategories.has(category.key)}
@@ -289,49 +302,15 @@ export function PlantSelectionScreen({
       />
 
       {/* Selection Footer */}
-      {selectedPlant && (
+      {picked.size > 0 && (
         <View className="absolute bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4">
-          <View className="flex-row items-center mb-3">
-            <View className="flex-1">
-              <Text className="text-white font-semibold">{selectedPlant.nameNl}</Text>
-              <Text className="text-gray-400 text-sm">
-                {selectedPlant.plantingStyle === 'thinning' ? t('plantSelection.finalSpacing') : selectedPlant.plantingStyle === 'patch' ? t('plantSelection.sowingSpacing') : t('plantSelection.spacing')}: {selectedPlant.plantingStyle === 'patch' ? (selectedPlant.sowingSpacingCm ?? plantDistanceCm(selectedPlant)) : plantDistanceCm(selectedPlant)}cm
-              </Text>
-            </View>
-
-            {/* Quantity selector */}
-            <View className="flex-row items-center bg-gray-800 rounded-xl">
-              <Pressable
-                onPress={() => handleQuantityChange(-1)}
-                className="w-10 h-10 items-center justify-center"
-                disabled={quantity <= 1}
-              >
-                <Text className={`text-xl ${quantity <= 1 ? 'text-gray-600' : 'text-white'}`}>
-                  -
-                </Text>
-              </Pressable>
-              <Text className="text-white font-bold px-4">{quantity}</Text>
-              <Pressable
-                onPress={() => handleQuantityChange(1)}
-                className="w-10 h-10 items-center justify-center"
-                disabled={quantity >= 10}
-              >
-                <Text className={`text-xl ${quantity >= 10 ? 'text-gray-600' : 'text-white'}`}>
-                  +
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
           <Pressable
             onPress={handleAddPlants}
             className="bg-green-600 rounded-xl py-4 items-center"
             android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
             testID="add-plants-button"
           >
-            <Text className="text-white font-semibold">
-              {t('plantSelection.addToComponent', { count: quantity })}
-            </Text>
+            <Text className="text-white font-semibold">{t('plantSelection.addSelected', { count: picked.size })}</Text>
           </Pressable>
         </View>
       )}

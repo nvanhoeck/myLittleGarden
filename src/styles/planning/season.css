@@ -1,0 +1,88 @@
+/*
+ * Season planning: season tabs, status dots, ratio steppers and season sections.
+ *
+ * Like src/styles/ai/chat.css, these classes document the visual contract;
+ * the components apply the same utility classes via className.
+ */
+
+/* Year bar: ‹ 2026 › on the left, view mode toggle on the right (40 high) */
+.year-bar {
+  @apply flex-row items-center h-10 px-2 border-b border-gray-800;
+}
+
+.year-bar__arrow {
+  @apply w-10 h-10 items-center justify-center;
+}
+
+.year-bar__arrow--disabled {
+  @apply opacity-40;
+}
+
+.year-bar__arrow-text {
+  @apply text-on-surface text-title-large;
+}
+
+.year-bar__year {
+  @apply text-on-surface text-title-medium px-2;
+}
+
+/* Status dot: grey = not planned, green = planned, orange = outdated */
+.season-status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+.season-status-dot--not-planned {
+  @apply bg-gray-500;
+}
+.season-status-dot--planned {
+  @apply bg-green-500;
+}
+.season-status-dot--outdated {
+  @apply bg-orange-400;
+}
+
+/* Tabs: Lente · Zomer · Herfst · Winter, each with its months */
+.season-tabs {
+  @apply flex-row border-b border-gray-800;
+}
+.season-tabs__tab {
+  @apply flex-1 items-center py-2;
+}
+.season-tabs__tab--selected {
+  @apply border-b-2 border-green-500;
+}
+.season-tabs__label {
+  @apply text-label-large text-on-surface;
+}
+.season-tabs__months {
+  @apply text-xs text-gray-400;
+}
+
+/* − [2] + */
+.ratio-stepper {
+  @apply flex-row items-center bg-gray-800 rounded-xl;
+}
+.ratio-stepper__button {
+  @apply w-12 h-12 items-center justify-center;
+}
+.ratio-stepper__value {
+  @apply text-white font-bold px-2 min-w-[24px] text-center;
+}
+
+/* Accordion per season on the Planning screen */
+.season-section {
+  @apply mb-2 rounded-xl bg-gray-900;
+}
+.season-section__header {
+  @apply flex-row items-center px-4 h-14;
+}
+.season-section__row {
+  @apply flex-row items-center px-4 py-2 border-t border-gray-800;
+}
+.season-section__result--does-not-fit {
+  @apply text-error;
+}
+
+/* Banner above the canvas when a season is outdated */
+.outdated-banner {
+  @apply flex-row items-center px-4 py-2 bg-orange-900/40 border-b border-orange-700;
+}

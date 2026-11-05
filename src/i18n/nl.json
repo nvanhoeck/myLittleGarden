@@ -179,7 +179,9 @@
     "spacing": "Plantafstand",
     "sowingSpacing": "Zaaiafstand",
     "finalSpacing": "Eindafstand",
-    "addToComponent": "Voeg {{count}} plant(en) toe"
+    "addSelected_one": "{{count}} plant toevoegen",
+    "addSelected_other": "{{count}} planten toevoegen",
+    "alreadyInPlanning": "Al in de planning"
   },
   "componentDetail": {
     "notFound": "Component niet gevonden",
@@ -272,6 +274,39 @@
       "edit": "Sleep planten om te verplaatsen • Tik om te vergrendelen/verwijderen",
       "view": "Druk op ✏️ Bewerken om planten te verplaatsen"
     }
+  },
+  "season": {
+    "spring": "Lente",
+    "summer": "Zomer",
+    "autumn": "Herfst",
+    "winter": "Winter",
+    "months": "{{first}}–{{last}}",
+    "status": {
+      "notPlanned": "Niet gepland",
+      "planned": "Gepland",
+      "outdated": "Verouderd"
+    }
+  },
+  "seasonPlanning": {
+    "title": "Planning",
+    "subtitle": "{{name}} · {{year}}",
+    "plants": "Planten",
+    "addPlant": "Plant toevoegen",
+    "noCalendar": "geen teeltkalender",
+    "empty": "Nog geen planten. Tik op Plant toevoegen.",
+    "emptySeason": "Geen planten in dit seizoen",
+    "carried": "doorlopend uit {{season}}",
+    "target": "{{percent}}%",
+    "result_one": "{{count}} plant · {{actual}}% (doel {{target}}%)",
+    "result_other": "{{count}} planten · {{actual}}% (doel {{target}}%)",
+    "doesNotFit": "Past niet",
+    "ratioDecrease": "Verhouding van {{name}} verlagen",
+    "ratioIncrease": "Verhouding van {{name}} verhogen",
+    "ratioValue": "Verhouding van {{name}}: {{ratio}}",
+    "removePlant": "{{name}} verwijderen",
+    "removeTitle": "{{name}} verwijderen?",
+    "removeMessage": "{{name}} en al zijn plaatsingen verdwijnen uit de planning van {{year}}.",
+    "sectionA11y": "{{season}}, {{months}}, {{status}}"
   },
   "accessibility": {
     "stepProgress": "Stap {{current}} van {{total}}",

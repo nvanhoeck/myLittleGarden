@@ -9,7 +9,8 @@ export type RootStackParamList = {
   Home: undefined;
   Settings: undefined;
   ComponentDetail: { componentId: string };
-  PlantSelection: { componentId: string; layerIndex?: number; year?: number };
+  PlantSelection: { componentId: string; year: number };
+  Planning: { componentId: string; year: number };
   PlantDetails: { plantId: string };
   AiChat: undefined;
 };
@@ -23,6 +24,7 @@ export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>
 export type SettingsScreenProps = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 export type ComponentDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'ComponentDetail'>;
 export type PlantSelectionScreenProps = NativeStackScreenProps<RootStackParamList, 'PlantSelection'>;
+export type PlanningScreenProps = NativeStackScreenProps<RootStackParamList, 'Planning'>;
 export type PlantDetailsScreenProps = NativeStackScreenProps<RootStackParamList, 'PlantDetails'>;
 export type AiChatScreenProps = NativeStackScreenProps<RootStackParamList, 'AiChat'>;
 

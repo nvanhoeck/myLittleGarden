@@ -8,3 +8,4 @@ export { TimeZoneSegment } from './TimeZoneSegment';
 export { ToPlanRow } from './ToPlanRow';
 export { ViewModeToggle } from './ViewModeToggle';
 export type { ViewMode } from './ViewModeToggle';
+export { RatioStepper } from './RatioStepper';

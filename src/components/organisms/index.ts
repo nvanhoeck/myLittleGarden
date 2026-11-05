@@ -9,3 +9,4 @@ export { LayerOverviewModal } from './LayerOverviewModal';
 export { WeekTimeline } from './WeekTimeline';
 export { ToPlanAccordion } from './ToPlanAccordion';
 export { PlanningActionBar } from './PlanningActionBar';
+export { SeasonPlanSection } from './SeasonPlanSection';

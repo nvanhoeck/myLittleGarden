@@ -5,6 +5,7 @@ import { EnvironmentSetupScreen } from '@screens/EnvironmentSetupScreen';
 import { HomeScreen } from '@screens/HomeScreen';
 import { SettingsScreen } from '@screens/SettingsScreen';
 import { ComponentDetailScreen } from '@screens/ComponentDetailScreen';
+import { PlanningScreen } from '@screens/PlanningScreen';
 import { PlantSelectionScreen } from '@screens/PlantSelectionScreen';
 import { PlantDetailsScreen } from '@screens/PlantDetailsScreen';
 import { ChatScreen } from '@/screens/ai';
@@ -54,6 +55,13 @@ export function RootNavigator(): React.JSX.Element {
       <Stack.Screen
         name="ComponentDetail"
         component={ComponentDetailScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="Planning"
+        component={PlanningScreen}
         options={{
           animation: 'slide_from_right',
         }}

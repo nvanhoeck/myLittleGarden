@@ -9,27 +9,6 @@
  * primary-container #00532A, surface-variant #3F4945, outline #899389.
  */
 
-/* Year bar: ‹ 2026 › on the left, view mode toggle on the right (40 high) */
-.year-bar {
-  @apply flex-row items-center h-10 px-2 border-b border-gray-800;
-}
-
-.year-bar__arrow {
-  @apply w-10 h-10 items-center justify-center;
-}
-
-.year-bar__arrow--disabled {
-  @apply opacity-40;
-}
-
-.year-bar__arrow-text {
-  @apply text-on-surface text-title-large;
-}
-
-.year-bar__year {
-  @apply text-on-surface text-title-medium px-2;
-}
-
 /* Canvas / Lijst segmented control */
 .view-mode-toggle {
   @apply flex-row ml-auto rounded-full border border-outline overflow-hidden;

@@ -5,3 +5,4 @@ export { HomeScreen } from './HomeScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { ComponentDetailScreen } from './ComponentDetailScreen';
 export { PlantSelectionScreen } from './PlantSelectionScreen';
+export { PlanningScreen } from './PlanningScreen';
