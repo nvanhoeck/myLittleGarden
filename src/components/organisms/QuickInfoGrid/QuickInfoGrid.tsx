@@ -8,6 +8,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { PlantData } from '@/types/plant.types';
+import { plantDistanceCm } from '@/domain/planning';
 import {
   formatDayRange,
   formatSunRequirementNl,
@@ -101,11 +102,9 @@ export function QuickInfoGrid({ plant }: QuickInfoGridProps): React.JSX.Element 
     : isPatch
       ? t('plantDetails.sowingSpacing')
       : t('plantDetails.spacing');
-  const spacingValue = isThinning
-    ? plant.spacingRadiusCm
-    : isPatch
-      ? (plant.sowingSpacingCm ?? plant.spacingRadiusCm)
-      : plant.spacingRadiusCm;
+  const spacingValue = isPatch
+    ? (plant.sowingSpacingCm ?? plantDistanceCm(plant))
+    : plantDistanceCm(plant);
 
   const infoCards = [
     {

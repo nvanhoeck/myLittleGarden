@@ -17,6 +17,7 @@ export {
   footprintOf,
   footprintsConflict,
   minimumPatchSideCm,
+  plantDistanceCm,
 } from './PlantFootprint';
 export type { Bounds, FootprintTraits, PatchFields, PatchShape, PositionedFootprint } from './PlantFootprint';
 

@@ -87,7 +87,7 @@ export function PlacedPlantItem({
                   const rotStr = rot > 0 ? ' • ' + rot + '° gedraaid' : '';
                   return plant.positionX.toFixed(0) + 'cm, ' + plant.positionY.toFixed(0) + 'cm • ' + wCm + ' x ' + hCm + ' cm' + rotStr;
                 })()
-              : plant.positionX.toFixed(0) + 'cm, ' + plant.positionY.toFixed(0) + 'cm • ' + spacingRadius + 'cm afstand'
+              : plant.positionX.toFixed(0) + 'cm, ' + plant.positionY.toFixed(0) + 'cm • ' + spacingRadius * 2 + 'cm afstand'
             }
           </Text>
         </View>

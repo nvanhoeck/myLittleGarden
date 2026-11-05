@@ -44,6 +44,11 @@ function isSownOverArea(plant: Pick<PlantData, 'plantingStyle'>): boolean {
   return plant.plantingStyle === 'patch' || plant.plantingStyle === 'thinning';
 }
 
+/** The distance between two neighbouring plants, centre to centre: twice the spacing radius */
+export function plantDistanceCm(plant: Pick<PlantData, 'spacingRadiusCm'>): number {
+  return 2 * plant.spacingRadiusCm;
+}
+
 /** The smallest side a patch can have: twice the sowing spacing, else twice the spacing radius */
 export function minimumPatchSideCm(plant: Pick<PlantData, 'spacingRadiusCm'> & Partial<Pick<PlantData, 'sowingSpacingCm'>>): number {
   return 2 * (plant.sowingSpacingCm ?? plant.spacingRadiusCm);

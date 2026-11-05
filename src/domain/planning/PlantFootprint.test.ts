@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PlantFootprint, conflictingPlantIds, footprintOf, footprintsConflict, minimumPatchSideCm } from './PlantFootprint.ts';
+import { PlantFootprint, conflictingPlantIds, footprintOf, footprintsConflict, minimumPatchSideCm, plantDistanceCm } from './PlantFootprint.ts';
 import { GrowingPeriod } from './GrowingPeriod.ts';
 import type { PlantData } from '../../types/plant.types.ts';
 
@@ -121,6 +121,10 @@ describe('PlantFootprint', () => {
   test('gives the minimum patch side of a plant: twice the sowing spacing, else twice the spacing radius', () => {
     assert.equal(minimumPatchSideCm({ spacingRadiusCm: 10, sowingSpacingCm: 3 }), 6);
     assert.equal(minimumPatchSideCm({ spacingRadiusCm: 10 }), 20);
+  });
+
+  test('gives the distance between two neighbouring plants: twice the spacing radius', () => {
+    assert.equal(plantDistanceCm({ spacingRadiusCm: 17.5 }), 35);
   });
 });
 

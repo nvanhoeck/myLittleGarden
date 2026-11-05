@@ -68,7 +68,7 @@ function hasSpacingOverlap(
     const dx = current.positionXInCm - other.positionXInCm;
     const dy = current.positionYInCm - other.positionYInCm;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const minDistance = Math.max(currentSpacing, otherPlant.spacingRadiusCm);
+    const minDistance = currentSpacing + otherPlant.spacingRadiusCm;
     return distance < minDistance;
   });
 }

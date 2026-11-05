@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { PlantSelectionScreenProps } from '@/navigation/navigationTypes';
 import { useAllPlants, useComponent, useComponentStore } from '@/stores';
 import type { PlantData, PlantCategory } from '@/types';
-import { PlantingWeek } from '@/domain/planning';
+import { PlantingWeek, plantDistanceCm } from '@/domain/planning';
 import { PLANT_CATEGORIES } from '@/types/plant.types';
 import { getPlantIcon, hasPlantIcon } from '@/assets';
 
@@ -79,7 +79,7 @@ function PlantTile({
         {plant.nameNl}
       </Text>
       <Text className={`text-xs ${isSelected ? 'text-green-200' : 'text-gray-400'}`}>
-        {plant.plantingStyle === "patch" ? (plant.sowingSpacingCm ?? plant.spacingRadiusCm) : plant.spacingRadiusCm}cm
+        {plant.plantingStyle === "patch" ? (plant.sowingSpacingCm ?? plantDistanceCm(plant)) : plantDistanceCm(plant)}cm
       </Text>
     </Pressable>
   );
@@ -295,7 +295,7 @@ export function PlantSelectionScreen({
             <View className="flex-1">
               <Text className="text-white font-semibold">{selectedPlant.nameNl}</Text>
               <Text className="text-gray-400 text-sm">
-                {selectedPlant.plantingStyle === 'thinning' ? t('plantSelection.finalSpacing') : selectedPlant.plantingStyle === 'patch' ? t('plantSelection.sowingSpacing') : t('plantSelection.spacing')}: {selectedPlant.plantingStyle === 'patch' ? (selectedPlant.sowingSpacingCm ?? selectedPlant.spacingRadiusCm) : selectedPlant.spacingRadiusCm}cm
+                {selectedPlant.plantingStyle === 'thinning' ? t('plantSelection.finalSpacing') : selectedPlant.plantingStyle === 'patch' ? t('plantSelection.sowingSpacing') : t('plantSelection.spacing')}: {selectedPlant.plantingStyle === 'patch' ? (selectedPlant.sowingSpacingCm ?? plantDistanceCm(selectedPlant)) : plantDistanceCm(selectedPlant)}cm
               </Text>
             </View>
 
