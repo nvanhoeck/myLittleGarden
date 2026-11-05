@@ -1,8 +1,8 @@
 appId: com.mylittlegarden.app
 ---
 # Shared: fresh install -> frost dates (picker defaults) -> home screen.
-# The planning flows never hardcode a week; they pick weeks and zones
-# through their accessibility labels, so the frost dates do not matter.
+# The season flows never hardcode a season; they pick season tabs through their
+# accessibility labels, so the frost dates matter only for season_carry_over.
 - launchApp:
     clearState: true
 - extendedWaitUntil:

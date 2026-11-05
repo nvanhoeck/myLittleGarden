@@ -50,6 +50,7 @@ This directory contains Maestro UI test flows for the My Little Garden Android a
 
 8. **season_carry_over.yaml**
    - Checks that a plant growing on is listed as carried and shown dimmed in a later season
+   - Depends on the picker-default frost date (the day the flow runs): it only works when Tomaat spans at least two seasons, i.e. when run March to November
 
 9. **season_outdated.yaml**
    - Changing ratios marks an optimized season outdated; re-optimizing clears the banner

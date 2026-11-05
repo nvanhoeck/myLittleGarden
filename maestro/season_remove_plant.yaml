@@ -6,7 +6,7 @@ name: Season planning - removing a plant asks for confirmation
 - tapOn:
     id: "planning-remove-sla"
 - assertVisible:
-    text: "Sla verwijderen\?"
+    text: "Sla verwijderen\\?"
 - tapOn:
     text: "Annuleren"
 - assertVisible:

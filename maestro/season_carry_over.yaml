@@ -16,6 +16,6 @@ name: Season planning - a plant growing on is shown dimmed in the next season
     timeout: 10000
 # Open a season that holds plants carried over from an earlier one
 - tapOn:
-    text: ".*, [1-9]\d* doorlopend"
+    text: ".*, [1-9]\\d* doorlopend"
 - assertVisible:
     id: "carried-plant-.*"

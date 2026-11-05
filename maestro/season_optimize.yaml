@@ -21,6 +21,6 @@ name: Season planning - optimizing a season fills the canvas
       id: "optimize-snackbar"
     timeout: 10000
 - assertVisible:
-    text: "[1-9]\d* (plant|planten) geplaatst.*"
+    text: "[1-9]\\d* (plant|planten) geplaatst.*"
 - assertVisible:
     id: "planning-footprint-.*"
