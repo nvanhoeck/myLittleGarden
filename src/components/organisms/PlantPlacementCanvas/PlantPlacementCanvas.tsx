@@ -45,6 +45,8 @@ interface PlantPlacementCanvasProps {
     carriedPlants?: readonly PlacedPlantData[];
     /** Label on a carried plant, e.g. "uit lente" */
     carriedLabelOf?: (plant: PlacedPlantData) => string;
+    /** Show the "add plants" hint when nothing is drawn; a screen with its own empty message turns it off */
+    showEmptyState?: boolean;
     layerDimensions?: { width: number; height: number };
     /** Footprint per placed-plant instance id, for every plant (a plant without one is not drawn) */
     footprints: ReadonlyMap<string, CanvasFootprint>;
@@ -723,6 +725,7 @@ export function PlantPlacementCanvas({
     plants: filteredPlants,
     carriedPlants = EMPTY_PLANTS,
     carriedLabelOf,
+    showEmptyState = true,
     layerDimensions,
     footprints,
     conflictIds,
@@ -982,10 +985,10 @@ export function PlantPlacementCanvas({
                                             );
                                         })}
 
-                                        {plants.length === 0 && carriedPlants.length === 0 && (
+                                        {showEmptyState && plants.length === 0 && carriedPlants.length === 0 && (
                                             <View style={styles.emptyState}>
                                                 <Text style={styles.emptyIcon}>🌱</Text>
-                                                <Text style={styles.emptyText}>Voeg planten toe</Text>
+                                                <Text style={styles.emptyText}>{t('componentDetail.canvasEmpty')}</Text>
                                             </View>
                                         )}
                                     </View>

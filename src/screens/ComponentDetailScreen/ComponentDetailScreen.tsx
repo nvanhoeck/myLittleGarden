@@ -28,6 +28,8 @@ import { useSeasonCanvas } from './useSeasonCanvas';
 
 /** How long the result snackbar stays */
 const SNACKBAR_DURATION_MS = 4000;
+/** Lets the busy spinner render before the optimizer takes the JS thread */
+const OPTIMIZE_DEFER_MS = 50;
 
 function getComponentDimensions(component: ComponentData): { width: number; height: number } {
   if (isGardenBox(component) || isRectangularTower(component)) {
@@ -70,6 +72,9 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   const [isEditMode, setIsEditMode] = useState(false);
   const [canvasKey, setCanvasKey] = useState(0);
   const [selectedPlantInstance, setSelectedPlantInstance] = useState<{ id: string; name: string } | null>(null);
+  const [optimizing, setOptimizing] = useState(false);
+  const optimizingRef = useRef(false);
+  const optimizeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [patchEditPlantId, setPatchEditPlantId] = useState<string | null>(null);
   const [patchEditOriginal, setPatchEditOriginal] = useState<{ widthInCm: number; heightInCm: number; rotationDeg: number } | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
@@ -88,6 +93,8 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   );
   const tabs = useMemo(() => (planning ? buildSeasonTabs(planning, translate) : []), [planning, translate]);
   const status = planning?.statusOf(season) ?? 'notPlanned';
+  // A patch edit is confirmed or cancelled before the season, year or layer changes
+  const editingPatch = patchEditPlantId !== null;
   const canOptimize = (planning?.plantsStartingIn(season).length ?? 0) > 0;
 
   const yearRange = useMemo(
@@ -113,6 +120,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
 
   useEffect(() => () => {
     if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
+    if (optimizeTimer.current) clearTimeout(optimizeTimer.current);
   }, []);
 
   const changeYear = useCallback(
@@ -125,13 +133,24 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
 
   const nameOf = useCallback((plantId: string) => getPlantById(plantId)?.nameNl ?? t('componentDetail.unknownPlant'), [getPlantById, t]);
 
+  // The search runs on the JS thread for a second or more: show the spinner first, then run it
   const handleOptimize = useCallback(() => {
-    const shares = actions.optimizeSeason(componentId, year, season);
-    if (shares === null) return;
-    setCanvasKey((key) => key + 1);
-    setResultMessage(optimizeResultMessage(shares, nameOf, translate));
-    if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
-    snackbarTimer.current = setTimeout(() => setResultMessage(null), SNACKBAR_DURATION_MS);
+    if (optimizingRef.current) return;
+    optimizingRef.current = true;
+    setOptimizing(true);
+    optimizeTimer.current = setTimeout(() => {
+      try {
+        const shares = actions.optimizeSeason(componentId, year, season);
+        if (shares === null) return;
+        setCanvasKey((key) => key + 1);
+        setResultMessage(optimizeResultMessage(shares, nameOf, translate));
+        if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
+        snackbarTimer.current = setTimeout(() => setResultMessage(null), SNACKBAR_DURATION_MS);
+      } finally {
+        optimizingRef.current = false;
+        setOptimizing(false);
+      }
+    }, OPTIMIZE_DEFER_MS);
   }, [actions, componentId, year, season, nameOf, translate]);
 
   const handleOpenChat = useCallback(() => {
@@ -247,19 +266,26 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           year={year}
           onPrev={() => changeYear(year - 1)}
           onNext={() => changeYear(year + 1)}
-          canPrev={year > yearRange.first}
-          canNext={year < yearRange.last}
+          canPrev={!editingPatch && year > yearRange.first}
+          canNext={!editingPatch && year < yearRange.last}
           previousLabel={t('planning.year.previous')}
           nextLabel={t('planning.year.next')}
         />
       </View>
 
-      <SeasonTabs tabs={tabs} selected={season} onSelect={setSeason} />
+      <SeasonTabs tabs={tabs} selected={season} onSelect={(next) => { if (!editingPatch) setSeason(next); }} />
 
       {status === 'outdated' && (
         <View className="flex-row items-center px-4 py-2 bg-orange-900/40 border-b border-orange-700" testID="outdated-banner">
           <Text className="flex-1 text-white text-sm">{t('componentDetail.outdated')}</Text>
-          <Pressable onPress={handleOptimize} className="h-12 px-3 items-center justify-center" accessibilityRole="button" testID="reoptimize-button">
+          <Pressable
+            onPress={handleOptimize}
+            disabled={optimizing || editingPatch}
+            className={`h-12 px-3 items-center justify-center ${optimizing || editingPatch ? 'opacity-40' : ''}`}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: optimizing || editingPatch, busy: optimizing }}
+            testID="reoptimize-button"
+          >
             <Text className="text-label-large text-primary-container">{t('componentDetail.reoptimize')}</Text>
           </Pressable>
         </View>
@@ -272,10 +298,11 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
               numberOfLayers={numberOfLayers}
               selectedLayer={selectedLayer}
               onLayerSelect={(layer) => {
+                if (editingPatch) return;
                 setSelectedLayer(layer);
                 setShowLayerOverview(false);
               }}
-              onOverviewPress={() => setShowLayerOverview(true)}
+              onOverviewPress={() => { if (!editingPatch) setShowLayerOverview(true); }}
             />
           </View>
           <Text className="text-gray-500 text-xs pr-4">
@@ -290,6 +317,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           component={component}
           plants={canvas.ownPlants}
           carriedPlants={canvas.carriedPlants}
+          showEmptyState={false}
           carriedLabelOf={(plant) => {
             const start = planning.startSeasonOf(plant.plantId);
             return start ? t('componentDetail.carriedFrom', { season: seasonLabel(start, translate).toLowerCase() }) : '';
@@ -360,7 +388,8 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
         <PlanningButton
           label={t('componentDetail.optimize')}
           variant="tonal"
-          disabled={!canOptimize}
+          disabled={!canOptimize || editingPatch}
+          loading={optimizing}
           onPress={handleOptimize}
           testID="optimize-button"
         />

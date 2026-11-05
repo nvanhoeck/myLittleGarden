@@ -186,6 +186,7 @@
   "componentDetail": {
     "notFound": "Component niet gevonden",
     "noPlants": "Tik op + om planten toe te voegen",
+    "canvasEmpty": "Voeg planten toe",
     "addPlant": "Plant toevoegen",
     "emptyPlantsMessage": "Nog geen planten geplaatst. Voeg planten toe om je component te vullen.",
     "unknownPlant": "Onbekende plant",
