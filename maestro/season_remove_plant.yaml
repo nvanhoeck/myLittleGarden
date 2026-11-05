@@ -1,0 +1,19 @@
+appId: com.mylittlegarden.app
+name: Season planning - removing a plant asks for confirmation
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+- tapOn:
+    id: "planning-remove-sla"
+- assertVisible:
+    text: "Sla verwijderen\?"
+- tapOn:
+    text: "Annuleren"
+- assertVisible:
+    id: "planning-plant-sla"
+- tapOn:
+    id: "planning-remove-sla"
+- tapOn:
+    text: "Verwijderen"
+- assertNotVisible:
+    id: "planning-plant-sla"

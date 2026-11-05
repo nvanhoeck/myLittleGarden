@@ -1,0 +1,13 @@
+appId: com.mylittlegarden.app
+name: Season planning - plants get their seasons from the calendar
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+# Each plant shows the seasons it grows in
+- assertVisible:
+    text: "(Lente|Zomer|Herfst|Winter)( · (Lente|Zomer|Herfst|Winter))*"
+# Every plant with a calendar has a ratio stepper in its start season
+- assertVisible:
+    id: "ratio-.*-tomaat"
+- assertVisible:
+    id: "ratio-.*-sla"

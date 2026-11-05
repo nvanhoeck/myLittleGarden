@@ -1,0 +1,21 @@
+appId: com.mylittlegarden.app
+name: Season planning - a plant growing on is shown dimmed in the next season
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+# Tomaat grows over more than one season, so a later season lists it as carried
+- assertVisible:
+    id: "carried-row-.*-tomaat"
+- back
+- runFlow: subflows/select_season_with_plants.yaml
+- tapOn:
+    id: "optimize-button"
+- extendedWaitUntil:
+    visible:
+      id: "optimize-snackbar"
+    timeout: 10000
+# Open a season that holds plants carried over from an earlier one
+- tapOn:
+    text: ".*, [1-9]\d* doorlopend"
+- assertVisible:
+    id: "carried-plant-.*"

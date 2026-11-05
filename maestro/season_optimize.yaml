@@ -1,0 +1,26 @@
+appId: com.mylittlegarden.app
+name: Season planning - optimizing a season fills the canvas
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+- tapOn:
+    id: "ratio-.*-sla-increase"
+- assertVisible:
+    id: "ratio-.*-sla-value"
+    text: "2"
+- back
+- extendedWaitUntil:
+    visible:
+      id: "component-detail-screen"
+    timeout: 5000
+- runFlow: subflows/select_season_with_plants.yaml
+- tapOn:
+    id: "optimize-button"
+- extendedWaitUntil:
+    visible:
+      id: "optimize-snackbar"
+    timeout: 10000
+- assertVisible:
+    text: "[1-9]\d* (plant|planten) geplaatst.*"
+- assertVisible:
+    id: "planning-footprint-.*"

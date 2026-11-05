@@ -1,0 +1,32 @@
+appId: com.mylittlegarden.app
+---
+# Shared: on the Planning screen, add Tomaat and Sla and come back.
+- tapOn:
+    id: "planning-add-plant-button"
+- extendedWaitUntil:
+    visible:
+      id: "plant-selection-screen"
+    timeout: 5000
+- tapOn:
+    id: "plant-search-input"
+- inputText: "Tomaat"
+- hideKeyboard
+- tapOn:
+    id: "plant-tile-tomaat"
+- tapOn:
+    id: "plant-search-input"
+- eraseText: 10
+- inputText: "Sla"
+- hideKeyboard
+- tapOn:
+    id: "plant-tile-sla"
+- assertVisible:
+    text: "2 planten toevoegen"
+- tapOn:
+    id: "add-plants-button"
+- extendedWaitUntil:
+    visible:
+      id: "planning-plant-tomaat"
+    timeout: 5000
+- assertVisible:
+    id: "planning-plant-sla"

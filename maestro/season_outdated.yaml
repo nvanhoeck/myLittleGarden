@@ -1,0 +1,31 @@
+appId: com.mylittlegarden.app
+name: Season planning - changing a ratio marks the season outdated
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+- back
+- runFlow: subflows/select_season_with_plants.yaml
+- tapOn:
+    id: "optimize-button"
+- extendedWaitUntil:
+    visible:
+      id: "optimize-snackbar"
+    timeout: 10000
+- tapOn:
+    id: "open-planning-button"
+# The optimized season holds Tomaat or Sla (or both): changing both ratios outdates it
+- tapOn:
+    id: "ratio-.*-tomaat-increase"
+- tapOn:
+    id: "ratio-.*-sla-increase"
+- assertVisible:
+    text: "Verouderd"
+- back
+- assertVisible:
+    id: "outdated-banner"
+- tapOn:
+    id: "reoptimize-button"
+- extendedWaitUntil:
+    notVisible:
+      id: "outdated-banner"
+    timeout: 10000

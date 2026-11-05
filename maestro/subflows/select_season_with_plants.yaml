@@ -1,0 +1,5 @@
+appId: com.mylittlegarden.app
+---
+# Shared: on the component detail screen, open a season tab that has plants to place.
+- tapOn:
+    text: ".*, [1-9]\d* (plant|planten) om te plaatsen, .*"

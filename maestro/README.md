@@ -40,6 +40,25 @@ This directory contains Maestro UI test flows for the My Little Garden Android a
    - Deletes a component with cancel-then-confirm
    - Uses `clearState: false`; run `environment_setup_happy_path.yaml` first on a fresh install
 
+### Season Planning Tests
+
+6. **season_add_plants.yaml**
+   - Adds Tomaat and Sla to a component's planning; each plant shows its derived seasons and a ratio stepper
+
+7. **season_optimize.yaml**
+   - Changes a ratio, optimizes a season on the component detail screen and checks the placed plants
+
+8. **season_carry_over.yaml**
+   - Checks that a plant growing on is listed as carried and shown dimmed in a later season
+
+9. **season_outdated.yaml**
+   - Changing ratios marks an optimized season outdated; re-optimizing clears the banner
+
+10. **season_remove_plant.yaml**
+    - Removing a plant from the planning asks for confirmation (cancel keeps it, confirm removes it)
+
+Shared steps live in `subflows/` (`open_planning`, `add_plants_to_planning`, `select_season_with_plants`). Flows never hardcode a season: frost dates come from the date picker defaults and season tabs are picked through their accessibility label.
+
 ## Running Tests
 
 ### Prerequisites
