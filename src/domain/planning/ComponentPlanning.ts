@@ -1,7 +1,7 @@
 import type { ComponentData } from '../../types/component.types.ts';
 import type { PlacedPlantData, PlantData } from '../../types/plant.types.ts';
 import type { PlantToPlanData } from '../../types/planning.types.ts';
-import { getTowerLayerDimensions } from '../component/towerLayerGeometry.ts';
+import { plantingAreaOf } from './ComponentArea.ts';
 import { placePlants } from './AutoPlacement.ts';
 import type { FixedPlant, PlacementCandidate, PlacementResult, PlantingArea, UnplacedCandidate } from './AutoPlacement.ts';
 import { GrowingPeriod } from './GrowingPeriod.ts';
@@ -59,30 +59,7 @@ export function startPlantingOver(input: ComponentPlanningInput): ComponentPlann
   return planComponent(input, 'choosePeriods');
 }
 
-/** The inner area of a component or tower layer, as the canvas draws it */
-export function plantingAreaOf(component: ComponentData, layerIndex?: number): PlantingArea {
-  const border = 2 * component.borderWidthInCm;
-  const layer = layerIndex ?? 0;
-
-  switch (component.type) {
-    case 'gardenBox':
-      return {
-        shape: 'rectangle',
-        widthCm: Math.max(0, component.widthInCm - border),
-        lengthCm: Math.max(0, component.lengthInCm - border),
-      };
-    case 'pot':
-      return { shape: 'circle', diameterCm: Math.max(0, component.diameterInCm - border) };
-    case 'rectangularTower': {
-      const dims = getTowerLayerDimensions(component.widthInCm - border, component.lengthInCm - border, layer);
-      return { shape: 'rectangle', widthCm: dims.width, lengthCm: dims.height };
-    }
-    case 'circularTower': {
-      const dims = getTowerLayerDimensions(component.diameterInCm - border, component.diameterInCm - border, layer);
-      return { shape: 'circle', diameterCm: dims.width };
-    }
-  }
-}
+export { plantingAreaOf };
 
 type PeriodChoice = 'keepPeriods' | 'choosePeriods';
 
