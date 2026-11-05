@@ -3,8 +3,8 @@
  * Pure: no Zustand, no AsyncStorage, no "@/" runtime imports.
  */
 import type { ComponentData } from '../../types/component.types';
-import type { PlanningData } from '../../types/planning.types';
-import { planningDataSchema } from '../../schemas/planningSchema.ts';
+import type { PlacementData, PlanningData, Season, SeasonPlanData, SeasonStatus } from '../../types/planning.types';
+import { placementDataSchema } from '../../schemas/planningSchema.ts';
 
 /**
  * Version 2: canvas position and rotation removed from components.
@@ -20,6 +20,9 @@ export interface PersistedComponentState {
 
 const EMPTY_STATE: PersistedComponentState = { components: [] };
 const YEAR_KEY = /^\d{4}$/;
+const SEASONS: readonly Season[] = ['spring', 'summer', 'autumn', 'winter'];
+const STATUSES: readonly SeasonStatus[] = ['notPlanned', 'planned', 'outdated'];
+const EMPTY_SEASON: SeasonPlanData = { ratios: {}, placements: [], status: 'notPlanned' };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -30,15 +33,51 @@ function stripCanvasFields(component: Record<string, unknown>): Record<string, u
   return rest;
 }
 
-/** The stored plannings that are valid; others are dropped */
+/**
+ * Salvages one season: valid ratios and placements stay, bad entries go. A
+ * planned season that lost an entry is outdated, so the user sees it needs a
+ * new run.
+ */
+function salvageSeason(value: unknown): SeasonPlanData {
+  if (!isRecord(value)) {
+    return EMPTY_SEASON;
+  }
+  const ratioEntries = isRecord(value.ratios) ? Object.entries(value.ratios) : [];
+  const ratios = Object.fromEntries(ratioEntries.filter(([, ratio]) => Number.isInteger(ratio) && (ratio as number) >= 1)) as Record<string, number>;
+  const placementEntries = Array.isArray(value.placements) ? value.placements : [];
+  const placements: PlacementData[] = placementEntries.flatMap((entry) => {
+    const parsed = placementDataSchema.safeParse(entry);
+    return parsed.success ? [parsed.data] : [];
+  });
+  const status = STATUSES.find((candidate) => candidate === value.status) ?? 'notPlanned';
+  const droppedAny = Object.keys(ratios).length < ratioEntries.length || placements.length < placementEntries.length;
+  return { ratios, placements, status: droppedAny && status === 'planned' ? 'outdated' : status };
+}
+
+/** Salvages one year: null when it has no usable plants list or seasons */
+function salvagePlanning(value: unknown): PlanningData | null {
+  if (!isRecord(value) || !Array.isArray(value.plants) || !isRecord(value.seasons)) {
+    return null;
+  }
+  const seasons = value.seasons;
+  const plants = value.plants.filter((plant): plant is string => typeof plant === 'string' && plant.length > 0);
+  const salvaged = SEASONS.map((season) => salvageSeason(seasons[season]));
+  const droppedPlant = plants.length < value.plants.length;
+  const [spring, summer, autumn, winter] = droppedPlant
+    ? salvaged.map((season) => (season.status === 'planned' ? { ...season, status: 'outdated' as const } : season))
+    : salvaged;
+  return { plants, seasons: { spring, summer, autumn, winter } };
+}
+
+/** The stored plannings that can be salvaged, entry by entry; others are dropped */
 function validPlannings(value: unknown): Record<string, PlanningData> {
   if (!isRecord(value)) {
     return {};
   }
   return Object.fromEntries(
     Object.entries(value).flatMap(([year, data]): [string, PlanningData][] => {
-      const parsed = planningDataSchema.safeParse(data);
-      return YEAR_KEY.test(year) && parsed.success ? [[year, parsed.data]] : [];
+      const planning = YEAR_KEY.test(year) ? salvagePlanning(data) : null;
+      return planning === null ? [] : [[year, planning]];
     }),
   );
 }
