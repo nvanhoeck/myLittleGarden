@@ -7,7 +7,8 @@
  * - Positive values = weeks AFTER last spring frost
  */
 
-import type { PlantData } from '@/types/plant.types';
+import type { PlantData } from '../types/plant.types.ts';
+import { frostDayOf, plantingDatesOf } from '../domain/planning/PlantCalendar.ts';
 
 /**
  * Date range for a growing calendar phase
@@ -73,27 +74,19 @@ export function calculateGrowingCalendar(
   plant: PlantData,
   lastSpringFrost: string
 ): GrowingCalendarData {
-  const frostDate = new Date(lastSpringFrost);
+  const frostDay = frostDayOf(lastSpringFrost);
+  if (frostDay === null) {
+    return { indoorStart: null, transplant: null, directSow: null };
+  }
 
-  // Calculate indoor start date range
-  const indoorStart = plant.indoorStartWeeks !== null
-    ? createDateRange(addWeeks(frostDate, plant.indoorStartWeeks))
-    : null;
-
-  // Calculate transplant date range
-  const transplant = plant.transplantWeeks !== null
-    ? createDateRange(addWeeks(frostDate, plant.transplantWeeks))
-    : null;
-
-  // Calculate direct sow date range
-  const directSow = plant.directSowWeeks !== null
-    ? createDateRange(addWeeks(frostDate, plant.directSowWeeks))
-    : null;
+  // The same dates the season planning uses
+  const dates = plantingDatesOf(plant, frostDay, Number(lastSpringFrost.slice(0, 4)));
+  const around = (date: Date | null): DateRange | null => (date === null ? null : createDateRange(date));
 
   return {
-    indoorStart,
-    transplant,
-    directSow,
+    indoorStart: around(dates.indoorStart),
+    transplant: around(dates.transplant),
+    directSow: around(dates.directSow),
   };
 }
 
