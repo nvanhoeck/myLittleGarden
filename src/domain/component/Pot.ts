@@ -140,8 +140,7 @@ export class Pot {
       createdAt: this._createdAt.toISOString(),
       diameterInCm: this._diameterInCm,
       borderWidthInCm: this._borderWidthInCm,
-      plants: [],
-      plantsToPlan: [],
+      plannings: {},
     };
   }
 }

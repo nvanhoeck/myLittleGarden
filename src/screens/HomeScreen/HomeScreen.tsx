@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { HomeScreenProps } from '@/navigation/navigationTypes';
 import { useAllComponents, useComponentStore } from '@/stores';
 import { usePlantStore } from '@/stores/plantStore';
+import { useCurrentPlacementsById } from '@/stores/planningContext';
 import { ComponentCreationModal, ComponentSlide } from '@/components/organisms';
 import { ComponentListRow } from '@/components/molecules';
 import type { ComponentData } from '@/types';
@@ -26,6 +27,8 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
     () => [...allComponents].sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
     [allComponents],
   );
+
+  const placementsById = useCurrentPlacementsById(components);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isCreationModalVisible, setIsCreationModalVisible] = useState(false);
@@ -126,6 +129,7 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
     ({ item }: { item: ComponentData }) => (
       <ComponentSlide
         component={item}
+        plants={placementsById.get(item.id) ?? []}
         getPlantById={getPlantById}
         slideWidth={windowWidth}
         onOpen={handleOpen}
@@ -133,14 +137,19 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
         onDelete={handleDelete}
       />
     ),
-    [getPlantById, windowWidth, handleOpen, handleEdit, handleDelete],
+    [placementsById, getPlantById, windowWidth, handleOpen, handleEdit, handleDelete],
   );
 
   const renderRow = useCallback(
     ({ item, index }: { item: ComponentData; index: number }) => (
-      <ComponentListRow component={item} isActive={index === clampedIndex} onPress={handleRowPress} />
+      <ComponentListRow
+        component={item}
+        plantCount={placementsById.get(item.id)?.length ?? 0}
+        isActive={index === clampedIndex}
+        onPress={handleRowPress}
+      />
     ),
-    [clampedIndex, handleRowPress],
+    [placementsById, clampedIndex, handleRowPress],
   );
 
   const keyExtractor = useCallback((item: ComponentData) => item.id, []);

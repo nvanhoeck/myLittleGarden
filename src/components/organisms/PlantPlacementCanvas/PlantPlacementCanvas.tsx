@@ -750,7 +750,7 @@ export function PlantPlacementCanvas({
     const componentInnerDimensions = useMemo(() => getInnerDimensions(component), [component]);
     const innerDimensions = layerDimensions ?? componentInnerDimensions;
     const isCircular = isPot(component) || isCircularTower(component);
-    const plants = filteredPlants ?? (component.plants || []);
+    const plants = filteredPlants ?? [];
 
     // While a patch is being edited, disable all drag-and-drop
     const draggingAllowed = isEditMode && patchEditPlantId == null;

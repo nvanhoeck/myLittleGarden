@@ -28,6 +28,8 @@ interface LayerOverviewModalProps {
   visible: boolean;
   onClose: () => void;
   component: ComponentData;
+  /** The plants of the season shown on the detail screen */
+  plants: readonly PlacedPlantData[];
 }
 
 interface LayerViewProps {
@@ -191,6 +193,7 @@ export function LayerOverviewModal({
   visible,
   onClose,
   component,
+  plants,
 }: LayerOverviewModalProps): React.JSX.Element | null {
   const { t } = useTranslation();
   const getPlantById = usePlantStore((state) => state.getPlantById);
@@ -221,8 +224,6 @@ export function LayerOverviewModal({
   const layers = useMemo(() => {
     return Array.from({ length: numberOfLayers }, (_, i) => numberOfLayers - 1 - i);
   }, [numberOfLayers]);
-
-  const plants = component.plants || [];
 
   return (
     <Modal

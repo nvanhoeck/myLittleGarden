@@ -1,11 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PlantFootprint, conflictingPlantIds, footprintOf, footprintsConflict, minimumPatchSideCm, plantDistanceCm } from './PlantFootprint.ts';
-import { GrowingPeriod } from './GrowingPeriod.ts';
 import type { PlantData } from '../../types/plant.types.ts';
-
-const period = (startWeek: number, endWeek: number): GrowingPeriod =>
-  GrowingPeriod.create({ year: 2026, startWeek, endWeek, method: 'transplant' });
 
 const square30 = PlantFootprint.of(30, 30);
 
@@ -56,11 +52,11 @@ describe('PlantFootprint', () => {
     assert.deepEqual(square30.boundsAt(50, 20), { left: 35, top: 5, right: 65, bottom: 35 });
   });
 
-  test('given two footprints that overlap in space and time, they conflict', () => {
+  test('given two footprints that overlap, they conflict', () => {
     assert.ok(
       footprintsConflict(
-        { footprint: square30, xCm: 15, yCm: 15, period: period(10, 20) },
-        { footprint: square30, xCm: 40, yCm: 15, period: period(20, 30) },
+        { footprint: square30, xCm: 15, yCm: 15 },
+        { footprint: square30, xCm: 40, yCm: 15 },
       ),
     );
   });
@@ -68,17 +64,8 @@ describe('PlantFootprint', () => {
   test('given two footprints whose edges only touch, they do not conflict', () => {
     assert.ok(
       !footprintsConflict(
-        { footprint: square30, xCm: 15, yCm: 15, period: period(10, 20) },
-        { footprint: square30, xCm: 45, yCm: 15, period: period(10, 20) },
-      ),
-    );
-  });
-
-  test('given two footprints at the same spot in consecutive periods, they do not conflict', () => {
-    assert.ok(
-      !footprintsConflict(
-        { footprint: square30, xCm: 15, yCm: 15, period: period(10, 20) },
-        { footprint: square30, xCm: 15, yCm: 15, period: period(21, 30) },
+        { footprint: square30, xCm: 15, yCm: 15 },
+        { footprint: square30, xCm: 45, yCm: 15 },
       ),
     );
   });
@@ -144,19 +131,18 @@ describe('footprintOf', () => {
 });
 
 describe('conflictingPlantIds', () => {
-  const placed = (id: string, xCm: number, startWeek: number, endWeek: number) => ({
+  const placed = (id: string, xCm: number) => ({
     id,
     positionX: xCm,
     positionY: 15,
-    growingPeriod: { year: 2026, startWeek, endWeek, method: 'transplant' as const },
   });
 
-  test('marks plants whose footprints overlap in a shared week; touching or separate weeks do not count', () => {
+  test('marks plants whose footprints overlap; touching ones do not count', () => {
     const ids = conflictingPlantIds(
-      [placed('a', 15, 10, 20), placed('b', 40, 20, 30), placed('c', 70, 10, 30), placed('d', 15, 21, 30)],
+      [placed('a', 15), placed('b', 40), placed('c', 70), placed('d', 15)],
       () => square30,
     );
-    // a-b share week 20 and overlap; b-d share weeks 21-30 and overlap; c only touches b; a and d never share a week
+    // a, b and d overlap each other; c only touches b
     assert.deepEqual([...ids].sort(), ['a', 'b', 'd']);
   });
 });

@@ -5,8 +5,7 @@
  */
 
 import type { SunDirection } from './environment.types';
-import type { PlacedPlantData } from './plant.types';
-import type { PlantToPlanData } from './planning.types';
+import type { PlanningData } from './planning.types';
 
 /**
  * Types of garden components available
@@ -23,8 +22,7 @@ export interface BaseComponentData {
   readonly sunDirection: SunDirection;
   readonly createdAt: string; // ISO date string
   readonly borderWidthInCm: number;
-  readonly plants: readonly PlacedPlantData[]; // Plants placed in this component
-  readonly plantsToPlan: readonly PlantToPlanData[]; // Plants waiting for auto-placement
+  readonly plannings: Readonly<Record<string, PlanningData>>; // Planning per year, keyed "2026"
 }
 
 /**

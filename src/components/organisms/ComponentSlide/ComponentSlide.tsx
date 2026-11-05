@@ -23,6 +23,8 @@ const ICON_PX = 20;
 
 interface ComponentSlideProps {
   component: ComponentData;
+  /** Plants growing in the component today */
+  plants: readonly PlacedPlantData[];
   getPlantById: (plantId: string) => PlantData | undefined;
   slideWidth: number;
   onOpen: (component: ComponentData) => void;
@@ -126,6 +128,7 @@ function LayerDrawing({
 
 export function ComponentSlide({
   component,
+  plants,
   getPlantById,
   slideWidth,
   onOpen,
@@ -157,14 +160,14 @@ export function ComponentSlide({
 
   const plantsByLayer = useMemo(() => {
     const map = new Map<number, PlacedPlantData[]>();
-    for (const plant of component.plants) {
+    for (const plant of plants) {
       const index = isTower ? plant.layerIndex ?? 0 : 0;
       const list = map.get(index) ?? [];
       list.push(plant);
       map.set(index, list);
     }
     return map;
-  }, [component.plants, isTower]);
+  }, [plants, isTower]);
 
   return (
     <View style={{ width: slideWidth }} className="items-center px-4" testID={slideTestID}>
@@ -233,7 +236,7 @@ export function ComponentSlide({
         {t(`components.${component.type}`)} • {getComponentDimensionsLabel(component)}
       </Text>
       <Text className="text-green-500 text-body-small mt-1">
-        ☀ {component.sunDirection} • {t('component.plantCount', { count: component.plants.length })}
+        ☀ {component.sunDirection} • {t('component.plantCount', { count: plants.length })}
         {isTower ? ` • ${t('component.layers', { count: numberOfLayers })}` : ''}
       </Text>
 

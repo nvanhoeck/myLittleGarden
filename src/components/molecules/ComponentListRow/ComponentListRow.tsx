@@ -10,6 +10,8 @@ import { getComponentTypeIcon, getComponentDimensionsLabel } from '@/utils/compo
 
 interface ComponentListRowProps {
   component: ComponentData;
+  /** Plants growing in the component today */
+  plantCount: number;
   isActive: boolean;
   onPress: (component: ComponentData) => void;
   testID?: string;
@@ -17,6 +19,7 @@ interface ComponentListRowProps {
 
 export function ComponentListRow({
   component,
+  plantCount,
   isActive,
   onPress,
   testID,
@@ -46,7 +49,7 @@ export function ComponentListRow({
           {component.name}
         </Text>
         <Text className="text-green-400 text-xs">
-          {getComponentDimensionsLabel(component)} • {t('component.plantCount', { count: component.plants.length })}
+          {getComponentDimensionsLabel(component)} • {t('component.plantCount', { count: plantCount })}
         </Text>
       </View>
       <View className="items-center ml-2">

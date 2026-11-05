@@ -1,6 +1,4 @@
 import type { PlacedPlantData, PlantData } from '../../types/plant.types.ts';
-import { GrowingPeriod } from './GrowingPeriod.ts';
-import type { GrowingPeriodData } from './GrowingPeriod.ts';
 
 /** Axis-aligned rectangle in cm, measured from the top-left of the area */
 export interface Bounds {
@@ -17,12 +15,11 @@ export interface PatchShape {
   readonly rotationDeg: number;
 }
 
-/** A footprint at a position during a period */
+/** A footprint at a position */
 export interface PositionedFootprint {
   readonly footprint: PlantFootprint;
   readonly xCm: number;
   readonly yCm: number;
-  readonly period: GrowingPeriodData;
 }
 
 /** The catalog fields that decide a plant's footprint */
@@ -135,9 +132,8 @@ export class PlantFootprint {
 }
 
 /**
- * The footprint of a placed plant or plant to plan, from the catalog and its
- * stored patch fields. This is the one rule the canvas draws and auto-placement
- * uses. Plants missing from the catalog get the canvas default spacing.
+ * The footprint of a placed plant, from the catalog and its stored patch
+ * fields. This is the one rule the canvas draws and the season placement uses. Plants missing from the catalog get the canvas default spacing.
  */
 export function footprintOf(plant: FootprintTraits | undefined, patchFields: PatchFields): PlantFootprint {
   const known = plant !== undefined && plant.spacingRadiusCm > 0
@@ -155,16 +151,13 @@ export function boundsOverlap(a: Bounds, b: Bounds): boolean {
   return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 }
 
-/** Two plants conflict when their footprints overlap in space during a shared week */
+/** Two plants conflict when their footprints overlap */
 export function footprintsConflict(a: PositionedFootprint, b: PositionedFootprint): boolean {
-  return (
-    GrowingPeriod.sharedWeeks(a.period, b.period) > 0 &&
-    boundsOverlap(a.footprint.boundsAt(a.xCm, a.yCm), b.footprint.boundsAt(b.xCm, b.yCm))
-  );
+  return boundsOverlap(a.footprint.boundsAt(a.xCm, a.yCm), b.footprint.boundsAt(b.xCm, b.yCm));
 }
 
 /** What conflict detection needs of a placed plant */
-type PlantInPlace = Pick<PlacedPlantData, 'id' | 'positionX' | 'positionY' | 'growingPeriod'>;
+type PlantInPlace = Pick<PlacedPlantData, 'id' | 'positionX' | 'positionY'>;
 
 /** The ids of the plants whose footprint conflicts with another plant's */
 export function conflictingPlantIds<P extends PlantInPlace>(
@@ -176,7 +169,6 @@ export function conflictingPlantIds<P extends PlantInPlace>(
     footprint: footprintOfPlant(plant),
     xCm: plant.positionX,
     yCm: plant.positionY,
-    period: plant.growingPeriod,
   }));
 
   const ids = new Set<string>();

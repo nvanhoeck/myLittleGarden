@@ -19,8 +19,8 @@ export {
   isCircularTower,
   isTower,
 } from './componentStore';
-export { usePlanningStore, useUnplacedOfLastRun, unplacedOf } from './planningStore';
-export type { PlanningScope } from './planningStore';
+export { usePlanningStore } from './planningStore';
+export type { SeasonKey } from './planningStore';
 export {
   usePlantStore,
   useAllPlants,

@@ -19,19 +19,18 @@ import {
   RectangularTower,
   CircularTower,
 } from '@/domain/component';
-import * as Planning from '@/domain/planning';
+import { Planning, optimizeSeason as optimizeSeasonOf, plantingAreasOf } from '@/domain/planning';
+import type { PlantShare, Season } from '@/domain/planning';
 import { generateId } from '@/utils/idGenerator';
 import {
   migrateComponentState,
   mergePersistedComponentState,
   COMPONENT_STORE_VERSION,
-  type PlantCatalogLookup,
 } from './migrations/componentStoreMigrations';
 import { usePlantStore } from './plantStore';
 import { useEnvironmentStore } from './environmentStore';
 import { usePlanningStore } from './planningStore';
-
-const catalogLookup: PlantCatalogLookup = (plantId) => usePlantStore.getState().getPlantById(plantId);
+import { seasonsOfYear } from './planningContext';
 
 /**
  * Component store state interface
@@ -74,53 +73,51 @@ interface ComponentState {
   updateComponent: (id: string, data: Partial<ComponentData>) => void;
   removeComponent: (id: string) => void;
   clearAllComponents: () => void;
-  togglePlantLock: (componentId: string, plantInstanceId: string) => void;
-  lockAllPlants: (componentId: string) => void;
-  unlockAllPlants: (componentId: string) => void;
-  updatePatchDimensions: (
-    componentId: string,
-    plantInstanceId: string,
-    patchWidthInCm: number,
-    patchHeightInCm: number,
-    patchRotationDeg: number,
-  ) => void;
 
-  // Actions - Planning
-  addPlantsToPlan: (componentId: string, plantId: string, quantity: number, year: number, layerIndex?: number) => void;
-  removePlantToPlan: (componentId: string, plantToPlanId: string) => void;
-  /** Rearrange: auto-places the plants of a year/layer; placed plants keep their period. Null when the component is gone. */
-  rearrangePlanting: (componentId: string, year: number, layerIndex?: number) => Planning.PlanningRunCounts | null;
-  /** Start over: auto-places the plants of a year/layer from scratch; locked plants stay. Null when the component is gone. */
-  startPlantingOver: (componentId: string, year: number, layerIndex?: number) => Planning.PlanningRunCounts | null;
+  // Actions - Planning (per component, year and season)
+  addPlantsToPlanning: (componentId: string, year: number, plantIds: readonly string[]) => void;
+  removePlantFromPlanning: (componentId: string, year: number, plantId: string) => void;
+  setRatio: (componentId: string, year: number, season: Season, plantId: string, ratio: number) => void;
+  /** Places the plants starting in the season by ratio; null when the component is gone */
+  optimizeSeason: (componentId: string, year: number, season: Season) => readonly PlantShare[] | null;
+  movePlacement: (componentId: string, year: number, season: Season, placementId: string, xCm: number, yCm: number) => void;
+  removePlacement: (componentId: string, year: number, season: Season, placementId: string) => void;
+  togglePlacementLock: (componentId: string, year: number, season: Season, placementId: string) => void;
+  setAllPlacementsLocked: (componentId: string, year: number, season: Season, locked: boolean) => void;
+  resizePatch: (
+    componentId: string,
+    year: number,
+    season: Season,
+    placementId: string,
+    widthCm: number,
+    heightCm: number,
+    rotationDeg: number,
+  ) => void;
+  /** After a new frost date: moves ratios to the plants' new start seasons */
+  reconcilePlannings: () => void;
 
   // Selectors
   getComponentById: (id: string) => ComponentData | undefined;
   getComponentsByType: (type: ComponentType) => ComponentData[];
 }
 
-/**
- * What the planning use cases need besides the component: the plant catalog,
- * the garden's last spring frost day and the current time.
- */
-function planningInputFor(component: ComponentData, year: number, layerIndex?: number): Planning.ComponentPlanningInput {
-  return {
-    component,
-    year,
-    layerIndex,
-    plantOf: (plantId) => usePlantStore.getState().getPlantById(plantId),
-    lastSpringFrost: Planning.frostDayOf(useEnvironmentStore.getState().lastSpringFrost),
-    now: new Date(),
-  };
+function planningOf(component: ComponentData, year: number): Planning {
+  return Planning.from(component.plannings[String(year)], seasonsOfYear(year));
 }
 
-function withOutcome(
+/** Applies a change to one component's planning of a year; unchanged plannings keep the component as it is */
+function withPlanning(
   components: ComponentData[],
   componentId: string,
-  outcome: Planning.ComponentPlanningOutcome,
+  year: number,
+  change: (planning: Planning) => Planning,
 ): ComponentData[] {
-  return components.map((comp) =>
-    comp.id === componentId ? { ...comp, plants: outcome.plants, plantsToPlan: outcome.plantsToPlan } : comp
-  );
+  return components.map((comp) => {
+    if (comp.id !== componentId) return comp;
+    const current = planningOf(comp, year);
+    const next = change(current);
+    return next === current ? comp : { ...comp, plannings: { ...comp.plannings, [String(year)]: next.toData() } };
+  });
 }
 
 /**
@@ -229,109 +226,75 @@ export const useComponentStore = create<ComponentState>()(
         set({ components: [] });
       },
 
-      // Toggle the locked state of a single plant inside a component
-      togglePlantLock: (componentId, plantInstanceId) => {
+      addPlantsToPlanning: (componentId, year, plantIds) => {
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.addPlants(plantIds)) }));
+      },
+
+      removePlantFromPlanning: (componentId, year, plantId) => {
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.removePlant(plantId)) }));
+      },
+
+      setRatio: (componentId, year, season, plantId, ratio) => {
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.setRatio(season, plantId, ratio)) }));
+      },
+
+      optimizeSeason: (componentId, year, season) => {
+        const component = get().getComponentById(componentId);
+        if (!component) return null;
+        const outcome = optimizeSeasonOf({
+          planning: planningOf(component, year),
+          season,
+          areas: plantingAreasOf(component),
+          hasLayers: isTower(component),
+          plantOf: (plantId) => usePlantStore.getState().getPlantById(plantId),
+          newId: generateId,
+        });
+        set((state) => ({ components: withPlanning(state.components, componentId, year, () => outcome.planning) }));
+        usePlanningStore.getState().setLastShares({ componentId, year, season }, outcome.shares);
+        return outcome.shares;
+      },
+
+      movePlacement: (componentId, year, season, placementId, xCm, yCm) => {
         set((state) => ({
-          components: state.components.map((comp) => {
-            if (comp.id !== componentId) return comp;
-            return {
-              ...comp,
-              plants: comp.plants.map((p) =>
-                p.id === plantInstanceId ? { ...p, locked: !p.locked } : p
-              ),
-            };
-          }),
+          components: withPlanning(state.components, componentId, year, (p) => p.movePlacement(season, placementId, xCm, yCm)),
         }));
       },
 
-      // Lock every plant inside a component
-      lockAllPlants: (componentId) => {
+      removePlacement: (componentId, year, season, placementId) => {
         set((state) => ({
-          components: state.components.map((comp) => {
-            if (comp.id !== componentId) return comp;
-            return {
-              ...comp,
-              plants: comp.plants.map((p) => ({ ...p, locked: true })),
-            };
-          }),
+          components: withPlanning(state.components, componentId, year, (p) => p.removePlacement(season, placementId)),
         }));
       },
 
-      // Unlock every plant inside a component
-      unlockAllPlants: (componentId) => {
+      togglePlacementLock: (componentId, year, season, placementId) => {
         set((state) => ({
-          components: state.components.map((comp) => {
-            if (comp.id !== componentId) return comp;
-            return {
-              ...comp,
-              plants: comp.plants.map((p) => ({ ...p, locked: false })),
-            };
-          }),
+          components: withPlanning(state.components, componentId, year, (p) => p.toggleLock(season, placementId)),
         }));
       },
 
-      // Update patch dimensions for a placed plant
-      updatePatchDimensions: (componentId, plantInstanceId, patchWidthInCm, patchHeightInCm, patchRotationDeg) => {
+      setAllPlacementsLocked: (componentId, year, season, locked) => {
         set((state) => ({
-          components: state.components.map((comp) => {
-            if (comp.id !== componentId) return comp;
-            return {
-              ...comp,
-              plants: comp.plants.map((p) =>
-                p.id === plantInstanceId
-                  ? { ...p, patchWidthInCm, patchHeightInCm, patchRotationDeg }
-                  : p
-              ),
-            };
-          }),
+          components: withPlanning(state.components, componentId, year, (p) => p.setAllLocked(season, locked)),
         }));
       },
 
-      // Add plants to the "to plan" list of a component for a year (and tower layer)
-      addPlantsToPlan: (componentId, plantId, quantity, year, layerIndex) => {
-        const added = Array.from({ length: Math.max(0, Math.floor(quantity)) }, () => ({
-          id: generateId(),
-          plantId,
-          year,
-          ...(layerIndex !== undefined ? { layerIndex } : {}),
-        }));
+      resizePatch: (componentId, year, season, placementId, widthCm, heightCm, rotationDeg) => {
         set((state) => ({
-          components: state.components.map((comp) =>
-            comp.id === componentId ? { ...comp, plantsToPlan: [...comp.plantsToPlan, ...added] } : comp
+          components: withPlanning(state.components, componentId, year, (p) =>
+            p.resizePatch(season, placementId, widthCm, heightCm, rotationDeg),
           ),
         }));
       },
 
-      // Remove one plant from the "to plan" list
-      removePlantToPlan: (componentId, plantToPlanId) => {
+      reconcilePlannings: () => {
         set((state) => ({
-          components: state.components.map((comp) =>
-            comp.id === componentId
-              ? { ...comp, plantsToPlan: comp.plantsToPlan.filter((p) => p.id !== plantToPlanId) }
-              : comp
-          ),
+          components: state.components.map((comp) => {
+            const years = Object.keys(comp.plannings);
+            const reconciled = years.map((year) => [year, planningOf(comp, Number(year)).reconciled().toData()] as const);
+            const changed = reconciled.some(([year, data]) => data !== comp.plannings[year]);
+            return changed ? { ...comp, plannings: Object.fromEntries(reconciled) } : comp;
+          }),
         }));
-        usePlanningStore.getState().forgetPlantToPlan(componentId, plantToPlanId);
-      },
-
-      // Auto-place a year/layer keeping the periods of placed plants
-      rearrangePlanting: (componentId, year, layerIndex) => {
-        const component = get().getComponentById(componentId);
-        if (!component) return null;
-        const outcome = Planning.rearrangePlanting(planningInputFor(component, year, layerIndex));
-        set((state) => ({ components: withOutcome(state.components, componentId, outcome) }));
-        usePlanningStore.getState().setLastRun({ componentId, year, layerIndex }, outcome.unplaced);
-        return outcome.counts;
-      },
-
-      // Auto-place a year/layer from scratch; locked plants stay
-      startPlantingOver: (componentId, year, layerIndex) => {
-        const component = get().getComponentById(componentId);
-        if (!component) return null;
-        const outcome = Planning.startPlantingOver(planningInputFor(component, year, layerIndex));
-        set((state) => ({ components: withOutcome(state.components, componentId, outcome) }));
-        usePlanningStore.getState().setLastRun({ componentId, year, layerIndex }, outcome.unplaced);
-        return outcome.counts;
       },
 
       // Get a component by ID
@@ -348,10 +311,8 @@ export const useComponentStore = create<ComponentState>()(
       name: 'component-storage',
       storage: createJSONStorage(() => AsyncStorage as StateStorage),
       version: COMPONENT_STORE_VERSION,
-      migrate: (persistedState, version) =>
-        migrateComponentState(persistedState, version, catalogLookup) as unknown as ComponentState,
-      merge: (persistedState, currentState) =>
-        mergePersistedComponentState(persistedState, currentState, catalogLookup),
+      migrate: (persistedState, version) => migrateComponentState(persistedState, version) as unknown as ComponentState,
+      merge: (persistedState, currentState) => mergePersistedComponentState(persistedState, currentState),
       // Only persist the components array
       partialize: (state) => ({
         components: state.components,
@@ -408,14 +369,15 @@ export function useComponentActions() {
       updateComponent: state.updateComponent,
       removeComponent: state.removeComponent,
       clearAllComponents: state.clearAllComponents,
-      togglePlantLock: state.togglePlantLock,
-      lockAllPlants: state.lockAllPlants,
-      unlockAllPlants: state.unlockAllPlants,
-      updatePatchDimensions: state.updatePatchDimensions,
-      addPlantsToPlan: state.addPlantsToPlan,
-      removePlantToPlan: state.removePlantToPlan,
-      rearrangePlanting: state.rearrangePlanting,
-      startPlantingOver: state.startPlantingOver,
+      addPlantsToPlanning: state.addPlantsToPlanning,
+      removePlantFromPlanning: state.removePlantFromPlanning,
+      setRatio: state.setRatio,
+      optimizeSeason: state.optimizeSeason,
+      movePlacement: state.movePlacement,
+      removePlacement: state.removePlacement,
+      togglePlacementLock: state.togglePlacementLock,
+      setAllPlacementsLocked: state.setAllPlacementsLocked,
+      resizePatch: state.resizePatch,
     }))
   );
 }
@@ -447,3 +409,12 @@ export function isTower(
 ): component is RectangularTowerData | CircularTowerData {
   return isRectangularTower(component) || isCircularTower(component);
 }
+
+// A new last-frost date can move plants to other seasons. Only a change from one
+// date to another reconciles: the first date, or the stored date loading at app
+// start (null to date), must not outdate the seasons.
+useEnvironmentStore.subscribe((state, previous) => {
+  if (previous.lastSpringFrost !== null && state.lastSpringFrost !== null && state.lastSpringFrost !== previous.lastSpringFrost) {
+    useComponentStore.getState().reconcilePlannings();
+  }
+});

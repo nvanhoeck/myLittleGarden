@@ -35,16 +35,12 @@ export {
   combativeRelationshipSchema,
   plantDataSchema,
   plantDatabaseSchema,
-  placedPlantDataSchema,
-  growingPeriodSchema,
-  plantToPlanDataSchema,
   validatePlantData,
   safeValidatePlantData,
   validatePlantDatabase,
   safeValidatePlantDatabase,
-  validatePlacedPlant,
-  safeValidatePlacedPlant,
 } from './plantSchema';
+export { placementDataSchema, planningDataSchema, seasonSchema } from './planningSchema';
 export type {
   SunRequirementType,
   WaterRequirementType,
@@ -57,7 +53,4 @@ export type {
   CombativeRelationshipType,
   PlantDataType,
   PlantDatabaseType,
-  PlacedPlantDataType,
-  GrowingPeriodDataType,
-  PlantToPlanDataType,
 } from './plantSchema';

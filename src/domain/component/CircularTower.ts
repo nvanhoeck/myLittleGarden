@@ -191,8 +191,7 @@ export class CircularTower {
       diameterInCm: this._diameterInCm,
       borderWidthInCm: this._borderWidthInCm,
       numberOfLayers: this._numberOfLayers,
-      plants: [] as const,
-      plantsToPlan: [] as const,
+      plannings: {},
     };
     // Only include customLayers if they exist
     if (this._customLayers) {

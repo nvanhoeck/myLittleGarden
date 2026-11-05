@@ -101,14 +101,17 @@ function mapPlant(plant: PlacedPlantData): PlacedPlantSnapshot {
 /**
  * Map a single component to its snapshot representation.
  */
-function mapComponent(component: ComponentData): ComponentSnapshot {
+function mapComponent(
+  component: ComponentData,
+  placementsOf: (component: ComponentData) => readonly PlacedPlantData[],
+): ComponentSnapshot {
   return {
     id: component.id,
     name: component.name,
     type: component.type,
     sunDirection: (component.sunDirection ?? null) as SnapshotSunDirection | null,
     dimensions: buildDimensions(component),
-    plants: component.plants.map(mapPlant),
+    plants: placementsOf(component).map(mapPlant),
     createdAt: component.createdAt,
   };
 }
@@ -121,6 +124,8 @@ function mapComponent(component: ComponentData): ComponentSnapshot {
 export function buildGardenSnapshot(
   garden: GardenStoreState,
   components: ComponentData[],
+  /** The plants growing in each component today */
+  placementsOf: (component: ComponentData) => readonly PlacedPlantData[],
   plantSpecs: PlantSpecSnapshot[] = [],
 ): GardenSnapshot {
   return {
@@ -130,7 +135,7 @@ export function buildGardenSnapshot(
       springFrostDate: toIsoStringOrNull(garden.springFrostDate),
       fallFrostDate: toIsoStringOrNull(garden.fallFrostDate),
     },
-    components: components.map(mapComponent),
+    components: components.map((component) => mapComponent(component, placementsOf)),
     ...(plantSpecs.length > 0 && { plantCatalog: plantSpecs }),
   };
 }
