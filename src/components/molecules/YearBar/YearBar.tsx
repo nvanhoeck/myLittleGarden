@@ -13,7 +13,7 @@ interface YearBarProps {
 
 /**
  * ‹ 2026 › year switch of the planning timeline.
- * BEM contract (src/styles/planning/timeline.css): .year-bar, __arrow, __year
+ * BEM contract (src/styles/planning/season.css): .year-bar, __arrow, __year
  */
 export function YearBar({
   year,

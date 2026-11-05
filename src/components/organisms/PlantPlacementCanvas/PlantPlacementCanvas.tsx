@@ -4,7 +4,8 @@
  * Individual plants render as their footprint rectangle (the space they claim).
  * Patch plants (plantingStyle === 'patch') render as resizable, rotatable rectangles.
  * The parent passes the footprints and the conflicting plants (overlapping
- * footprints in a shared week); a conflict is a warning and never blocks a drag.
+ * footprints); carried plants from an earlier season are drawn dimmed and
+ * cannot be moved. A conflict is a warning and never blocks a drag.
  * Dragging only changes a plant's position.
  *
  * Patch resize/rotate mode:
@@ -40,6 +41,10 @@ export interface CanvasFootprint {
 interface PlantPlacementCanvasProps {
     component: ComponentData;
     plants?: readonly PlacedPlantData[];
+    /** Plants carried over from an earlier season: drawn dimmed with a label, never movable */
+    carriedPlants?: readonly PlacedPlantData[];
+    /** Label on a carried plant, e.g. "uit lente" */
+    carriedLabelOf?: (plant: PlacedPlantData) => string;
     layerDimensions?: { width: number; height: number };
     /** Footprint per placed-plant instance id, for every plant (a plant without one is not drawn) */
     footprints: ReadonlyMap<string, CanvasFootprint>;
@@ -708,6 +713,7 @@ function DraggablePlant({
 
 // ─── PlantPlacementCanvas ─────────────────────────────────────────────────────
 
+const EMPTY_PLANTS: readonly PlacedPlantData[] = [];
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3.0;
 const ZOOM_STEP = 0.25;
@@ -715,6 +721,8 @@ const ZOOM_STEP = 0.25;
 export function PlantPlacementCanvas({
     component,
     plants: filteredPlants,
+    carriedPlants = EMPTY_PLANTS,
+    carriedLabelOf,
     layerDimensions,
     footprints,
     conflictIds,
@@ -750,7 +758,7 @@ export function PlantPlacementCanvas({
     const componentInnerDimensions = useMemo(() => getInnerDimensions(component), [component]);
     const innerDimensions = layerDimensions ?? componentInnerDimensions;
     const isCircular = isPot(component) || isCircularTower(component);
-    const plants = filteredPlants ?? [];
+    const plants = filteredPlants ?? EMPTY_PLANTS;
 
     // While a patch is being edited, disable all drag-and-drop
     const draggingAllowed = isEditMode && patchEditPlantId == null;
@@ -799,8 +807,8 @@ export function PlantPlacementCanvas({
     // Conflicts and wall violations come from the parent (conflictIds, outOfBoundsIds)
 
     const plantRelationships = useMemo(
-        () => calculatePlantRelationships(plants, getPlantById),
-        [plants, getPlantById]
+        () => calculatePlantRelationships([...carriedPlants, ...plants], getPlantById),
+        [carriedPlants, plants, getPlantById]
     );
 
     const handleRelationshipPress = useCallback((relationship: PlantRelationship) => {
@@ -832,7 +840,7 @@ export function PlantPlacementCanvas({
 
     const warningTooltip = (() => {
         if (!activeWarningPlantId) return null;
-        const plant = plants.find((p) => p.id === activeWarningPlantId);
+        const plant = [...carriedPlants, ...plants].find((p) => p.id === activeWarningPlantId);
         if (!plant) return null;
         const plantData = getPlantById(plant.plantId);
         const isRectPlant = plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning';
@@ -897,6 +905,49 @@ export function PlantPlacementCanvas({
                                             />
                                         ))}
 
+                                        {carriedPlants.map((plant) => {
+                                            const footprint = footprints.get(plant.id);
+                                            if (!footprint) return null;
+                                            const plantData = getPlantById(plant.plantId);
+                                            const isPatchPlant = plantData?.plantingStyle === 'patch' || plantData?.plantingStyle === 'thinning';
+                                            return (
+                                                <View
+                                                    key={plant.id}
+                                                    pointerEvents="none"
+                                                    style={styles.carriedLayer}
+                                                    testID={`carried-plant-${plant.id}`}
+                                                >
+                                                    <DraggablePlant
+                                                        plant={plant}
+                                                        plantData={plantData}
+                                                        scale={scale}
+                                                        containerWidth={containerWidth}
+                                                        containerHeight={containerHeight}
+                                                        onPositionChange={onPlantPositionChange}
+                                                        footprint={footprint}
+                                                        hasConflict={conflictIds.has(plant.id)}
+                                                        hasWallProximityWarning={false}
+                                                        isSelected={false}
+                                                        onSelect={() => undefined}
+                                                        showPlantName={showPlantNames}
+                                                        isPatch={isPatchPlant}
+                                                        isThinning={plantData?.plantingStyle === 'thinning'}
+                                                        draggingEnabled={false}
+                                                        isLocked={true}
+                                                        onWarningBadgePress={() => undefined}
+                                                        isInPatchEditMode={false}
+                                                    />
+                                                    {carriedLabelOf && (
+                                                        <Text
+                                                            style={[styles.carriedLabel, {left: plant.positionX * scale - 24, top: plant.positionY * scale + 10}]}
+                                                        >
+                                                            {carriedLabelOf(plant)}
+                                                        </Text>
+                                                    )}
+                                                </View>
+                                            );
+                                        })}
+
                                         {plants.map((plant) => {
                                             const footprint = footprints.get(plant.id);
                                             if (!footprint) return null;
@@ -931,7 +982,7 @@ export function PlantPlacementCanvas({
                                             );
                                         })}
 
-                                        {plants.length === 0 && (
+                                        {plants.length === 0 && carriedPlants.length === 0 && (
                                             <View style={styles.emptyState}>
                                                 <Text style={styles.emptyIcon}>🌱</Text>
                                                 <Text style={styles.emptyText}>Voeg planten toe</Text>
@@ -1071,6 +1122,19 @@ export function PlantPlacementCanvas({
 }
 
 const styles = StyleSheet.create({
+    carriedLayer: {
+        ...StyleSheet.absoluteFillObject,
+        opacity: 0.4,
+    },
+    carriedLabel: {
+        position: 'absolute',
+        width: 48,
+        textAlign: 'center',
+        fontSize: 10,
+        color: '#ffffff',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderRadius: 4,
+    },
     root: {flex: 1},
     container: {flex: 1, backgroundColor: '#1f2937', borderRadius: 12, overflow: 'hidden'},
     scrollView: {flex: 1},

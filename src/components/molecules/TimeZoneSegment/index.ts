@@ -1,1 +1,0 @@
-export { TimeZoneSegment } from './TimeZoneSegment';

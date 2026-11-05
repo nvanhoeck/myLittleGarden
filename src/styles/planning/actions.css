@@ -1,11 +1,11 @@
 /*
- * Time planning: action bar, its buttons and the result snackbar.
+ * Season planning: action bar, its buttons and the result snackbar.
  *
  * Like src/styles/ai/chat.css, these classes document the visual contract;
  * the components apply the same utility classes via className.
  */
 
-/* Bottom bar 56 high: [Herschikken] [Opnieuw beginnen] */
+/* Bottom bar 56 high: [Planning] [Optimaliseren] */
 .planning-action-bar {
   @apply flex-row items-center h-14 px-4 gap-3 border-t border-gray-800 bg-background;
 }

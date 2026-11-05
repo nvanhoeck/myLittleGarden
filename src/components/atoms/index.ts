@@ -5,7 +5,5 @@ export { CompassSelector } from './CompassSelector';
 export { DateInputCard } from './DateInputCard';
 export { DimensionInput } from './DimensionInput';
 export { PlanningButton } from './PlanningButton';
-export { WeekSlot, WEEK_SLOT_WIDTH } from './WeekSlot';
 export { Snackbar } from './Snackbar';
-export { PlanningCaption } from './PlanningCaption';
 export { SeasonStatusDot } from './SeasonStatusDot';
