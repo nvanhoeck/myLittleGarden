@@ -40,3 +40,38 @@ export interface PlantToPlanData {
  * (Jun-Aug), autumn (Sep-Nov), winter (Dec-Feb of the next calendar year)
  */
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+
+/** Where a season stands: never placed, placed, or placed but its inputs changed since */
+export type SeasonStatus = 'notPlanned' | 'planned' | 'outdated';
+
+/**
+ * One plant placed in a component, in the season it is planted.
+ * Positions are cm from the top-left of the inner area (border excluded).
+ */
+export interface PlacementData {
+  readonly id: string;
+  readonly plantId: string;
+  readonly positionX: number;
+  readonly positionY: number;
+  readonly layerIndex?: number; // Tower layer (0 = bottom), undefined for components without layers
+  readonly locked?: boolean; // Locked placements are never moved by the optimizer
+  // Patch-only fields, undefined for individual plants
+  readonly patchWidthInCm?: number;
+  readonly patchHeightInCm?: number;
+  readonly patchRotationDeg?: number;
+}
+
+/** Ratios and placements of the plants that start in one season */
+export interface SeasonPlanData {
+  /** Relative share of the free area per plant id; a missing plant has ratio 1 */
+  readonly ratios: Readonly<Record<string, number>>;
+  readonly placements: readonly PlacementData[];
+  readonly status: SeasonStatus;
+}
+
+/** What grows in one component during one planning year */
+export interface PlanningData {
+  /** The plants in the planning, without amounts */
+  readonly plants: readonly string[];
+  readonly seasons: Readonly<Record<Season, SeasonPlanData>>;
+}
