@@ -1,54 +1,16 @@
 import type { Planning } from '../../domain/planning/Planning.ts';
-import { SEASONS, seasonMonths } from '../../domain/planning/Season.ts';
+import { SEASONS } from '../../domain/planning/Season.ts';
 import type { PlantShare } from '../../domain/planning/SeasonPlacement.ts';
-import type { Season, SeasonStatus } from '../../types/planning.types.ts';
-
-/** i18next's t, narrowed to what the view models use */
-export type Translate = (key: string, options?: Record<string, unknown>) => string;
+import type { Season } from '../../types/planning.types.ts';
+import type { CarriedRowView, RatioRowView, SeasonSectionView } from '../../types/planningViews.types.ts';
+import { seasonLabel, seasonMonthsLabel } from '../shared/seasonLabels.ts';
+import type { Translate } from '../shared/seasonLabels.ts';
 
 export interface PlantListItemView {
   readonly plantId: string;
   readonly name: string;
   readonly seasonLabels: readonly string[];
   readonly hasCalendar: boolean;
-}
-
-export interface RatioRowView {
-  readonly plantId: string;
-  readonly name: string;
-  readonly ratio: number;
-  /** "25%": the share the ratio asks for */
-  readonly targetLabel: string;
-  /** What the last optimization gave; null when the season was not optimized in this session */
-  readonly resultLabel: string | null;
-  readonly fits: boolean;
-}
-
-export interface CarriedRowView {
-  readonly plantId: string;
-  readonly name: string;
-  readonly label: string;
-}
-
-export interface SeasonSectionView {
-  readonly season: Season;
-  readonly title: string;
-  readonly monthsLabel: string;
-  readonly status: SeasonStatus;
-  readonly statusLabel: string;
-  readonly ratioRows: readonly RatioRowView[];
-  readonly carriedRows: readonly CarriedRowView[];
-  readonly isEmpty: boolean;
-}
-
-export function seasonLabel(season: Season, t: Translate): string {
-  return t(`season.${season}`);
-}
-
-/** "mrt–mei" */
-export function seasonMonthsLabel(season: Season, t: Translate): string {
-  const { first, last } = seasonMonths(season);
-  return t('season.months', { first: t(`planning.month.short.${first}`), last: t(`planning.month.short.${last}`) });
 }
 
 export function buildPlantList(planning: Planning, nameOf: (plantId: string) => string, t: Translate): PlantListItemView[] {
@@ -67,7 +29,9 @@ export function buildSeasonSections(
   return SEASONS.map((season) => {
     const starting = planning.plantsStartingIn(season);
     const totalRatio = starting.reduce((sum, plantId) => sum + planning.ratioOf(season, plantId), 0);
-    const shares = sharesOf(season);
+    const status = planning.statusOf(season);
+    // The last run only says something about a season that is still planned
+    const shares = status === 'planned' ? sharesOf(season) : undefined;
 
     const ratioRows = starting.map((plantId): RatioRowView => {
       const ratio = planning.ratioOf(season, plantId);
@@ -97,7 +61,6 @@ export function buildSeasonSections(
       return { plantId, name: nameOf(plantId), label: t('seasonPlanning.carried', { season: seasonLabel(start, t) }) };
     });
 
-    const status = planning.statusOf(season);
     return {
       season,
       title: seasonLabel(season, t),

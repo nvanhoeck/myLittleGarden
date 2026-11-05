@@ -3,3 +3,4 @@ export * from './environment.types';
 export * from './component.types';
 export * from './plant.types';
 export * from './planning.types';
+export * from './planningViews.types';

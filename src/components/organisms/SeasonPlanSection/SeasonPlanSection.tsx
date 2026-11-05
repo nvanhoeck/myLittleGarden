@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SeasonStatusDot } from '@/components/atoms/SeasonStatusDot';
 import { RatioStepper } from '@/components/molecules/RatioStepper';
-import type { SeasonSectionView } from '@/screens/PlanningScreen/planningScreenViewModel';
+import type { SeasonSectionView } from '@/types';
 
 interface SeasonPlanSectionProps {
   view: SeasonSectionView;

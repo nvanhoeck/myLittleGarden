@@ -16,7 +16,7 @@ import { usePlanning } from '@/stores/planningContext';
 import { SeasonPlanSection } from '@/components/organisms/SeasonPlanSection';
 import type { Season } from '@/types';
 import { buildPlantList, buildSeasonSections } from './planningScreenViewModel';
-import type { Translate } from './planningScreenViewModel';
+import type { Translate } from '../shared/seasonLabels';
 
 export function PlanningScreen({ navigation, route }: PlanningScreenProps): React.JSX.Element | null {
   const { t } = useTranslation();

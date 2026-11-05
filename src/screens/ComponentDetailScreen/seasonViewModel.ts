@@ -2,8 +2,8 @@ import type { Planning } from '../../domain/planning/Planning.ts';
 import { SEASONS } from '../../domain/planning/Season.ts';
 import type { PlantShare } from '../../domain/planning/SeasonPlacement.ts';
 import type { Season, SeasonStatus } from '../../types/planning.types.ts';
-import { seasonLabel, seasonMonthsLabel } from '../PlanningScreen/planningScreenViewModel.ts';
-import type { Translate } from '../PlanningScreen/planningScreenViewModel.ts';
+import { seasonLabel, seasonMonthsLabel } from '../shared/seasonLabels.ts';
+import type { Translate } from '../shared/seasonLabels.ts';
 
 export interface SeasonTabView {
   readonly season: Season;

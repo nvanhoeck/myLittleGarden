@@ -22,8 +22,8 @@ import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
 import { CanvasEditActions } from './CanvasEditActions';
 import { buildSeasonTabs, defaultSeasonFor, optimizeResultMessage, planningYearRange } from './seasonViewModel';
-import { seasonLabel } from '../PlanningScreen/planningScreenViewModel';
-import type { Translate } from '../PlanningScreen/planningScreenViewModel';
+import { seasonLabel } from '../shared/seasonLabels';
+import type { Translate } from '../shared/seasonLabels';
 import { useSeasonCanvas } from './useSeasonCanvas';
 
 /** How long the result snackbar stays */
