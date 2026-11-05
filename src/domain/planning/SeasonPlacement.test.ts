@@ -4,6 +4,7 @@ import { fillByRatio } from './SeasonPlacement.ts';
 import type { NewPlacement, RatioPlant, SeasonPlacementRequest } from './SeasonPlacement.ts';
 import { PlantFootprint, boundsOverlap } from './PlantFootprint.ts';
 import type { PlantRelations } from './PlantRelations.ts';
+import { fitsInArea } from './PlantingArea.ts';
 
 const neutral: PlantRelations = () => 'neutral';
 const box100 = { shape: 'rectangle', widthCm: 100, lengthCm: 100 } as const;
@@ -109,6 +110,28 @@ describe('fillByRatio', () => {
     const patch = fillByRatio(req).placements[0]?.patch;
     assert.ok(patch);
     assert.ok(patch.heightCm <= 15 && patch.heightCm >= 10, `height ${patch.heightCm}`);
+  });
+
+  test('given a fixed plant on a layer that does not exist, it takes no space', () => {
+    const req = request({
+      fixed: [{ plantId: 'x', layerIndex: 3, footprint: PlantFootprint.of(50, 100), xCm: 25, yCm: 50 }],
+      plants: [individual('a', 10, 1)],
+    });
+    const { placements, shares } = fillByRatio(req);
+    assert.equal(placements.length, 25);
+    assert.equal(shares[0].actualShare, 1);
+    assertNoOverlap(req, placements);
+  });
+
+  test('given a circular layer, every placement lies inside the circle', () => {
+    const layer = { shape: 'circle', diameterCm: 60 } as const;
+    const req = request({ layers: [layer], plants: [individual('a', 10, 1)] });
+    const { placements } = fillByRatio(req);
+    assert.ok(placements.length >= 4, `only ${placements.length} placed`);
+    for (const p of placements) {
+      assert.ok(fitsInArea(layer, PlantFootprint.of(20, 20), p.xCm, p.yCm), `outside at ${p.xCm}, ${p.yCm}`);
+    }
+    assertNoOverlap(req, placements);
   });
 
   test('given a layer smaller than the minimum patch, the plant does not fit', () => {

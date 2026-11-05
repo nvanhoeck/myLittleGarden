@@ -24,6 +24,13 @@ describe('bestSpot', () => {
     assert.equal(bestSpot('a', square20, box, occupants, combative)?.xCm, 40);
   });
 
+  test('given a companion occupant, the nearest spot within 5 cm scores +1 times its weight', () => {
+    const companion: PlantRelations = () => 'companion';
+    const occupants = [{ plantId: 'b', bounds: { left: 40, top: 0, right: 60, bottom: 20 }, weight: 2 }];
+    // Left 15 leaves a 5 cm gap to b, which counts as a neighbour; it wins the smallest-x tie over left 20 (flush)
+    assert.deepEqual(bestSpot('a', square20, box, occupants, companion), { xCm: 25, yCm: 10, score: 2 });
+  });
+
   test('given no free spot, null', () => {
     const occupants = [{ plantId: 'b', bounds: { left: 0, top: 0, right: 100, bottom: 20 }, weight: 1 }];
     assert.equal(bestSpot('a', square20, box, occupants, neutral), null);

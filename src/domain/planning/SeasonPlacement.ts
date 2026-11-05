@@ -67,16 +67,18 @@ const EPSILON = 1e-9;
  */
 export function fillByRatio(request: SeasonPlacementRequest): SeasonPlacementResult {
   const plants = [...request.plants].sort((a, b) => compareText(a.plantId, b.plantId));
+  // A fixed plant on a layer that does not exist takes no space at all
+  const fixedOnLayers = request.fixed.filter((f) => f.layerIndex >= 0 && f.layerIndex < request.layers.length);
   const occupants: Occupant[][] = request.layers.map(() => []);
-  for (const fixed of request.fixed) {
-    occupants[fixed.layerIndex]?.push({
+  for (const fixed of fixedOnLayers) {
+    occupants[fixed.layerIndex].push({
       plantId: fixed.plantId,
       bounds: fixed.footprint.boundsAt(fixed.xCm, fixed.yCm),
       weight: FIXED_WEIGHT,
     });
   }
 
-  const freeArea = Math.max(0, sum(request.layers.map(areaOf)) - sum(request.fixed.map((f) => f.footprint.areaCm2)));
+  const freeArea = Math.max(0, sum(request.layers.map(areaOf)) - sum(fixedOnLayers.map((f) => f.footprint.areaCm2)));
   const totalRatio = sum(plants.map((p) => p.ratio));
   const targetOf = new Map(plants.map((p) => [p.plantId, totalRatio > 0 ? (p.ratio / totalRatio) * freeArea : 0]));
   const placedAreaOf = new Map(plants.map((p) => [p.plantId, 0]));
