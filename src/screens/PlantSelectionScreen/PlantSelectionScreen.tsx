@@ -71,10 +71,12 @@ function PlantTile({
       `}
       style={{ minWidth: 100, maxWidth: 120 }}
       android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
-      accessibilityState={{ selected: isSelected }}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: isSelected, disabled: inPlanning }}
+      accessibilityLabel={inPlanning ? `${plant.nameNl}, ${t('plantSelection.alreadyInPlanning')}` : plant.nameNl}
       testID={`plant-tile-${plant.id}`}
     >
-      {isSelected && <Text className="absolute top-1 right-2 text-white">✓</Text>}
+      {isSelected && <Text accessible={false} className="absolute top-1 right-2 text-white">✓</Text>}
       <View className="mb-1">
         <PlantIconDisplay plant={plant} />
       </View>

@@ -18,7 +18,7 @@ import type { Season } from '@/types';
 import { buildPlantList, buildSeasonSections } from './planningScreenViewModel';
 import type { Translate } from './planningScreenViewModel';
 
-export function PlanningScreen({ navigation, route }: PlanningScreenProps): React.JSX.Element {
+export function PlanningScreen({ navigation, route }: PlanningScreenProps): React.JSX.Element | null {
   const { t } = useTranslation();
   const translate = useCallback<Translate>((key, options) => t(key, options), [t]);
   const { componentId, year } = route.params;
@@ -71,6 +71,8 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
     });
   }, []);
 
+  if (lastSpringFrost === null) return null;
+
   if (!component || !planning) {
     return (
       <SafeAreaView className="flex-1 bg-background items-center justify-center">
@@ -102,8 +104,9 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
           <Text className="text-white font-semibold flex-1">{t('seasonPlanning.plants')}</Text>
           <Pressable
             onPress={() => navigation.navigate('PlantSelection', { componentId, year })}
-            className="bg-green-600 px-4 h-10 rounded-full items-center justify-center"
+            className="bg-green-600 px-4 h-12 rounded-full items-center justify-center"
             accessibilityRole="button"
+            accessibilityLabel={t('seasonPlanning.addPlant')}
             testID="planning-add-plant-button"
           >
             <Text className="text-white font-medium">+ {t('seasonPlanning.addPlant')}</Text>
