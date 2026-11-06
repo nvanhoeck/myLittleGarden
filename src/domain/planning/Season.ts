@@ -2,9 +2,6 @@ import type { Season } from '../../types/planning.types.ts';
 
 export type { Season };
 
-/** The seasons a plant grows in during one planning year, by plant id */
-export type SeasonsOf = (plantId: string) => readonly Season[];
-
 /** The seasons of a planning year in order; winter runs into the next calendar year */
 export const SEASONS: readonly Season[] = ['spring', 'summer', 'autumn', 'winter'];
 

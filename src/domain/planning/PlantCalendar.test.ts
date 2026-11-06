@@ -6,7 +6,7 @@ import {
   growingSeasonsFrom,
   plantingWindowOf,
   reachableSeasonsOf,
-  seasonsLookup,
+  plantingCalendarFor,
   sowingDatesOf,
 } from './PlantCalendar.ts';
 import type { PlantTiming } from './PlantCalendar.ts';
@@ -117,11 +117,30 @@ describe('growingSeasonsFrom', () => {
   });
 });
 
-describe('seasonsLookup', () => {
-  test('gives the growing seasons of the first planting; unknown plants or no frost date give none', () => {
-    const catalog = new Map([['tomaat', tomato]]);
-    assert.deepEqual(seasonsLookup(2026, frost, (id) => catalog.get(id))('tomaat'), ['spring', 'summer']);
-    assert.deepEqual(seasonsLookup(2026, frost, (id) => catalog.get(id))('onbekend'), []);
-    assert.deepEqual(seasonsLookup(2026, null, (id) => catalog.get(id))('tomaat'), []);
+describe('plantingCalendarFor', () => {
+  const catalog = new Map<string, PlantTiming>([
+    ['tomaat', tomato],
+    ['sla', lettuce],
+    ['appel', timing({})],
+  ]);
+  const calendar = plantingCalendarFor(2026, frost, (id) => catalog.get(id));
+
+  test('knows which plants have a planting window', () => {
+    assert.equal(calendar.hasCalendar('sla'), true);
+    assert.equal(calendar.hasCalendar('appel'), false);
+    assert.equal(calendar.hasCalendar('onbekend'), false);
+  });
+
+  test('gives reachable seasons and the growing seasons per start season', () => {
+    assert.deepEqual(calendar.reachableSeasons('sla'), ['spring', 'summer']);
+    assert.deepEqual(calendar.growingSeasons('tomaat', 'spring'), ['spring', 'summer']);
+    assert.deepEqual(calendar.growingSeasons('sla', 'summer'), ['summer']);
+    assert.deepEqual(calendar.growingSeasons('sla', 'winter'), []);
+  });
+
+  test('without frost date nothing is reachable, but plants still have a calendar', () => {
+    const noFrost = plantingCalendarFor(2026, null, (id) => catalog.get(id));
+    assert.equal(noFrost.hasCalendar('sla'), true);
+    assert.deepEqual(noFrost.reachableSeasons('sla'), []);
   });
 });

@@ -4,18 +4,18 @@
  */
 
 export { SEASONS, seasonContaining, seasonMonths, seasonRange, seasonsAfter } from './Season';
-export type { Season, SeasonRange, SeasonsOf } from './Season';
+export type { Season, SeasonRange } from './Season';
 
 export {
   earliestPlantingDate,
   frostDayOf,
   growingSeasonsFrom,
+  plantingCalendarFor,
   plantingWindowOf,
   reachableSeasonsOf,
-  seasonsLookup,
   sowingDatesOf,
 } from './PlantCalendar';
-export type { DateWindow, FrostDay, PlantTiming, SowingDates } from './PlantCalendar';
+export type { DateWindow, FrostDay, PlantTiming, PlantingCalendar, SowingDates } from './PlantCalendar';
 
 export {
   PlantFootprint,
@@ -42,6 +42,6 @@ export { fillByRatio } from './SeasonPlacement';
 export type { FixedPlacement, NewPlacement, PlantShare, RatioPlant, SeasonPlacementRequest, SeasonPlacementResult } from './SeasonPlacement';
 
 export { optimizeSeason } from './SeasonOptimization';
-export type { SeasonOptimizationInput, SeasonOptimizationOutcome } from './SeasonOptimization';
+export type { PlantingShare, SeasonOptimizationInput, SeasonOptimizationOutcome } from './SeasonOptimization';
 
 export { placementsGrowingOn } from './CurrentPlacements';

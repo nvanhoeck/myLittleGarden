@@ -1,7 +1,6 @@
 import type { PlantData, SowingWindow } from '../../types/plant.types.ts';
 import type { Season } from '../../types/planning.types.ts';
 import { SEASONS, seasonRange } from './Season.ts';
-import type { SeasonsOf } from './Season.ts';
 
 /** A day in the year without a year, such as the garden's frost dates */
 export interface FrostDay {
@@ -127,18 +126,34 @@ export function growingSeasonsFrom(plant: PlantTiming, lastSpringFrost: FrostDay
   });
 }
 
-/** Growing seasons of each plant's first planting for one planning year; unknown plants or no frost date give none */
-export function seasonsLookup(
+/** What the planning needs to know about the plants' calendars in one planning year */
+export interface PlantingCalendar {
+  /** True when the plant has a planting window (transplant or direct sow) */
+  hasCalendar(plantId: string): boolean;
+  /** The seasons a planting of the plant can start in, in order */
+  reachableSeasons(plantId: string): readonly Season[];
+  /** The seasons a planting starting in startSeason grows in; none when that season is not reachable */
+  growingSeasons(plantId: string, startSeason: Season): readonly Season[];
+}
+
+/** The planting calendar of a planning year, from the catalog and the garden's last frost */
+export function plantingCalendarFor(
   year: number,
   lastSpringFrost: FrostDay | null,
   plantOf: (plantId: string) => PlantTiming | undefined,
-): SeasonsOf {
-  return (plantId) => {
-    const plant = plantOf(plantId);
-    if (plant === undefined || lastSpringFrost === null) {
-      return [];
-    }
-    const first = reachableSeasonsOf(plant, lastSpringFrost, year)[0];
-    return first === undefined ? [] : growingSeasonsFrom(plant, lastSpringFrost, year, first);
+): PlantingCalendar {
+  return {
+    hasCalendar: (plantId) => {
+      const plant = plantOf(plantId);
+      return plant !== undefined && (plant.transplantWindow !== null || plant.directSowWindow !== null);
+    },
+    reachableSeasons: (plantId) => {
+      const plant = plantOf(plantId);
+      return plant !== undefined && lastSpringFrost !== null ? reachableSeasonsOf(plant, lastSpringFrost, year) : [];
+    },
+    growingSeasons: (plantId, startSeason) => {
+      const plant = plantOf(plantId);
+      return plant !== undefined && lastSpringFrost !== null ? growingSeasonsFrom(plant, lastSpringFrost, year, startSeason) : [];
+    },
   };
 }

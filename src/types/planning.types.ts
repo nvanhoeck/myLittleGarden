@@ -18,6 +18,7 @@ export type SeasonStatus = 'notPlanned' | 'planned' | 'outdated';
 export interface PlacementData {
   readonly id: string;
   readonly plantId: string;
+  readonly plantingId: string; // The planting this placement belongs to
   readonly positionX: number;
   readonly positionY: number;
   readonly layerIndex?: number; // Tower layer (0 = bottom), undefined for components without layers
@@ -30,15 +31,26 @@ export interface PlacementData {
 
 /** Ratios and placements of the plants that start in one season */
 export interface SeasonPlanData {
-  /** Relative share of the free area per plant id; a missing plant has ratio 1 */
+  /** Relative share of the free area per planting id; a missing planting has ratio 1 */
   readonly ratios: Readonly<Record<string, number>>;
   readonly placements: readonly PlacementData[];
   readonly status: SeasonStatus;
+}
+
+/** One time a plant is planted: where in the year it starts */
+export interface PlantingData {
+  readonly id: string;
+  readonly plantId: string;
+  readonly startSeason: Season;
+  /** The growing seasons saved when the planting was placed; frost-date changes no longer alter them */
+  readonly fixedSeasons?: readonly Season[];
 }
 
 /** What grows in one component during one planning year */
 export interface PlanningData {
   /** The plants in the planning, without amounts */
   readonly plants: readonly string[];
+  /** Each time a plant is planted; at most one per plant per start season */
+  readonly plantings: readonly PlantingData[];
   readonly seasons: Readonly<Record<Season, SeasonPlanData>>;
 }

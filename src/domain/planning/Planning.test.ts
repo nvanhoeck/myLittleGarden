@@ -1,221 +1,241 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Planning } from './Planning.ts';
-import type { PlacementData, Season } from '../../types/planning.types.ts';
+import type { PlantingCalendar } from './PlantCalendar.ts';
+import type { PlacementData, PlanningData, Season } from '../../types/planning.types.ts';
 
-const SEASONS_BY_PLANT: Record<string, readonly Season[]> = {
-  tomaat: ['spring', 'summer'],
-  sla: ['spring'],
-  boerenkool: ['summer', 'autumn'],
-  knoflook: [],
+type CalendarTable = Record<string, { reach: readonly Season[]; grow: Partial<Record<Season, readonly Season[]>> }>;
+
+const TABLE: CalendarTable = {
+  tomaat: { reach: ['spring'], grow: { spring: ['spring', 'summer'] } },
+  sla: { reach: ['spring', 'summer'], grow: { spring: ['spring'], summer: ['summer'] } },
+  boerenkool: { reach: ['summer', 'autumn'], grow: { summer: ['summer', 'autumn'], autumn: ['autumn'] } },
+  knoflook: { reach: [], grow: {} }, // has a window, but outside this planning year
 };
-const seasonsOf = (plantId: string): readonly Season[] => SEASONS_BY_PLANT[plantId] ?? [];
 
-const placement = (id: string, plantId: string, extra: Partial<PlacementData> = {}): PlacementData => ({
+function calendarOf(table: CalendarTable): PlantingCalendar {
+  return {
+    hasCalendar: (id) => id in table,
+    reachableSeasons: (id) => table[id]?.reach ?? [],
+    growingSeasons: (id, season) => table[id]?.grow[season] ?? [],
+  };
+}
+const calendar = calendarOf(TABLE);
+
+const placement = (id: string, plantingId: string, extra: Partial<PlacementData> = {}): PlacementData => ({
   id,
-  plantId,
+  plantId: plantingId.split('-')[0],
+  plantingId,
   positionX: 10,
   positionY: 10,
   ...extra,
 });
 
-const withPlants = (...plantIds: string[]): Planning => Planning.empty(seasonsOf).addPlants(plantIds);
+const withPlants = (...plantIds: string[]): Planning => Planning.from(undefined, calendar).addPlants(plantIds);
 
-describe('Planning queries', () => {
-  test('given an empty planning, no plants and every season not planned', () => {
-    const planning = Planning.empty(seasonsOf);
-    assert.deepEqual(planning.plants, []);
-    assert.deepEqual(['spring', 'summer', 'autumn', 'winter'].map((s) => planning.statusOf(s as Season)), [
-      'notPlanned',
-      'notPlanned',
-      'notPlanned',
-      'notPlanned',
-    ]);
+describe('adding plants', () => {
+  test('a plant with a calendar gets its first planting in its first reachable season, ratio 1', () => {
+    const planning = withPlants('sla', 'boerenkool');
+    assert.deepEqual(planning.plantings.map((p) => [p.id, p.startSeason]), [['sla-spring', 'spring'], ['boerenkool-summer', 'summer']]);
+    assert.equal(planning.ratioOf('spring', 'sla-spring'), 1);
   });
 
-  test('given plants, they start in their first season and are carried into the later ones', () => {
-    const planning = withPlants('tomaat', 'sla', 'boerenkool');
-    assert.deepEqual(planning.plantsStartingIn('spring'), ['tomaat', 'sla']);
-    assert.deepEqual(planning.plantsStartingIn('summer'), ['boerenkool']);
-    assert.deepEqual(planning.plantsCarriedInto('summer'), ['tomaat']);
-    assert.deepEqual(planning.plantsCarriedInto('autumn'), ['boerenkool']);
-  });
-
-  test('given a plant without calendar, it is in the list but in no season', () => {
-    const planning = withPlants('knoflook');
-    assert.deepEqual(planning.plants, ['knoflook']);
-    assert.equal(planning.startSeasonOf('knoflook'), null);
-    assert.deepEqual(planning.plantsStartingIn('spring'), []);
-  });
-
-  test('given no stored data, from() gives an empty planning', () => {
-    assert.deepEqual(Planning.from(undefined, seasonsOf).toData(), Planning.empty(seasonsOf).toData());
+  test('a plant without calendar or outside the year is listed without plantings; duplicates are ignored', () => {
+    const planning = withPlants('appel', 'knoflook', 'appel');
+    assert.deepEqual(planning.plants, ['appel', 'knoflook']);
+    assert.deepEqual(planning.plantings, []);
+    assert.equal(planning.hasCalendar('appel'), false);
+    assert.equal(planning.hasCalendar('knoflook'), true);
   });
 });
 
-describe('addPlants', () => {
-  test('new plants get ratio 1 in their start season; duplicates are ignored', () => {
-    const planning = withPlants('tomaat').addPlants(['tomaat', 'sla', 'sla']);
-    assert.deepEqual(planning.plants, ['tomaat', 'sla']);
-    assert.equal(planning.ratioOf('spring', 'sla'), 1);
+describe('carrying over', () => {
+  test('a planting is carried into its later growing seasons with its placements', () => {
+    const planning = withPlants('tomaat').applyPlacement('spring', [placement('t1', 'tomaat-spring')]);
+    assert.deepEqual(planning.plantingsCarriedInto('summer').map((p) => p.id), ['tomaat-spring']);
+    assert.deepEqual(planning.carriedPlacementsIn('summer').map((p) => p.id), ['t1']);
+    assert.deepEqual(planning.fixedPlacementsIn('summer').map((p) => p.id), ['t1']);
+  });
+});
+
+describe('duplicating a planting', () => {
+  const placed = withPlants('sla').applyPlacement('spring', [placement('s1', 'sla-spring')]);
+
+  test('is only possible for a placed planting, into an available season', () => {
+    assert.throws(() => withPlants('sla').duplicatePlanting('sla-spring', 'summer'), /niet geplaatst/);
+    assert.throws(() => placed.duplicatePlanting('sla-spring', 'autumn'), /niet beschikbaar/);
+    assert.deepEqual(placed.seasonsAvailableFor('sla-spring'), ['summer']);
   });
 
-  test('adding a plant makes its planned start season outdated', () => {
-    const planned = withPlants('tomaat').applyPlacement('spring', [placement('p1', 'tomaat')]);
-    assert.equal(planned.addPlants(['sla']).statusOf('spring'), 'outdated');
+  test('adds a second planting in that season with ratio 1, numbered 2', () => {
+    const duplicated = placed.duplicatePlanting('sla-spring', 'summer');
+    assert.deepEqual(duplicated.plantingsOf('sla').map((p) => [p.id, p.startSeason]), [['sla-spring', 'spring'], ['sla-summer', 'summer']]);
+    assert.equal(duplicated.ratioOf('summer', 'sla-summer'), 1);
+    assert.equal(duplicated.plantingNumberOf('sla-summer'), 2);
+    assert.deepEqual(duplicated.seasonsAvailableFor('sla-spring'), []);
   });
 
-  test('does not change the planning it was called on', () => {
-    const planning = Planning.empty(seasonsOf);
-    planning.addPlants(['tomaat']);
-    assert.deepEqual(planning.plants, []);
+  test('outdates the target season when it was planned', () => {
+    const planning = withPlants('sla', 'boerenkool')
+      .applyPlacement('summer', [placement('b1', 'boerenkool-summer')])
+      .applyPlacement('spring', [placement('s1', 'sla-spring')]);
+    assert.equal(planning.duplicatePlanting('sla-spring', 'summer').statusOf('summer'), 'outdated');
+  });
+});
+
+describe('moving a planting', () => {
+  const placed = withPlants('sla').applyPlacement('spring', [placement('s1', 'sla-spring')]);
+
+  test('keeps its id, loses its placements and fixed seasons, starts at ratio 1, and outdates both seasons', () => {
+    const moved = placed.setRatio('spring', 'sla-spring', 3).applyPlacement('spring', [placement('s1', 'sla-spring')]).movePlanting('sla-spring', 'summer');
+    const planting = moved.plantingById('sla-spring');
+    assert.deepEqual([planting?.startSeason, planting?.fixedSeasons], ['summer', undefined]);
+    assert.deepEqual(moved.placementsIn('spring'), []);
+    assert.equal(moved.ratioOf('summer', 'sla-spring'), 1);
+    assert.equal(moved.toData().seasons.spring.ratios['sla-spring'], undefined);
+    assert.equal(moved.statusOf('spring'), 'outdated');
+  });
+
+  test('can move back to an earlier season once placed again', () => {
+    const inSummer = placed.movePlanting('sla-spring', 'summer').applyPlacement('summer', [placement('s2', 'sla-spring')]);
+    assert.deepEqual(inSummer.seasonsAvailableFor('sla-spring'), ['spring']);
+    assert.equal(inSummer.movePlanting('sla-spring', 'spring').plantingById('sla-spring')?.startSeason, 'spring');
+  });
+
+  test('a second planting created in a season whose id is taken by a moved planting gets a suffix', () => {
+    const inSummer = placed.movePlanting('sla-spring', 'summer').applyPlacement('summer', [placement('s2', 'sla-spring')]);
+    const duplicated = inSummer.duplicatePlanting('sla-spring', 'spring');
+    assert.deepEqual(duplicated.plantingsOf('sla').map((p) => p.id), ['sla-spring-2', 'sla-spring']);
+  });
+});
+
+describe('removing', () => {
+  test('removing one of two plantings keeps the plant and renumbers the other', () => {
+    const planning = withPlants('sla')
+      .applyPlacement('spring', [placement('s1', 'sla-spring')])
+      .duplicatePlanting('sla-spring', 'summer')
+      .removePlanting('sla-spring');
+    assert.deepEqual(planning.plants, ['sla']);
+    assert.deepEqual(planning.plantings.map((p) => p.id), ['sla-summer']);
+    assert.equal(planning.plantingNumberOf('sla-summer'), 1);
+    assert.deepEqual(planning.placementsIn('spring'), []);
+    assert.equal(planning.statusOf('spring'), 'outdated');
+  });
+
+  test('removing the last planting removes the plant', () => {
+    assert.deepEqual(withPlants('sla').removePlanting('sla-spring').plants, []);
+  });
+
+  test('removing a plant removes all its plantings, ratios and placements', () => {
+    const planning = withPlants('sla').applyPlacement('spring', [placement('s1', 'sla-spring')]).duplicatePlanting('sla-spring', 'summer').removePlant('sla');
+    assert.deepEqual([planning.plants, planning.plantings, planning.placementsIn('spring')], [[], [], []]);
+    assert.deepEqual(planning.toData().seasons.summer.ratios, {});
   });
 });
 
 describe('setRatio', () => {
-  test('sets the ratio of a plant starting in the season and outdates a planned season', () => {
-    const planned = withPlants('tomaat', 'sla').applyPlacement('spring', []);
-    const changed = planned.setRatio('spring', 'sla', 3);
-    assert.equal(changed.ratioOf('spring', 'sla'), 3);
-    assert.equal(changed.statusOf('spring'), 'outdated');
-  });
-
-  test('rejects a plant carried into the season and ratios that are not whole numbers of at least 1', () => {
+  test('only for a planting starting in the season, with a whole ratio of at least 1', () => {
     const planning = withPlants('tomaat');
-    assert.throws(() => planning.setRatio('summer', 'tomaat', 2));
-    assert.throws(() => planning.setRatio('spring', 'tomaat', 0));
-    assert.throws(() => planning.setRatio('spring', 'tomaat', 1.5));
+    assert.equal(planning.setRatio('spring', 'tomaat-spring', 2).ratioOf('spring', 'tomaat-spring'), 2);
+    assert.throws(() => planning.setRatio('summer', 'tomaat-spring', 2), /start niet/);
+    assert.throws(() => planning.setRatio('spring', 'tomaat-spring', 0), /Ongeldige verhouding/);
   });
 });
 
 describe('applyPlacement', () => {
-  test('replaces unlocked placements, keeps locked ones and marks the season planned', () => {
-    const first = withPlants('tomaat').applyPlacement('spring', [
-      placement('locked', 'tomaat', { locked: true }),
-      placement('loose', 'tomaat'),
-    ]);
-    const second = first.applyPlacement('spring', [placement('new', 'tomaat')]);
-    assert.deepEqual(second.placementsIn('spring').map((p) => p.id), ['locked', 'new']);
-    assert.equal(second.statusOf('spring'), 'planned');
+  test('freezes the growing seasons of placed plantings and clears them for unplaced ones', () => {
+    const planning = withPlants('tomaat', 'sla').applyPlacement('spring', [placement('t1', 'tomaat-spring')]);
+    assert.deepEqual(planning.plantingById('tomaat-spring')?.fixedSeasons, ['spring', 'summer']);
+    assert.equal(planning.plantingById('sla-spring')?.fixedSeasons, undefined);
+    assert.equal(planning.statusOf('spring'), 'planned');
   });
 
-  test('outdates a planned later season that holds plants carried from this season; not-planned seasons stay', () => {
+  test('outdates a planned later season that the placed planting is carried into', () => {
     const planning = withPlants('tomaat', 'boerenkool')
-      .applyPlacement('summer', [placement('b1', 'boerenkool')])
-      .applyPlacement('spring', [placement('t1', 'tomaat')]);
+      .applyPlacement('summer', [placement('b1', 'boerenkool-summer')])
+      .applyPlacement('spring', [placement('t1', 'tomaat-spring')]);
     assert.equal(planning.statusOf('summer'), 'outdated');
-    assert.equal(planning.statusOf('autumn'), 'notPlanned');
+  });
+
+  test('keeps locked placements', () => {
+    const planning = withPlants('sla')
+      .applyPlacement('spring', [placement('locked', 'sla-spring', { locked: true }), placement('loose', 'sla-spring')])
+      .applyPlacement('spring', [placement('new', 'sla-spring')]);
+    assert.deepEqual(planning.placementsIn('spring').map((p) => p.id), ['locked', 'new']);
   });
 });
 
-describe('fixedPlacementsIn', () => {
-  test('gives the carried placements and the locked placements of the season', () => {
-    const planning = withPlants('tomaat', 'boerenkool')
-      .applyPlacement('spring', [placement('t1', 'tomaat')])
-      .applyPlacement('summer', [placement('b1', 'boerenkool', { locked: true }), placement('b2', 'boerenkool')]);
-    assert.deepEqual(planning.carriedPlacementsIn('summer').map((p) => p.id), ['t1']);
-    assert.deepEqual(planning.fixedPlacementsIn('summer').map((p) => p.id), ['t1', 'b1']);
+describe('reconciling with a new calendar (frost-date change and every load)', () => {
+  const placedTomato = withPlants('tomaat', 'sla').applyPlacement('spring', [placement('t1', 'tomaat-spring')]);
+  // After a later frost date: tomato and lettuce only reach summer
+  const later = calendarOf({
+    ...TABLE,
+    tomaat: { reach: ['summer'], grow: { summer: ['summer'] } },
+    sla: { reach: ['summer'], grow: { summer: ['summer'] } },
   });
-});
 
-describe('removePlant', () => {
-  test('removes the plant, its ratios and placements, and outdates its planned seasons', () => {
-    const planning = withPlants('tomaat', 'boerenkool')
-      .applyPlacement('spring', [placement('t1', 'tomaat')])
-      .applyPlacement('summer', [placement('b1', 'boerenkool')])
-      .removePlant('tomaat');
-    assert.deepEqual(planning.plants, ['boerenkool']);
-    assert.deepEqual(planning.placementsIn('spring'), []);
-    assert.equal(planning.toData().seasons.spring.ratios.tomaat, undefined);
+  test('a placed planting keeps its season, placements, fixed seasons and its season status', () => {
+    const onlyTomato = withPlants('tomaat').applyPlacement('spring', [placement('t1', 'tomaat-spring')]);
+    const planning = Planning.from(onlyTomato.toData(), later);
+    assert.deepEqual(planning.plantingById('tomaat-spring')?.startSeason, 'spring');
+    assert.deepEqual(planning.plantingById('tomaat-spring')?.fixedSeasons, ['spring', 'summer']);
+    assert.deepEqual(planning.placementsIn('spring').map((p) => p.id), ['t1']);
+    assert.equal(planning.statusOf('spring'), 'planned');
+  });
+
+  test('an unplaced planting moves to the first available season with ratio 1; the season it left becomes outdated', () => {
+    const planning = Planning.from(placedTomato.setRatio('spring', 'sla-spring', 4).toData(), later);
+    assert.deepEqual([planning.plantingById('sla-spring')?.startSeason, planning.ratioOf('summer', 'sla-spring')], ['summer', 1]);
+    assert.equal(planning.toData().seasons.spring.ratios['sla-spring'], undefined);
     assert.equal(planning.statusOf('spring'), 'outdated');
-    assert.equal(planning.statusOf('summer'), 'outdated');
+  });
+
+  test('an unplaced planting is dropped when every reachable season already has a planting of the plant', () => {
+    const data: PlanningData = {
+      plants: ['sla'],
+      plantings: [
+        { id: 'sla-spring', plantId: 'sla', startSeason: 'spring' },
+        { id: 'sla-summer', plantId: 'sla', startSeason: 'summer' },
+      ],
+      seasons: {
+        spring: { ratios: { 'sla-spring': 1 }, placements: [], status: 'notPlanned' },
+        summer: { ratios: { 'sla-summer': 1 }, placements: [placement('s2', 'sla-summer')], status: 'planned' },
+        autumn: { ratios: {}, placements: [], status: 'notPlanned' },
+        winter: { ratios: {}, placements: [], status: 'notPlanned' },
+      },
+    };
+    assert.deepEqual(Planning.from(data, later).plantings.map((p) => p.id), ['sla-summer']);
+  });
+
+  test('a placed planting without fixed seasons (migrated) gets them from the calendar', () => {
+    const data = placedTomato.toData();
+    const withoutFixed: PlanningData = { ...data, plantings: data.plantings.map(({ fixedSeasons: _f, ...p }) => p) };
+    assert.deepEqual(Planning.from(withoutFixed, calendar).plantingById('tomaat-spring')?.fixedSeasons, ['spring', 'summer']);
+  });
+
+  test('a plant in the list without planting gets its first planting', () => {
+    const data: PlanningData = { ...Planning.from(undefined, calendar).toData(), plants: ['boerenkool'] };
+    assert.deepEqual(Planning.from(data, calendar).plantings.map((p) => p.id), ['boerenkool-summer']);
+  });
+
+  test('is idempotent: reconciling again gives the same planning and the same ids', () => {
+    const once = Planning.from(placedTomato.setRatio('spring', 'sla-spring', 4).toData(), later);
+    assert.equal(once.reconciled(), once);
+    assert.deepEqual(Planning.from(once.toData(), later).toData(), once.toData());
   });
 });
 
 describe('changing one placement', () => {
   const planned = withPlants('tomaat', 'boerenkool')
-    .applyPlacement('spring', [placement('t1', 'tomaat')])
-    .applyPlacement('summer', [placement('b1', 'boerenkool')]);
+    .applyPlacement('spring', [placement('t1', 'tomaat-spring')])
+    .applyPlacement('summer', [placement('b1', 'boerenkool-summer')]);
 
-  test('moving a carried plant outdates the later seasons it grows in, not its own season', () => {
+  test('moving a carried planting outdates the later seasons it grows in, not its own season', () => {
     const moved = planned.movePlacement('spring', 't1', 50, 60);
-    assert.deepEqual([moved.placementsIn('spring')[0].positionX, moved.placementsIn('spring')[0].positionY], [50, 60]);
-    assert.equal(moved.statusOf('spring'), 'planned');
-    assert.equal(moved.statusOf('summer'), 'outdated');
-  });
-
-  test('resizing and removing work the same way', () => {
-    const resized = planned.resizePatch('spring', 't1', 30, 40, 15);
-    assert.deepEqual(
-      [resized.placementsIn('spring')[0].patchWidthInCm, resized.placementsIn('spring')[0].patchHeightInCm, resized.placementsIn('spring')[0].patchRotationDeg],
-      [30, 40, 15],
-    );
-    assert.equal(resized.statusOf('summer'), 'outdated');
-    assert.deepEqual(planned.removePlacement('spring', 't1').placementsIn('spring'), []);
+    assert.deepEqual([moved.placementsIn('spring')[0].positionX, moved.statusOf('spring'), moved.statusOf('summer')], [50, 'planned', 'outdated']);
   });
 
   test('locking changes no status', () => {
-    const locked = planned.toggleLock('spring', 't1').setAllLocked('summer', true);
-    assert.equal(locked.placementsIn('spring')[0].locked, true);
-    assert.equal(locked.placementsIn('summer')[0].locked, true);
-    assert.equal(locked.statusOf('summer'), 'planned');
-  });
-
-  test('an unknown placement id changes nothing', () => {
-    assert.equal(planned.movePlacement('spring', 'missing', 1, 1), planned);
-  });
-});
-
-describe('reconciled', () => {
-  test('given a plant whose start season moved, its ratio moves along, its placements go and the seasons involved are outdated', () => {
-    // Stored while tomaat started in summer; its calendar now says spring
-    const stored = Planning.from(
-      {
-        plants: ['tomaat'],
-        seasons: {
-          spring: { ratios: {}, placements: [], status: 'planned' },
-          summer: { ratios: { tomaat: 3 }, placements: [placement('t1', 'tomaat')], status: 'planned' },
-          autumn: { ratios: {}, placements: [], status: 'notPlanned' },
-          winter: { ratios: {}, placements: [], status: 'notPlanned' },
-        },
-      },
-      seasonsOf,
-    );
-    const planning = stored.reconciled();
-    assert.equal(planning.ratioOf('spring', 'tomaat'), 3);
-    assert.equal(planning.toData().seasons.summer.ratios.tomaat, undefined);
-    assert.deepEqual(planning.placementsIn('summer'), []);
-    assert.equal(planning.statusOf('spring'), 'outdated');
-    assert.equal(planning.statusOf('summer'), 'outdated');
-  });
-
-  test('given a planning without planned seasons, it gives the same planning', () => {
-    const planning = withPlants('tomaat');
-    assert.equal(planning.reconciled(), planning);
-  });
-
-  test('outdates every planned season that holds plants', () => {
-    const planned = withPlants('tomaat').applyPlacement('spring', [placement('t1', 'tomaat')]);
-    const reconciled = planned.reconciled();
-    assert.equal(reconciled.statusOf('spring'), 'outdated');
-    assert.equal(reconciled.statusOf('summer'), 'notPlanned');
-  });
-
-  test('a plant that gained a calendar outdates its now planned start season', () => {
-    const newSeasonsOf = (plantId: string): readonly Season[] => (plantId === 'knoflook' ? ['spring'] : []);
-    // Stored while knoflook had no calendar, so spring was planned without it
-    const stored = Planning.from(
-      {
-        plants: ['knoflook'],
-        seasons: {
-          spring: { ratios: {}, placements: [], status: 'planned' },
-          summer: { ratios: {}, placements: [], status: 'notPlanned' },
-          autumn: { ratios: {}, placements: [], status: 'notPlanned' },
-          winter: { ratios: {}, placements: [], status: 'notPlanned' },
-        },
-      },
-      newSeasonsOf,
-    );
-    assert.equal(stored.reconciled().statusOf('spring'), 'outdated');
+    assert.equal(planned.toggleLock('spring', 't1').setAllLocked('summer', true).statusOf('summer'), 'planned');
   });
 });

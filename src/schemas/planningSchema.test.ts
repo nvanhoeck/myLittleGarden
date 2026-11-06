@@ -4,26 +4,33 @@ import { planningDataSchema } from './planningSchema.ts';
 
 const emptySeason = { ratios: {}, placements: [], status: 'notPlanned' };
 const valid = {
-  plants: ['tomaat'],
+  plants: ['sla'],
+  plantings: [
+    { id: 'sla-spring', plantId: 'sla', startSeason: 'spring', fixedSeasons: ['spring'] },
+    { id: 'sla-summer', plantId: 'sla', startSeason: 'summer' },
+  ],
   seasons: {
-    spring: { ratios: { tomaat: 2 }, placements: [{ id: 'p1', plantId: 'tomaat', positionX: 25, positionY: 25, locked: true }], status: 'planned' },
-    summer: emptySeason,
+    spring: {
+      ratios: { 'sla-spring': 2 },
+      placements: [{ id: 'p1', plantId: 'sla', plantingId: 'sla-spring', positionX: 25, positionY: 25 }],
+      status: 'planned',
+    },
+    summer: { ...emptySeason, ratios: { 'sla-summer': 1 } },
     autumn: emptySeason,
     winter: emptySeason,
   },
 };
 
 describe('planningDataSchema', () => {
-  test('accepts a valid planning', () => {
+  test('accepts a planning with plantings', () => {
     assert.ok(planningDataSchema.safeParse(valid).success);
   });
 
-  test('rejects a ratio below 1 or not whole, an unknown status and a missing season', () => {
-    const withRatio = (ratio: number) => ({ ...valid, seasons: { ...valid.seasons, spring: { ...valid.seasons.spring, ratios: { tomaat: ratio } } } });
-    assert.equal(planningDataSchema.safeParse(withRatio(0)).success, false);
-    assert.equal(planningDataSchema.safeParse(withRatio(1.5)).success, false);
-    assert.equal(planningDataSchema.safeParse({ ...valid, seasons: { ...valid.seasons, summer: { ...emptySeason, status: 'done' } } }).success, false);
-    const { winter: _winter, ...threeSeasons } = valid.seasons;
-    assert.equal(planningDataSchema.safeParse({ ...valid, seasons: threeSeasons }).success, false);
+  test('rejects a placement without planting id, a planting with an unknown season, and a missing plantings list', () => {
+    const { plantingId: _p, ...placement } = valid.seasons.spring.placements[0];
+    assert.equal(planningDataSchema.safeParse({ ...valid, seasons: { ...valid.seasons, spring: { ...valid.seasons.spring, placements: [placement] } } }).success, false);
+    assert.equal(planningDataSchema.safeParse({ ...valid, plantings: [{ id: 'x', plantId: 'sla', startSeason: 'lente' }] }).success, false);
+    const { plantings: _q, ...withoutPlantings } = valid;
+    assert.equal(planningDataSchema.safeParse(withoutPlantings).success, false);
   });
 });

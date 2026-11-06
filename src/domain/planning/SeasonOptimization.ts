@@ -18,41 +18,52 @@ export interface SeasonOptimizationInput {
   readonly newId: () => string;
 }
 
+/** A planting's share of the free area; plantId is the plant, plantingId the planting */
+export interface PlantingShare extends PlantShare {
+  readonly plantingId: string;
+}
+
 export interface SeasonOptimizationOutcome {
   readonly planning: Planning;
-  readonly shares: readonly PlantShare[];
+  readonly shares: readonly PlantingShare[];
 }
 
 /**
- * Optimize one season: the plants starting in it fill the free area by
- * ratio around the carried-over and locked plants. Unlocked placements of
- * the season are replaced. Plants missing from the catalog are skipped.
+ * Optimize one season: the plantings starting in it fill the free area by
+ * ratio around the carried-over and locked plantings. Unlocked placements
+ * of the season are replaced. Plantings of plants missing from the catalog
+ * are skipped. fillByRatio sees planting ids as its plant ids, so two
+ * plantings of one plant are placed independently; relations still use the plant.
  */
 export function optimizeSeason(input: SeasonOptimizationInput): SeasonOptimizationOutcome {
   const { planning, season, plantOf } = input;
+  const plantIdOf = new Map(planning.plantings.map((p) => [p.id, p.plantId]));
+  const plantOfPlanting = (plantingId: string): string => plantIdOf.get(plantingId) ?? plantingId;
+  const catalogRelations = relationsFromCatalog(planning.plants.flatMap((plantId) => plantOf(plantId) ?? []));
 
   const fixed = planning.fixedPlacementsIn(season).map((placement) => ({
-    plantId: placement.plantId,
+    plantId: placement.plantingId,
     layerIndex: placement.layerIndex ?? 0,
     footprint: footprintOf(plantOf(placement.plantId), placement),
     xCm: placement.positionX,
     yCm: placement.positionY,
   }));
-  const plants = planning.plantsStartingIn(season).flatMap((plantId) => {
-    const plant = plantOf(plantId);
-    return plant === undefined ? [] : [{ plantId, ratio: planning.ratioOf(season, plantId), traits: plant }];
+  const plantings = planning.plantingsStartingIn(season).flatMap((planting) => {
+    const plant = plantOf(planting.plantId);
+    return plant === undefined ? [] : [{ plantId: planting.id, ratio: planning.ratioOf(season, planting.id), traits: plant }];
   });
 
   const result = fillByRatio({
     layers: input.areas,
     fixed,
-    plants,
-    relations: relationsFromCatalog(planning.plants.flatMap((plantId) => plantOf(plantId) ?? [])),
+    plants: plantings,
+    relations: (a, b) => catalogRelations(plantOfPlanting(a), plantOfPlanting(b)),
   });
 
   const placements = result.placements.map((placed): PlacementData => ({
     id: input.newId(),
-    plantId: placed.plantId,
+    plantId: plantOfPlanting(placed.plantId),
+    plantingId: placed.plantId,
     positionX: placed.xCm,
     positionY: placed.yCm,
     ...(input.hasLayers ? { layerIndex: placed.layerIndex } : {}),
@@ -61,5 +72,8 @@ export function optimizeSeason(input: SeasonOptimizationInput): SeasonOptimizati
       : {}),
   }));
 
-  return { planning: planning.applyPlacement(season, placements), shares: result.shares };
+  return {
+    planning: planning.applyPlacement(season, placements),
+    shares: result.shares.map((share) => ({ ...share, plantingId: share.plantId, plantId: plantOfPlanting(share.plantId) })),
+  };
 }

@@ -2,7 +2,7 @@ import type { ComponentData } from '../../types/component.types.ts';
 import type { PlacementData } from '../../types/planning.types.ts';
 import { Planning } from './Planning.ts';
 import { seasonContaining } from './Season.ts';
-import type { SeasonsOf } from './Season.ts';
+import type { PlantingCalendar } from './PlantCalendar.ts';
 
 /**
  * What grows in a component on a day: the placements of that day's season,
@@ -11,9 +11,9 @@ import type { SeasonsOf } from './Season.ts';
 export function placementsGrowingOn(
   component: Pick<ComponentData, 'plannings'>,
   date: Date,
-  seasonsOfYear: (year: number) => SeasonsOf,
+  calendarOfYear: (year: number) => PlantingCalendar,
 ): PlacementData[] {
   const { year, season } = seasonContaining(date);
-  const planning = Planning.from(component.plannings[String(year)], seasonsOfYear(year));
+  const planning = Planning.from(component.plannings[String(year)], calendarOfYear(year));
   return [...planning.carriedPlacementsIn(season), ...planning.placementsIn(season)];
 }
