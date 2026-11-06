@@ -4,7 +4,9 @@
 
 Voor elke plant is per methode (voorzaaien binnen, uitplanten, buiten zaaien) een periode bepaald, omgezet naar weken ten opzichte van 15 april (typische laatste voorjaarsvorst, Belgisch binnenland).
 
-**Beperkte verificatie:** de beschikbare tools lieten geen drie onafhankelijke bronnen per gewas toe. Gebruikt: de Hubo-zaaikalender (alleen jan-mei leesbaar, geen uitplantdata), de Plukkers-maandkalenders (NL/BE, jan-okt), de Leefmilieu Brussel infofiche 6 (2012, 'Gemakkelijke groenten'), de Velt schoolmoestuinkalender 2025 (klein gewasaanbod), de IVN-factsheet zaaien, en webwoordenboek.nl/Gamma/Bosch voor kruiden. Per rij staat het aantal werkelijk geraadpleegde bronnen; **een ster (*) = vakkennis zonder bevestigende bron**. De meeste rijen hebben dus minder dan 3 bronnen en vragen een reviewcontrole. Aveve en Belgische zaadzakjes (Sluis, Vreeken, Bruno Nebelung) waren niet raadpleegbaar. Voorzaai- en uitplantperiodes zijn voor veel gewassen afgeleid (Hubo geeft geen uitplantdata).
+### Bronnen en beperkingen
+
+97 van 130 rijen met vensters hebben minder dan 3 bronnen; rijen met * zijn vakkennis en moeten door de gebruiker gecontroleerd worden. De beschikbare tools lieten geen drie onafhankelijke bronnen per gewas toe. Gebruikt: de Hubo-zaaikalender (alleen jan-mei leesbaar, geen uitplantdata), de Plukkers-maandkalenders (NL/BE, jan-okt), de Leefmilieu Brussel infofiche 6 (2012, 'Gemakkelijke groenten'), de Velt schoolmoestuinkalender 2025 (klein gewasaanbod), de IVN-factsheet zaaien, en webwoordenboek.nl/Gamma/Bosch voor kruiden. Per rij staat het aantal werkelijk geraadpleegde bronnen; **een ster (*) = vakkennis zonder bevestigende bron**. De meeste rijen hebben dus minder dan 3 bronnen en vragen een reviewcontrole. Aveve en Belgische zaadzakjes (Sluis, Vreeken, Bruno Nebelung) waren niet raadpleegbaar. Voorzaai- en uitplantperiodes zijn voor veel gewassen afgeleid (Hubo geeft geen uitplantdata).
 
 ## Omzetting
 
@@ -39,7 +41,7 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | sla | Sla | feb-apr (-11..2) | apr-aug (-2..19) | apr-aug (-2..19) | Hubo, Plukkers, Leefmilieu-Brussel, IVN (4 bronnen) | Brussel: kropsla buiten vanaf april, uitplanten tot half augustus |
 | spinazie | Spinazie | jan-feb (-15..-7) | - | mrt-okt (-7..28) | Hubo, Plukkers, IVN (3 bronnen) | Serre jan-feb; buiten maart-mei en half aug-okt; juni-juli niet aanbevolen (doorschieten), een enkel venster kan die onderbreking niet tonen; uitplanten niet gangbaar; oude transplantWeeks vervalt (niet gangbaar) |
 | rucola | Rucola | - | - | mrt-sep (-7..24) | Plukkers, IVN (2 bronnen) | Compo: rucola blijft in serre/vensterbank; oude transplantWeeks vervalt (niet gangbaar) |
-| andijvie | Andijvie | feb-apr (-11..2) | mei-aug (2..19) | apr-aug (-2..19) | Plukkers, IVN (2 bronnen) |  |
+| andijvie | Andijvie | jun-aug (6..19) | jul-aug (11..19) | jun-jul (6..15) | Plukkers, vakkennis* (1 bron) | Belgische herfstteelt: voorzaaien (kweekbed) juni-aug, uitplanten juli-aug, direct juni-juli; vroege zaai (voor juni) schiet door; Plukkers noemt ook zaai april-aug |
 | snijsla | Snijsla | - | - | 2e helft mrt-aug (-5..19) | Hubo, Plukkers, Leefmilieu-Brussel (3 bronnen) | Brussel: pluksla vanaf begin maart, snijsla vanaf mei; alleen direct gezaaid; oude indoorStartWeeks vervalt (niet gangbaar); oude transplantWeeks vervalt (niet gangbaar) |
 | ijsberg-sla | IJsberg Sla | feb-apr (-11..2) | apr-aug (-2..19) | apr-aug (-2..19) | Hubo, Plukkers, Leefmilieu-Brussel (3 bronnen) | zoals sla |
 | romaine-sla | Romaine Sla | feb-apr (-11..2) | apr-aug (-2..19) | apr-aug (-2..19) | Hubo, Plukkers, Leefmilieu-Brussel (3 bronnen) | zoals sla |
@@ -60,7 +62,7 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | kruidplant | Kruidplant | - | - | - | - | Gewas niet eenduidig te identificeren |
 | asperge | Asperge | feb-mrt (-11..-3) | mrt-apr (-7..2) | - | vakkennis* (0 bronnen) | Geen bron; kroon planten maart-april |
 | kapuzijner-kers | Kapucijner Kers | apr-mei (-2..6) | 2e helft mei-jun (4..10) | 2e helft mei-jun (4..10) | vakkennis* (0 bronnen) | Geen bron geraadpleegd |
-| selderij | Selderij | 2e helft feb-apr (-9..2) | mei-jun (2..10) | 2e helft apr-jul (0..15) | Leefmilieu-Brussel, Plukkers, Hubo (3 bronnen) | zoals bladselderij |
+| selderij | Selderij | 2e helft feb-apr (-9..2) | mei-jun (2..10) | - | Leefmilieu-Brussel, Plukkers, Hubo (3 bronnen) | Direct zaaien van selderij in open lucht is niet gangbaar in Belgie (Brussel: voorzaaien/plantgoed); alleen bladselderij/snijselder wordt direct gezaaid |
 | kaasstelen | Kaas Stelen | - | - | - | - | Gewas niet eenduidig te identificeren |
 | stengelbiet | Stengelbiet | mrt-apr (-7..2) | mei-jun (2..10) | apr-jul (-2..15) | Leefmilieu-Brussel, Plukkers (2 bronnen) |  |
 | zuringelambique | Zuringelambique | - | - | - | - | Gewas niet eenduidig te identificeren |
@@ -92,10 +94,10 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | boerenkool | Boerenkool | apr-mei (-2..6) | 2e helft mei-jul (4..15) | apr-jun (-2..10) | Hubo, Plukkers, Velt, Leefmilieu-Brussel (4 bronnen) | Velt: voorzaaien tot half mei; Brussel: buiten mei-juni |
 | bloemkool | Bloemkool | feb-apr (-11..2) | 2e helft apr-jul (0..15) | apr-jul (-2..15) | Hubo, Plukkers (2 bronnen) |  |
 | spruitjes | Spruitjes | mrt-apr (-7..2) | mei-jun (2..10) | mrt-mei (-7..6) | Hubo, Plukkers, Velt, IVN (4 bronnen) | Velt: voorzaaien tot half april |
-| savooiekool | Savooiekool | mrt-apr (-7..2) | 2e helft mei-half jun (4..8) | 2e helft mrt-mei (-5..6) | Plukkers, Leefmilieu-Brussel (2 bronnen) | Brussel: uitplanten half mei-half juni |
-| groene-kool | Groene Kool | mrt-apr (-7..2) | 2e helft mei-half jun (4..8) | 2e helft mrt-mei (-5..6) | Plukkers, Leefmilieu-Brussel (2 bronnen) | zoals savooiekool |
-| rode-kool | Rode Kool | mrt-apr (-7..2) | 2e helft mei-half jun (4..8) | 2e helft mrt-mei (-5..6) | Hubo, Plukkers, Leefmilieu-Brussel (3 bronnen) | Brussel: buiten zaaien laatste week maart-eind april |
-| chinese-kool | Chinese Kool | - | - | jun-half aug (6..17) | Leefmilieu-Brussel, Plukkers (2 bronnen) | Brussel: 15 jul-15 aug; Plukkers: juni; oude indoorStartWeeks vervalt (niet gangbaar); oude transplantWeeks vervalt (niet gangbaar) |
+| savooiekool | Savooiekool | mrt-apr (-7..2) | mei-jul (2..15) | 2e helft mrt-mei (-5..6) | Plukkers, Leefmilieu-Brussel (2 bronnen) | Brussel: uitplanten half mei-half juni |
+| groene-kool | Groene Kool | mrt-apr (-7..2) | mei-jul (2..15) | 2e helft mrt-mei (-5..6) | Plukkers, Leefmilieu-Brussel (2 bronnen) | zoals savooiekool |
+| rode-kool | Rode Kool | mrt-apr (-7..2) | mei-jul (2..15) | 2e helft mrt-mei (-5..6) | Hubo, Plukkers, Leefmilieu-Brussel (3 bronnen) | Brussel: buiten zaaien laatste week maart-eind april |
+| chinese-kool | Chinese Kool | - | - | 2e helft jul-half aug (13..17) | Leefmilieu-Brussel (1 bron) | Brussel: 15 jul-15 aug; vroegere zaai schiet door (Plukkers noemt juni); uitplanten niet opgenomen; oude indoorStartWeeks vervalt (niet gangbaar); oude transplantWeeks vervalt (niet gangbaar) |
 | koolrabi | Koolrabi | feb-apr (-11..2) | apr-jul (-2..15) | apr-aug (-2..19) | Plukkers, IVN (2 bronnen) |  |
 | skraelkool | Skraelkool | apr-mei (-2..6) | 2e helft mei-jul (4..15) | apr-jun (-2..10) | vakkennis* (0 bronnen) | Als boerenkool; geen bron |
 
@@ -132,7 +134,7 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | munt | Munt | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | apr-jun (-2..10) | Plukkers, IVN, Webwoordenboek/Gamma/Bosch (3 bronnen) |  |
 | tijm | Tijm | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | 2e helft apr-jun (0..10) | Plukkers, Webwoordenboek/Gamma/Bosch, IVN (3 bronnen) |  |
 | oregano | Oregano | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | - | Plukkers, Webwoordenboek/Gamma/Bosch (2 bronnen) |  |
-| rozemarijn | Rozemarijn | - | - | - | - | plantType shrub: volgens brief null (potplant; Bosch: moeilijk uit zaad) |
+| rozemarijn | Rozemarijn | feb-apr (-11..2) | 2e helft apr-jun (0..10) | - | Plukkers, Webwoordenboek/Gamma/Bosch (2 bronnen) | In catalogus getypeerd als shrub maar geteeld als tuinkruid; Bosch: moeilijk uit zaad; zoals salie/lavendel |
 | salie | Salie | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | - | Plukkers, Webwoordenboek/Gamma/Bosch (2 bronnen) | Bosch: moeilijk uit zaad |
 | majoraan | Majoraan | mrt-apr (-7..2) | 2e helft mei-jun (4..10) | - | Plukkers, vakkennis* (1 bron) |  |
 | lavendel | Lavendel | feb-apr (-11..2) | 2e helft apr-jun (0..10) | - | Webwoordenboek/Gamma/Bosch, vakkennis* (1 bron) | Moeilijk uit zaad |
@@ -141,7 +143,7 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | dragon | Dragon | mrt-apr (-7..2) | mei-jun (2..10) | - | Plukkers, vakkennis* (1 bron) | Franse dragon niet uit zaad |
 | kervel | Kervel | - | - | apr-jul (-2..15) | Hubo, Plukkers (2 bronnen) | Hubo april; verplant slecht; oude transplantWeeks vervalt (niet gangbaar) |
 | bezemkruid | Bezemkruid | - | - | - | - | Gewas niet eenduidig te identificeren |
-| sleutelbloem | Sleutelbloem | - | - | - | - | Primula vraagt koudebehandeling; geen betrouwbare bron |
+| sleutelbloem | Sleutelbloem | jan-mrt (-15..-3) | apr-mei (-2..6) | - | vakkennis* (0 bronnen) | Primula veris; direct zaaien null: zaad vraagt koudebehandeling (stratificatie) |
 | goudsbloemkruid | Goudsbloem | mrt-apr (-7..2) | 2e helft apr-mei (0..6) | 2e helft mrt-jun (-5..10) | Plukkers, vakkennis* (1 bron) |  |
 | chia | Chia | mrt-apr (-7..2) | 2e helft mei-jun (4..10) | - | vakkennis* (0 bronnen) | Geen bron; experimenteel |
 | eetbare-bloem | Eetbare Bloem | - | - | - | - | Verzamelnaam, niet per soort te bepalen |
@@ -157,8 +159,8 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | salie-rood | Rode Salie | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | - | Plukkers, vakkennis* (1 bron) | zoals salie |
 | citroensalie | Citroensalie | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | - | Plukkers, vakkennis* (1 bron) | zoals salie |
 | borage | Borage | mrt-apr (-7..2) | 2e helft apr-mei (0..6) | apr-jun (-2..10) | vakkennis* (0 bronnen) | Geen bron |
-| sleutelbloem-thee | Sleutelbloem Thee | - | - | - | - | Primula vraagt koudebehandeling; geen betrouwbare bron |
-| roodlover | Roodkloverbloem | - | - | - | - | Gewas niet eenduidig te identificeren |
+| sleutelbloem-thee | Sleutelbloem Thee | jan-mrt (-15..-3) | apr-mei (-2..6) | - | vakkennis* (0 bronnen) | Primula veris; direct zaaien null: zaad vraagt koudebehandeling (stratificatie) |
+| roodlover | Roodkloverbloem | - | - | apr-aug (-2..19) | vakkennis* (0 bronnen) | Trifolium pratense (rode klaver); geen voorzaai/uitplant |
 | vogelvoet | Vogelvoet | - | - | - | - | Gewas niet eenduidig te identificeren |
 | studentenkruid | Studentenkruid | - | - | - | - | Gewas niet eenduidig te identificeren |
 | steentijm | Steentijm | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | 2e helft apr-jun (0..10) | Plukkers, vakkennis* (1 bron) | zoals tijm |
@@ -236,17 +238,13 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 
 ## Planten zonder vensters
 
-- rozemarijn (Rozemarijn): plantType shrub: volgens brief null (potplant; Bosch: moeilijk uit zaad)
 - bezemkruid (Bezemkruid): Gewas niet eenduidig te identificeren
-- sleutelbloem (Sleutelbloem): Primula vraagt koudebehandeling; geen betrouwbare bron
 - retichie (Retichie): Gewas niet eenduidig te identificeren
 - kruidplant (Kruidplant): Gewas niet eenduidig te identificeren
 - schuimboon (Schuimboon): Gewas niet eenduidig te identificeren
 - perzik (Perzik): Boom/struik/fruit: als stek/pot geplant, geen zaaiperiode
 - eetbare-bloem (Eetbare Bloem): Verzamelnaam, niet per soort te bepalen
 - reigersbek (Reigersbek): Wild/sierplant, geen bron
-- sleutelbloem-thee (Sleutelbloem Thee): Primula vraagt koudebehandeling; geen betrouwbare bron
-- roodlover (Roodkloverbloem): Gewas niet eenduidig te identificeren
 - kaasstelen (Kaas Stelen): Gewas niet eenduidig te identificeren
 - zuringelambique (Zuringelambique): Gewas niet eenduidig te identificeren
 - vogelvoet (Vogelvoet): Gewas niet eenduidig te identificeren

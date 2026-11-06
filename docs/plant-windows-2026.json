@@ -305,8 +305,8 @@
         "toWeeks": 2
       },
       "transplantWindow": {
-        "fromWeeks": 4,
-        "toWeeks": 8
+        "fromWeeks": 2,
+        "toWeeks": 15
       },
       "directSowWindow": {
         "fromWeeks": -5,
@@ -319,8 +319,8 @@
         "toWeeks": 2
       },
       "transplantWindow": {
-        "fromWeeks": 4,
-        "toWeeks": 8
+        "fromWeeks": 2,
+        "toWeeks": 15
       },
       "directSowWindow": {
         "fromWeeks": -5,
@@ -333,8 +333,8 @@
         "toWeeks": 2
       },
       "transplantWindow": {
-        "fromWeeks": 4,
-        "toWeeks": 8
+        "fromWeeks": 2,
+        "toWeeks": 15
       },
       "directSowWindow": {
         "fromWeeks": -5,
@@ -343,16 +343,16 @@
     },
     "andijvie": {
       "indoorStartWindow": {
-        "fromWeeks": -11,
-        "toWeeks": 2
+        "fromWeeks": 6,
+        "toWeeks": 19
       },
       "transplantWindow": {
-        "fromWeeks": 2,
+        "fromWeeks": 11,
         "toWeeks": 19
       },
       "directSowWindow": {
-        "fromWeeks": -2,
-        "toWeeks": 19
+        "fromWeeks": 6,
+        "toWeeks": 15
       }
     },
     "snijsla": {
@@ -403,7 +403,7 @@
       "indoorStartWindow": null,
       "transplantWindow": null,
       "directSowWindow": {
-        "fromWeeks": 6,
+        "fromWeeks": 13,
         "toWeeks": 17
       }
     },
@@ -567,8 +567,14 @@
       "directSowWindow": null
     },
     "rozemarijn": {
-      "indoorStartWindow": null,
-      "transplantWindow": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
       "directSowWindow": null
     },
     "salie": {
@@ -659,8 +665,14 @@
       "directSowWindow": null
     },
     "sleutelbloem": {
-      "indoorStartWindow": null,
-      "transplantWindow": null,
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
       "directSowWindow": null
     },
     "paardebloem": {
@@ -1017,10 +1029,7 @@
         "fromWeeks": 2,
         "toWeeks": 10
       },
-      "directSowWindow": {
-        "fromWeeks": 0,
-        "toWeeks": 15
-      }
+      "directSowWindow": null
     },
     "mandarijnkruid": {
       "indoorStartWindow": {
@@ -1114,14 +1123,23 @@
       }
     },
     "sleutelbloem-thee": {
-      "indoorStartWindow": null,
-      "transplantWindow": null,
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
       "directSowWindow": null
     },
     "roodlover": {
       "indoorStartWindow": null,
       "transplantWindow": null,
-      "directSowWindow": null
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
     },
     "oca": {
       "indoorStartWindow": {
