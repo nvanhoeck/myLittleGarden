@@ -20,7 +20,7 @@ import {
   CircularTower,
 } from '@/domain/component';
 import { Planning, optimizeSeason as optimizeSeasonOf, plantingAreasOf } from '@/domain/planning';
-import type { PlantShare, Season } from '@/domain/planning';
+import type { PlantingShare, Season } from '@/domain/planning';
 import { generateId } from '@/utils/idGenerator';
 import {
   migrateComponentState,
@@ -30,7 +30,7 @@ import {
 import { usePlantStore } from './plantStore';
 import { useEnvironmentStore } from './environmentStore';
 import { usePlanningStore } from './planningStore';
-import { seasonsOfYear } from './planningContext';
+import { plantingCalendarOfYear } from './planningContext';
 import { shouldReconcile } from './reconcilePolicy';
 
 /**
@@ -78,9 +78,15 @@ interface ComponentState {
   // Actions - Planning (per component, year and season)
   addPlantsToPlanning: (componentId: string, year: number, plantIds: readonly string[]) => void;
   removePlantFromPlanning: (componentId: string, year: number, plantId: string) => void;
-  setRatio: (componentId: string, year: number, season: Season, plantId: string, ratio: number) => void;
+  setRatio: (componentId: string, year: number, season: Season, plantingId: string, ratio: number) => void;
+  /** Plants a placed planting again in another available season, at ratio 1 */
+  duplicatePlanting: (componentId: string, year: number, plantingId: string, season: Season) => void;
+  /** Moves a placed planting to another available season; its placements go */
+  movePlanting: (componentId: string, year: number, plantingId: string, season: Season) => void;
+  /** Removes one planting; the plant leaves the planning with its last planting */
+  removePlanting: (componentId: string, year: number, plantingId: string) => void;
   /** Places the plants starting in the season by ratio; null when the component is gone */
-  optimizeSeason: (componentId: string, year: number, season: Season) => readonly PlantShare[] | null;
+  optimizeSeason: (componentId: string, year: number, season: Season) => readonly PlantingShare[] | null;
   movePlacement: (componentId: string, year: number, season: Season, placementId: string, xCm: number, yCm: number) => void;
   removePlacement: (componentId: string, year: number, season: Season, placementId: string) => void;
   togglePlacementLock: (componentId: string, year: number, season: Season, placementId: string) => void;
@@ -103,7 +109,7 @@ interface ComponentState {
 }
 
 function planningOf(component: ComponentData, year: number): Planning {
-  return Planning.from(component.plannings[String(year)], seasonsOfYear(year));
+  return Planning.from(component.plannings[String(year)], plantingCalendarOfYear(year));
 }
 
 /** Applies a change to one component's planning of a year; unchanged plannings keep the component as it is */
@@ -235,8 +241,20 @@ export const useComponentStore = create<ComponentState>()(
         set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.removePlant(plantId)) }));
       },
 
-      setRatio: (componentId, year, season, plantId, ratio) => {
-        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.setRatio(season, plantId, ratio)) }));
+      setRatio: (componentId, year, season, plantingId, ratio) => {
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.setRatio(season, plantingId, ratio)) }));
+      },
+
+      duplicatePlanting: (componentId, year, plantingId, season) => {
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.duplicatePlanting(plantingId, season)) }));
+      },
+
+      movePlanting: (componentId, year, plantingId, season) => {
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.movePlanting(plantingId, season)) }));
+      },
+
+      removePlanting: (componentId, year, plantingId) => {
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.removePlanting(plantingId)) }));
       },
 
       optimizeSeason: (componentId, year, season) => {
@@ -373,6 +391,9 @@ export function useComponentActions() {
       addPlantsToPlanning: state.addPlantsToPlanning,
       removePlantFromPlanning: state.removePlantFromPlanning,
       setRatio: state.setRatio,
+      duplicatePlanting: state.duplicatePlanting,
+      movePlanting: state.movePlanting,
+      removePlanting: state.removePlanting,
       optimizeSeason: state.optimizeSeason,
       movePlacement: state.movePlacement,
       removePlacement: state.removePlacement,

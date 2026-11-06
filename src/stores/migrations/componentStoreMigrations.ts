@@ -3,16 +3,17 @@
  * Pure: no Zustand, no AsyncStorage, no "@/" runtime imports.
  */
 import type { ComponentData } from '../../types/component.types';
-import type { PlacementData, PlanningData, Season, SeasonPlanData, SeasonStatus } from '../../types/planning.types';
-import { placementDataSchema } from '../../schemas/planningSchema.ts';
+import type { PlacementData, PlanningData, PlantingData, Season, SeasonPlanData, SeasonStatus } from '../../types/planning.types';
+import { placementDataSchema, plantingDataSchema } from '../../schemas/planningSchema.ts';
 
 /**
  * Version 2: canvas position and rotation removed from components.
  * Version 3: week-based planning (placed plants with growing periods, plants to plan).
  * Version 4: plants live in plannings per year and season; plantings from
  * version 3 and before are not converted.
+ * Version 5: plants have plantings (one per start season); ratios and placements belong to plantings. v4 plannings are converted.
  */
-export const COMPONENT_STORE_VERSION = 4;
+export const COMPONENT_STORE_VERSION = 5;
 
 export interface PersistedComponentState {
   components: ComponentData[];
@@ -33,25 +34,54 @@ function stripCanvasFields(component: Record<string, unknown>): Record<string, u
   return rest;
 }
 
-/**
- * Salvages one season: valid ratios and placements stay, bad entries go. A
- * planned season that lost an entry is outdated, so the user sees it needs a
- * new run.
- */
-function salvageSeason(value: unknown): SeasonPlanData {
+interface SalvagedSeason {
+  readonly plan: SeasonPlanData;
+  readonly droppedAny: boolean;
+}
+
+/** Valid ratios (whole, ≥ 1) of known plantings and valid placements of known plantings */
+function salvageSeason(value: unknown, knownPlanting: (plantingId: string) => boolean): SalvagedSeason {
   if (!isRecord(value)) {
-    return EMPTY_SEASON;
+    return { plan: EMPTY_SEASON, droppedAny: false };
   }
   const ratioEntries = isRecord(value.ratios) ? Object.entries(value.ratios) : [];
-  const ratios = Object.fromEntries(ratioEntries.filter(([, ratio]) => Number.isInteger(ratio) && (ratio as number) >= 1)) as Record<string, number>;
+  const ratios = Object.fromEntries(
+    ratioEntries.filter(([id, ratio]) => knownPlanting(id) && Number.isInteger(ratio) && (ratio as number) >= 1),
+  ) as Record<string, number>;
   const placementEntries = Array.isArray(value.placements) ? value.placements : [];
   const placements: PlacementData[] = placementEntries.flatMap((entry) => {
     const parsed = placementDataSchema.safeParse(entry);
-    return parsed.success ? [parsed.data] : [];
+    return parsed.success && knownPlanting(parsed.data.plantingId) ? [parsed.data] : [];
   });
   const status = STATUSES.find((candidate) => candidate === value.status) ?? 'notPlanned';
   const droppedAny = Object.keys(ratios).length < ratioEntries.length || placements.length < placementEntries.length;
-  return { ratios, placements, status: droppedAny && status === 'planned' ? 'outdated' : status };
+  return { plan: { ratios, placements, status: droppedAny && status === 'planned' ? 'outdated' : status }, droppedAny };
+}
+
+/**
+ * A v4 planning keyed ratios and placements by plant id per season: each
+ * plant with a ratio or placements in season S becomes planting "<plantId>-<S>".
+ */
+function withPlantingsFromV4(value: Record<string, unknown>, plants: string[]): Record<string, unknown> {
+  const seasons = isRecord(value.seasons) ? value.seasons : {};
+  const plantings: PlantingData[] = [];
+  const converted: Record<string, unknown> = {};
+  for (const season of SEASONS) {
+    const plan = isRecord(seasons[season]) ? seasons[season] : {};
+    const ratios = isRecord(plan.ratios) ? plan.ratios : {};
+    const placements = Array.isArray(plan.placements) ? plan.placements.filter(isRecord) : [];
+    const plantIds = [...new Set([...Object.keys(ratios), ...placements.map((p) => p.plantId).filter((id): id is string => typeof id === 'string')])];
+    for (const plantId of plantIds) {
+      plantings.push({ id: `${plantId}-${season}`, plantId, startSeason: season });
+      if (!plants.includes(plantId)) plants.push(plantId);
+    }
+    converted[season] = {
+      ...plan,
+      ratios: Object.fromEntries(Object.entries(ratios).map(([plantId, ratio]) => [`${plantId}-${season}`, ratio])),
+      placements: placements.map((p) => ({ ...p, plantingId: `${String(p.plantId)}-${season}` })),
+    };
+  }
+  return { ...value, plantings, seasons: converted };
 }
 
 /** Salvages one year: null when it has no usable plants list or seasons */
@@ -59,14 +89,22 @@ function salvagePlanning(value: unknown): PlanningData | null {
   if (!isRecord(value) || !Array.isArray(value.plants) || !isRecord(value.seasons)) {
     return null;
   }
-  const seasons = value.seasons;
   const plants = value.plants.filter((plant): plant is string => typeof plant === 'string' && plant.length > 0);
-  const salvaged = SEASONS.map((season) => salvageSeason(seasons[season]));
   const droppedPlant = plants.length < value.plants.length;
-  const [spring, summer, autumn, winter] = droppedPlant
+  const current = Array.isArray(value.plantings) ? value : withPlantingsFromV4(value, plants);
+  const plantingEntries = Array.isArray(current.plantings) ? current.plantings : [];
+  const plantings: PlantingData[] = plantingEntries.flatMap((entry) => {
+    const parsed = plantingDataSchema.safeParse(entry);
+    return parsed.success ? [parsed.data] : [];
+  });
+  const known = new Set(plantings.map((p) => p.id));
+  const seasons = isRecord(current.seasons) ? current.seasons : {};
+  const salvaged = SEASONS.map((season) => salvageSeason(seasons[season], (id) => known.has(id)).plan);
+  const outdateAll = droppedPlant || plantings.length < plantingEntries.length;
+  const [spring, summer, autumn, winter] = outdateAll
     ? salvaged.map((season) => (season.status === 'planned' ? { ...season, status: 'outdated' as const } : season))
     : salvaged;
-  return { plants, seasons: { spring, summer, autumn, winter } };
+  return { plants, plantings, seasons: { spring, summer, autumn, winter } };
 }
 
 /** The stored plannings that can be salvaged, entry by entry; others are dropped */

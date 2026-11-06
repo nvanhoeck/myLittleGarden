@@ -7,7 +7,7 @@ import { usePlantStore } from '@/stores/plantStore';
 import type { PlantSpecSnapshot } from '@/domain/ai/GardenSnapshot';
 import { buildGardenSnapshot } from '@/domain/ai/buildGardenSnapshot';
 import { placementsGrowingOn, plantDistanceCm } from '@/domain/planning';
-import { seasonsOfYear } from '@/stores/planningContext';
+import { plantingCalendarOfYear } from '@/stores/planningContext';
 import type { ComponentData } from '@/types';
 import { chatService } from '@/services/ai/chatService';
 import type { ChatHistoryMessage } from '@/services/ai/chatService';
@@ -67,7 +67,7 @@ export function useAiChat(): UseAiChatResult {
       const plantState = usePlantStore.getState();
 
       const today = new Date();
-      const placementsOf = (component: ComponentData) => placementsGrowingOn(component, today, seasonsOfYear);
+      const placementsOf = (component: ComponentData) => placementsGrowingOn(component, today, plantingCalendarOfYear);
       const uniquePlantIds = new Set(
         componentsState.components.flatMap((c) => placementsOf(c).map((p) => p.plantId)),
       );
