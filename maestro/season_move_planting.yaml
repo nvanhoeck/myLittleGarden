@@ -2,7 +2,7 @@ appId: com.mylittlegarden.app
 name: Plantings - moving a placed planting asks for confirmation and outdates the season it left
 ---
 - runFlow: subflows/open_planning.yaml
-- runFlow: subflows/add_plants_to_planning.yaml
+- runFlow: subflows/add_sla_to_planning.yaml
 - runFlow: subflows/optimize_first_season.yaml
 - tapOn:
     id: "planting-menu-.*-sla"

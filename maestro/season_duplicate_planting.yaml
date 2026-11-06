@@ -2,7 +2,7 @@ appId: com.mylittlegarden.app
 name: Plantings - duplicating a placed planting adds a second planting
 ---
 - runFlow: subflows/open_planning.yaml
-- runFlow: subflows/add_plants_to_planning.yaml
+- runFlow: subflows/add_sla_to_planning.yaml
 - runFlow: subflows/optimize_first_season.yaml
 - tapOn:
     id: "planting-menu-.*-sla"
@@ -10,5 +10,3 @@ name: Plantings - duplicating a placed planting adds a second planting
     id: "planting-action-duplicate-.*"
 - assertVisible:
     text: "Sla \\(2e teelt\\)"
-- assertVisible:
-    text: ".*\\(2e\\).*"
