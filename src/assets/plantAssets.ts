@@ -259,14 +259,11 @@ export const PLANT_ICONS: Record<string, ImageSourcePropType> = {
     witlof: ICONS.witlof,
     radicchio: ICONS.sla,
     zuring: ICONS.zuring,
-    kruidplant: ICONS.kruidplant,
     amarant: ICONS.spinazie,
     'rucola-sla': ICONS.rucola,
     'kapuzijner-kers': ICONS.oost_indische_kers,
     selderij: ICONS.schermbloemigen,
-    kaasstelen: ICONS.spinazie,
     stengelbiet: ICONS.spinazie,
-    zuringelambique: ICONS.zuring,
     waterkers: ICONS.waterkers,
 
     // -------------------------------------------------------------------------
@@ -281,7 +278,6 @@ export const PLANT_ICONS: Record<string, ImageSourcePropType> = {
     koolraap: ICONS.koolraap,
     raap: ICONS.koolraap,
     rammenas: ICONS.rammenas,
-    retichie: ICONS.wortel,
     'schorseneel-wit': ICONS.schorseneer,
     oca: ICONS.oca,
     'kleine-radijs': ICONS.radijs,
@@ -315,7 +311,6 @@ export const PLANT_ICONS: Record<string, ImageSourcePropType> = {
     dubbelboon: ICONS.peulvruchten,
     pronkboon: ICONS.peulvruchten,
     limaboon: ICONS.peulvruchten,
-    schuimboon: ICONS.peulvruchten,
     pronkerwt: ICONS.erwten,
 
     // -------------------------------------------------------------------------
@@ -358,7 +353,6 @@ export const PLANT_ICONS: Record<string, ImageSourcePropType> = {
 
     // Other herbs
     dragon: ICONS.kruidplant,
-    bezemkruid: ICONS.kruidplant,
     goudsbloemkruid: ICONS.goudsbloem,
     chia: ICONS.kruidplant,
     maggiekruid: ICONS.kruidplant,
@@ -369,8 +363,6 @@ export const PLANT_ICONS: Record<string, ImageSourcePropType> = {
     reigersbek: ICONS.kruidplant,
     borage: ICONS.eetbare_bloem,
     roodlover: ICONS.kruidplant,
-    vogelvoet: ICONS.kruidplant,
-    studentenkruid: ICONS.kruidplant,
     steentijm: ICONS.tijm,
     'goudsbloem-peterselie': ICONS.goudsbloem,
     akkerwinde: ICONS.kruidplant,
@@ -482,14 +474,11 @@ export const PLANT_IMAGES: Record<string, ImageSourcePropType> = {
     witlof: IMAGES.witlof,
     radicchio: IMAGES.sla,
     zuring: IMAGES.zuring,
-    kruidplant: IMAGES.kruidplant,
     amarant: IMAGES.spinazie,
     'rucola-sla': IMAGES.rucola,
     'kapuzijner-kers': IMAGES.oost_indische_kers,
     selderij: IMAGES.schermbloemige,
-    kaasstelen: IMAGES.spinazie,
     stengelbiet: IMAGES.spinazie,
-    zuringelambique: IMAGES.zuring,
     waterkers: IMAGES.waterkers,
 
     // -------------------------------------------------------------------------
@@ -504,7 +493,6 @@ export const PLANT_IMAGES: Record<string, ImageSourcePropType> = {
     koolraap: IMAGES.rapen,
     raap: IMAGES.rapen,
     rammenas: IMAGES.rammenas,
-    retichie: IMAGES.wortel,
     'schorseneel-wit': IMAGES.schorsenere,
     oca: IMAGES.knolgewassen,
     'kleine-radijs': IMAGES.radijs,
@@ -538,7 +526,6 @@ export const PLANT_IMAGES: Record<string, ImageSourcePropType> = {
     dubbelboon: IMAGES.peulvruchten,
     pronkboon: IMAGES.peulvruchten,
     limaboon: IMAGES.peulvruchten,
-    schuimboon: IMAGES.peulvruchten,
     pronkerwt: IMAGES.erwt,
 
     // -------------------------------------------------------------------------
@@ -581,7 +568,6 @@ export const PLANT_IMAGES: Record<string, ImageSourcePropType> = {
 
     // Other herbs
     dragon: IMAGES.kruidplant,
-    bezemkruid: IMAGES.kruidplant,
     goudsbloemkruid: IMAGES.goudsbloem,
     chia: IMAGES.kruidplant,
     maggiekruid: IMAGES.kruidplant,
@@ -592,8 +578,6 @@ export const PLANT_IMAGES: Record<string, ImageSourcePropType> = {
     reigersbek: IMAGES.kruidplant,
     borage: IMAGES.eetbare_bloem,
     roodlover: IMAGES.kruidplant,
-    vogelvoet: IMAGES.kruidplant,
-    studentenkruid: IMAGES.kruidplant,
     steentijm: IMAGES.tijm,
     'goudsbloem-peterselie': IMAGES.goudsbloem,
     akkerwinde: IMAGES.kruidplant,

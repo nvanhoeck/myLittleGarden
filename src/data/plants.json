@@ -3280,48 +3280,6 @@
       "plantingStyle": "patch"
     },
     {
-      "id": "bezemkruid",
-      "nameNl": "Bezemkruid",
-      "scientificName": "Anethum graveolens",
-      "category": "kruiden",
-      "description": "Bezemkruid (Anethum graveolens) is een kruiden in deze dataset. Kruiden gebruik je vers of gedroogd. Veel soorten houden van zon en een goed drainerende bodem; sommige zijn juist dorstig en groeien graag in halfschaduw.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: winterhard (kan goed tegen kou en lichte tot matige vorst).\n\nDirect zaaien buiten kan 2 week/weken vóór de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 30 cm afstand tussen de planten. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 7–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 90–120 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nGoede buren: broccoli (kan helpen plagen te weren), komkommer (trekt bestuivers/nuttige insecten aan).\n\nKort samengevat: Dille variant voor uitmuntende zaadbinding.",
-      "spacingRadiusCm": 15,
-      "plantingDepthCm": 0.5,
-      "sun": "full",
-      "water": "moderate",
-      "frostTolerance": "hardy",
-      "germinationDays": {
-        "min": 7,
-        "max": 14
-      },
-      "daysToHarvest": {
-        "min": 90,
-        "max": 120
-      },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -2,
-      "companions": [
-        {
-          "plantId": "broccoli",
-          "benefits": [
-            "detersPests"
-          ]
-        },
-        {
-          "plantId": "komkommer",
-          "benefits": [
-            "attractsPollinators"
-          ]
-        }
-      ],
-      "combatives": [],
-      "growthHabit": "upright",
-      "spreadsViaRunners": false,
-      "plantType": "herb",
-      "plantingStyle": "individual"
-    },
-    {
       "id": "sleutelbloem",
       "nameNl": "Sleutelbloem",
       "scientificName": "Primula veris",
@@ -3686,43 +3644,6 @@
       "plantingStyle": "thinning"
     },
     {
-      "id": "retichie",
-      "nameNl": "Retichie",
-      "scientificName": "Raphanus sativus var. acanthiformis",
-      "category": "wortelgroenten",
-      "description": "Retichie (Raphanus sativus var. acanthiformis) is een wortelgroenten in deze dataset. Wortelgroenten ontwikkelen hun oogst ondergronds. Een luchtige, steenarme bodem helpt om rechte, gave wortels of knollen te vormen.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: redelijk vorsttolerant (kan wat kou hebben, bescherm bij harde vorst).\n\nDirect zaaien buiten kan 2 week/weken vóór de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 12 cm afstand tussen de planten. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 5–10 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 50–70 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nGoede buren: sla (kan helpen plagen te weren).\n\nTeelttips: Zorg voor een fijne, steenarme bodem en dun op tijd uit; zo voorkom je vertakte of misvormde wortels.\n\nKort samengevat: Daikon wortel. Japanse radijs.",
-      "spacingRadiusCm": 6,
-      "sowingSpacingCm": 12,
-      "plantingDepthCm": 0.5,
-      "sun": "full",
-      "water": "moderate",
-      "frostTolerance": "semi-hardy",
-      "germinationDays": {
-        "min": 5,
-        "max": 10
-      },
-      "daysToHarvest": {
-        "min": 50,
-        "max": 70
-      },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -2,
-      "companions": [
-        {
-          "plantId": "sla",
-          "benefits": [
-            "detersPests"
-          ]
-        }
-      ],
-      "combatives": [],
-      "growthHabit": "upright",
-      "spreadsViaRunners": false,
-      "plantType": "vegetable",
-      "plantingStyle": "thinning"
-    },
-    {
       "id": "sugarloaf",
       "nameNl": "Sugarloaf",
       "scientificName": "Cichorium intybus var. foliosum",
@@ -3882,35 +3803,6 @@
       "indoorStartWeeks": -6,
       "transplantWeeks": -2,
       "directSowWeeks": null,
-      "companions": [],
-      "combatives": [],
-      "growthHabit": "upright",
-      "spreadsViaRunners": false,
-      "plantType": "vegetable",
-      "plantingStyle": "individual"
-    },
-    {
-      "id": "kruidplant",
-      "nameNl": "Kruidplant",
-      "scientificName": "Portulaca oleracea",
-      "category": "bladgroenten",
-      "description": "Kruidplant (Portulaca oleracea) is een bladgroenten in deze dataset. Bladgroenten oogst je vooral om het blad. Ze groeien vaak snel en waarderen een gelijkmatige vochtvoorziening om mals te blijven.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: weinig water (laat de bovenlaag tussen gietbeurten opdrogen). Vorst: vorstgevoelig (pas buiten na de laatste vorst).\n\nBinnen voorzaaien kan 4 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 2 week/weken na de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen. Direct zaaien buiten kan 2 week/weken na de eindVorstDatum. Zaai bij voorkeur in opgewarmde grond en dek indien nodig af tegen kou of uitdroging.\n\nHoud bij het uitplanten of uitdunnen ongeveer 20 cm afstand tussen de planten. Zaai/plant op circa 0.25 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 10–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 30–50 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nTeelttips: Geef liever diep en minder frequent water; dit stimuleert een dieper wortelgestel. Bij koude nachten kun je tijdelijk afdekken (vliesdoek) of beschut plaatsen om groeistilstand te beperken.\n\nKort samengevat: Zurige groente. Zomers gewas.",
-      "spacingRadiusCm": 10,
-      "plantingDepthCm": 0.25,
-      "sun": "full",
-      "water": "low",
-      "frostTolerance": "tender",
-      "germinationDays": {
-        "min": 10,
-        "max": 14
-      },
-      "daysToHarvest": {
-        "min": 30,
-        "max": 50
-      },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 2,
-      "directSowWeeks": 2,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -4331,42 +4223,6 @@
       ],
       "combatives": [],
       "growthHabit": "climbing",
-      "spreadsViaRunners": false,
-      "plantType": "vegetable",
-      "plantingStyle": "individual"
-    },
-    {
-      "id": "schuimboon",
-      "nameNl": "Schuimboon",
-      "scientificName": "Lathyrus odoratus",
-      "category": "peulvruchten",
-      "description": "Schuimboon (Lathyrus odoratus) is een peulvruchten in deze dataset. Peulvruchten worden vaak gewaardeerd omdat ze (afhankelijk van soort) stikstof in de bodem kunnen brengen. Ze doen het goed in de zon met voldoende ruimte en regelmatige oogst.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: redelijk vorsttolerant (kan wat kou hebben, bescherm bij harde vorst).\n\nBinnen voorzaaien kan 8 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 2 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen.\n\nHoud bij het uitplanten of uitdunnen ongeveer 12 cm afstand tussen de planten. Zaai/plant op circa 1 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 10–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 50–70 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nGoede buren: wortel (bindt stikstof in de bodem (gunstig voor buren)).\n\nTeelttips: Geef steun aan klimmende rassen en oogst regelmatig; dit stimuleert nieuwe bloei en peulvorming.\n\nKort samengevat: Pronkende looper. Geur.",
-      "spacingRadiusCm": 6,
-      "plantingDepthCm": 1,
-      "sun": "full",
-      "water": "moderate",
-      "frostTolerance": "semi-hardy",
-      "germinationDays": {
-        "min": 10,
-        "max": 14
-      },
-      "daysToHarvest": {
-        "min": 50,
-        "max": 70
-      },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
-      "companions": [
-        {
-          "plantId": "wortel",
-          "benefits": [
-            "fixesNitrogen"
-          ]
-        }
-      ],
-      "combatives": [],
-      "growthHabit": "upright",
       "spreadsViaRunners": false,
       "plantType": "vegetable",
       "plantingStyle": "individual"
@@ -5158,35 +5014,6 @@
       "plantingStyle": "individual"
     },
     {
-      "id": "kaasstelen",
-      "nameNl": "Kaas Stelen",
-      "scientificName": "Smyrnium olusatrum",
-      "category": "bladgroenten",
-      "description": "Kaas Stelen (Smyrnium olusatrum) is een bladgroenten in deze dataset. Bladgroenten oogst je vooral om het blad. Ze groeien vaak snel en waarderen een gelijkmatige vochtvoorziening om mals te blijven.\n\nStandplaats: halfschaduw (ca. 3–6 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: winterhard (kan goed tegen kou en lichte tot matige vorst).\n\nBinnen voorzaaien kan 8 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 4 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen.\n\nHoud bij het uitplanten of uitdunnen ongeveer 25 cm afstand tussen de planten. Zaai/plant op circa 0.5 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 14–21 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 45–75 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nKort samengevat: Middeleeuwse groente. Kruidig.",
-      "spacingRadiusCm": 12.5,
-      "plantingDepthCm": 0.5,
-      "sun": "partial",
-      "water": "moderate",
-      "frostTolerance": "hardy",
-      "germinationDays": {
-        "min": 14,
-        "max": 21
-      },
-      "daysToHarvest": {
-        "min": 45,
-        "max": 75
-      },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
-      "companions": [],
-      "combatives": [],
-      "growthHabit": "upright",
-      "spreadsViaRunners": false,
-      "plantType": "vegetable",
-      "plantingStyle": "individual"
-    },
-    {
       "id": "skraelkool",
       "nameNl": "Skraelkool",
       "scientificName": "Brassica oleracea var. acephala",
@@ -5244,93 +5071,6 @@
       "spreadsViaRunners": false,
       "plantType": "vegetable",
       "plantingStyle": "patch"
-    },
-    {
-      "id": "zuringelambique",
-      "nameNl": "Zuringelambique",
-      "scientificName": "Rumex scutatus",
-      "category": "bladgroenten",
-      "description": "Zuringelambique (Rumex scutatus) is een bladgroenten in deze dataset. Bladgroenten oogst je vooral om het blad. Ze groeien vaak snel en waarderen een gelijkmatige vochtvoorziening om mals te blijven.\n\nStandplaats: halfschaduw (ca. 3–6 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: winterhard (kan goed tegen kou en lichte tot matige vorst).\n\nBinnen voorzaaien kan 6 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 2 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen.\n\nHoud bij het uitplanten of uitdunnen ongeveer 25 cm afstand tussen de planten. Zaai/plant op circa 0.25 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 10–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 30–60 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nKort samengevat: Zure bladgroente. Winterhard.",
-      "spacingRadiusCm": 12.5,
-      "plantingDepthCm": 0.25,
-      "sun": "partial",
-      "water": "moderate",
-      "frostTolerance": "hardy",
-      "germinationDays": {
-        "min": 10,
-        "max": 14
-      },
-      "daysToHarvest": {
-        "min": 30,
-        "max": 60
-      },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
-      "companions": [],
-      "combatives": [],
-      "growthHabit": "upright",
-      "spreadsViaRunners": false,
-      "plantType": "vegetable",
-      "plantingStyle": "individual"
-    },
-    {
-      "id": "vogelvoet",
-      "nameNl": "Vogelvoet",
-      "scientificName": "Celosia cristata",
-      "category": "kruiden",
-      "description": "Vogelvoet (Celosia cristata) is een kruiden in deze dataset. Kruiden gebruik je vers of gedroogd. Veel soorten houden van zon en een goed drainerende bodem; sommige zijn juist dorstig en groeien graag in halfschaduw.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: matig water (grond gelijkmatig licht vochtig houden). Vorst: vorstgevoelig (pas buiten na de laatste vorst).\n\nBinnen voorzaaien kan 6 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 1 week/weken na de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen.\n\nHoud bij het uitplanten of uitdunnen ongeveer 25 cm afstand tussen de planten. Zaai/plant op circa 0.25 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 10–14 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 60–90 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nTeelttips: Bij koude nachten kun je tijdelijk afdekken (vliesdoek) of beschut plaatsen om groeistilstand te beperken.\n\nKort samengevat: Eetbare bloem. Voor soep.",
-      "spacingRadiusCm": 12.5,
-      "plantingDepthCm": 0.25,
-      "sun": "full",
-      "water": "moderate",
-      "frostTolerance": "tender",
-      "germinationDays": {
-        "min": 10,
-        "max": 14
-      },
-      "daysToHarvest": {
-        "min": 60,
-        "max": 90
-      },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": 1,
-      "directSowWeeks": null,
-      "companions": [],
-      "combatives": [],
-      "growthHabit": "upright",
-      "spreadsViaRunners": false,
-      "plantType": "herb",
-      "plantingStyle": "individual"
-    },
-    {
-      "id": "studentenkruid",
-      "nameNl": "Studentenkruid",
-      "scientificName": "Hypericum perforatum",
-      "category": "kruiden",
-      "description": "Studentenkruid (Hypericum perforatum) is een kruiden in deze dataset. Kruiden gebruik je vers of gedroogd. Veel soorten houden van zon en een goed drainerende bodem; sommige zijn juist dorstig en groeien graag in halfschaduw.\n\nStandplaats: volle zon (min. 6–8 uur zonlicht). Waterbehoefte: weinig water (laat de bovenlaag tussen gietbeurten opdrogen). Vorst: winterhard (kan goed tegen kou en lichte tot matige vorst).\n\nBinnen voorzaaien kan 8 week/weken vóór de startVorstdatum. Zaai oppervlakkig in luchtige zaaigrond en geef veel licht om slappe groei te voorkomen. Uitplanten kan 2 week/weken vóór de eindVorstDatum. Hard de plantjes eerst af door ze een week geleidelijk aan buitenomstandigheden te laten wennen.\n\nHoud bij het uitplanten of uitdunnen ongeveer 30 cm afstand tussen de planten. Zaai/plant op circa 0.25 cm diepte; bij heel fijne zaden volstaat vaak slechts licht aandrukken en dun afdekken.\n\nKieming: gemiddeld 14–21 dagen. Constante vochtigheid en een passende temperatuur versnellen doorgaans het kiemen.\n\nTeeltduur tot oogst: ongeveer 60–120 dagen. Oogst in het juiste stadium voor de beste smaak en structuur; regelmatig oogsten kan de productie verlengen.\n\nTeelttips: Geef liever diep en minder frequent water; dit stimuleert een dieper wortelgestel.\n\nKort samengevat: Heilzaam kruid. Voor thee.",
-      "spacingRadiusCm": 15,
-      "plantingDepthCm": 0.25,
-      "sun": "full",
-      "water": "low",
-      "frostTolerance": "hardy",
-      "germinationDays": {
-        "min": 14,
-        "max": 21
-      },
-      "daysToHarvest": {
-        "min": 60,
-        "max": 120
-      },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
-      "companions": [],
-      "combatives": [],
-      "growthHabit": "upright",
-      "spreadsViaRunners": false,
-      "plantType": "herb",
-      "plantingStyle": "individual"
     },
     {
       "id": "steentijm",

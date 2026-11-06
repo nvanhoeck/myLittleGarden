@@ -8,6 +8,8 @@ Voor elke plant is per methode (voorzaaien binnen, uitplanten, buiten zaaien) ee
 
 97 van 130 rijen met vensters hebben minder dan 3 bronnen; rijen met * zijn vakkennis en moeten door de gebruiker gecontroleerd worden. De beschikbare tools lieten geen drie onafhankelijke bronnen per gewas toe. Gebruikt: de Hubo-zaaikalender (alleen jan-mei leesbaar, geen uitplantdata), de Plukkers-maandkalenders (NL/BE, jan-okt), de Leefmilieu Brussel infofiche 6 (2012, 'Gemakkelijke groenten'), de Velt schoolmoestuinkalender 2025 (klein gewasaanbod), de IVN-factsheet zaaien, en webwoordenboek.nl/Gamma/Bosch voor kruiden. Per rij staat het aantal werkelijk geraadpleegde bronnen; **een ster (*) = vakkennis zonder bevestigende bron**. De meeste rijen hebben dus minder dan 3 bronnen en vragen een reviewcontrole. Aveve en Belgische zaadzakjes (Sluis, Vreeken, Bruno Nebelung) waren niet raadpleegbaar. Voorzaai- en uitplantperiodes zijn voor veel gewassen afgeleid (Hubo geeft geen uitplantdata).
 
+Verwijderd uit de catalogus op verzoek van de gebruiker: kruidplant, schuimboon, bezemkruid, zuringelambique, kaasstelen, retichie, vogelvoet, studentenkruid.
+
 ## Omzetting
 
 Een periode die in de eerste helft van een maand start begint op de 1e, anders op de 15e. Einde: laatste dag van de eindmaand (of de 15e bij "half"). fromWeeks = floor((start - 15 april)/7), toWeeks = floor((einde - 15 april)/7), zelfde jaar; loopt een periode over de jaargrens (okt-maart), dan +365 dagen bij het einde.
@@ -59,13 +61,10 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | witlof | Witlof | - | - | apr-jun (-2..10) | Hubo (1 bron) | Hubo: april en juni volle grond; wordt direct gezaaid; oude transplantWeeks vervalt (niet gangbaar) |
 | radicchio | Radicchio | apr-mei (-2..6) | jun-jul (6..15) | 2e helft mei-jul (4..15) | Plukkers, vakkennis* (1 bron) | idem |
 | zuring | Zuring | - | - | mrt-mei (-7..6) | Hubo (1 bron) | Hubo: maart; oude indoorStartWeeks vervalt (niet gangbaar); oude transplantWeeks vervalt (niet gangbaar) |
-| kruidplant | Kruidplant | - | - | - | - | Gewas niet eenduidig te identificeren |
 | asperge | Asperge | feb-mrt (-11..-3) | mrt-apr (-7..2) | - | vakkennis* (0 bronnen) | Geen bron; kroon planten maart-april |
 | kapuzijner-kers | Kapucijner Kers | apr-mei (-2..6) | 2e helft mei-jun (4..10) | 2e helft mei-jun (4..10) | vakkennis* (0 bronnen) | Geen bron geraadpleegd |
 | selderij | Selderij | 2e helft feb-apr (-9..2) | mei-jun (2..10) | - | Leefmilieu-Brussel, Plukkers, Hubo (3 bronnen) | Direct zaaien van selderij in open lucht is niet gangbaar in Belgie (Brussel: voorzaaien/plantgoed); alleen bladselderij/snijselder wordt direct gezaaid |
-| kaasstelen | Kaas Stelen | - | - | - | - | Gewas niet eenduidig te identificeren |
 | stengelbiet | Stengelbiet | mrt-apr (-7..2) | mei-jun (2..10) | apr-jul (-2..15) | Leefmilieu-Brussel, Plukkers (2 bronnen) |  |
-| zuringelambique | Zuringelambique | - | - | - | - | Gewas niet eenduidig te identificeren |
 | waterkers | Waterkers | - | - | apr-aug (-2..19) | vakkennis* (0 bronnen) | Geen bron geraadpleegd; oude transplantWeeks vervalt (niet gangbaar) |
 | prei | Prei | feb-apr (-11..2) | mei-jul (2..15) | mrt-jun (-7..10) | Hubo, Plukkers (2 bronnen) | Hubo: buiten zaaien mei en juni; Plukkers: binnen jan-maart, buiten maart; uitplanten afgeleid |
 
@@ -81,7 +80,6 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | schorseneer | Schorseneer | - | - | apr-mei (-2..6) | Hubo (1 bron) | Hubo: april |
 | raap | Raap | - | - | mrt-aug (-7..19) | Hubo, Plukkers (2 bronnen) | Hubo raapstelen maart; Plukkers mei-juli; oude transplantWeeks vervalt (niet gangbaar) |
 | rammenas | Rammenas | - | - | feb-aug (-11..19) | Hubo, vakkennis* (1 bron) | Hubo: februari (voorjaarsrammenas); winterrammenas jul-aug (schatting) |
-| retichie | Retichie | - | - | - | - | Gewas niet eenduidig te identificeren |
 | oca | Oca | mrt-apr (-7..2) | 2e helft mei-jun (4..10) | - | vakkennis* (0 bronnen) | Geen bron geraadpleegd |
 | kleine-radijs | Kleine Radijs | - | - | mrt-sep (-7..24) | Hubo, Plukkers, Leefmilieu-Brussel, IVN (4 bronnen) | zoals radijs |
 | aardappel | Aardappel | - | - | 2e helft mrt-mei (-5..6) | Plukkers, IVN (2 bronnen) | Poten van pootaardappelen: Plukkers/IVN maart-april |
@@ -117,7 +115,6 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | dubbelboon | Dubbelboon | apr-mei (-2..6) | 2e helft mei-jun (4..10) | 2e helft mei-jul (4..15) | Plukkers, vakkennis* (1 bron) | zoals snijboon |
 | pronkboon | Pronkboon | apr-mei (-2..6) | 2e helft mei-jun (4..10) | 2e helft mei-jul (4..15) | Plukkers, vakkennis* (1 bron) | zoals snijboon |
 | limaboon | Limaboon | apr-mei (-2..6) | 2e helft mei-jun (4..10) | 2e helft mei-jun (4..10) | vakkennis* (0 bronnen) | Warmteminnend; geen bron |
-| schuimboon | Schuimboon | - | - | - | - | Gewas niet eenduidig te identificeren |
 | pronkerwt | Pronkerwt | - | - | mrt-mei (-7..6) | vakkennis* (0 bronnen) | Als erwt; geen bron |
 | struikboon | Struikboon | - | - | 2e helft mei-jul (4..15) | Hubo, Plukkers (2 bronnen) |  |
 
@@ -142,7 +139,6 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | koriander-zaad | Koriander Zaad | - | - | apr-jun (-2..10) | Plukkers (1 bron) | Verplant slecht; oude transplantWeeks vervalt (niet gangbaar) |
 | dragon | Dragon | mrt-apr (-7..2) | mei-jun (2..10) | - | Plukkers, vakkennis* (1 bron) | Franse dragon niet uit zaad |
 | kervel | Kervel | - | - | apr-jul (-2..15) | Hubo, Plukkers (2 bronnen) | Hubo april; verplant slecht; oude transplantWeeks vervalt (niet gangbaar) |
-| bezemkruid | Bezemkruid | - | - | - | - | Gewas niet eenduidig te identificeren |
 | sleutelbloem | Sleutelbloem | jan-mrt (-15..-3) | apr-mei (-2..6) | - | vakkennis* (0 bronnen) | Primula veris; direct zaaien null: zaad vraagt koudebehandeling (stratificatie) |
 | goudsbloemkruid | Goudsbloem | mrt-apr (-7..2) | 2e helft apr-mei (0..6) | 2e helft mrt-jun (-5..10) | Plukkers, vakkennis* (1 bron) |  |
 | chia | Chia | mrt-apr (-7..2) | 2e helft mei-jun (4..10) | - | vakkennis* (0 bronnen) | Geen bron; experimenteel |
@@ -161,8 +157,6 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 | borage | Borage | mrt-apr (-7..2) | 2e helft apr-mei (0..6) | apr-jun (-2..10) | vakkennis* (0 bronnen) | Geen bron |
 | sleutelbloem-thee | Sleutelbloem Thee | jan-mrt (-15..-3) | apr-mei (-2..6) | - | vakkennis* (0 bronnen) | Primula veris; direct zaaien null: zaad vraagt koudebehandeling (stratificatie) |
 | roodlover | Roodkloverbloem | - | - | apr-aug (-2..19) | vakkennis* (0 bronnen) | Trifolium pratense (rode klaver); geen voorzaai/uitplant |
-| vogelvoet | Vogelvoet | - | - | - | - | Gewas niet eenduidig te identificeren |
-| studentenkruid | Studentenkruid | - | - | - | - | Gewas niet eenduidig te identificeren |
 | steentijm | Steentijm | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | 2e helft apr-jun (0..10) | Plukkers, vakkennis* (1 bron) | zoals tijm |
 | platte-peterselie | Platte peterselie | mrt-apr (-7..2) | 2e helft apr-jun (0..10) | mrt-jul (-7..15) | Plukkers, IVN, Webwoordenboek/Gamma/Bosch (3 bronnen) | zoals peterselie |
 | akkerwinde | Akkerwinde | - | - | - | - | Wild kruid, geen teeltperiode |
@@ -238,17 +232,9 @@ Cellen tonen: periode (fromWeeks..toWeeks). Een enkel venster kan geen onderbrek
 
 ## Planten zonder vensters
 
-- bezemkruid (Bezemkruid): Gewas niet eenduidig te identificeren
-- retichie (Retichie): Gewas niet eenduidig te identificeren
-- kruidplant (Kruidplant): Gewas niet eenduidig te identificeren
-- schuimboon (Schuimboon): Gewas niet eenduidig te identificeren
 - perzik (Perzik): Boom/struik/fruit: als stek/pot geplant, geen zaaiperiode
 - eetbare-bloem (Eetbare Bloem): Verzamelnaam, niet per soort te bepalen
 - reigersbek (Reigersbek): Wild/sierplant, geen bron
-- kaasstelen (Kaas Stelen): Gewas niet eenduidig te identificeren
-- zuringelambique (Zuringelambique): Gewas niet eenduidig te identificeren
-- vogelvoet (Vogelvoet): Gewas niet eenduidig te identificeren
-- studentenkruid (Studentenkruid): Gewas niet eenduidig te identificeren
 - cherimoya (Cherimoya): Boom/struik/fruit: als stek/pot geplant, geen zaaiperiode
 - akkerwinde (Akkerwinde): Wild kruid, geen teeltperiode
 - vlierbes (Vlierbes): Boom/struik/fruit: als stek/pot geplant, geen zaaiperiode
