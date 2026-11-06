@@ -108,12 +108,13 @@ describe('optimizeSeason', () => {
       reachableSeasons: (id) => (id === 'sla' ? ['spring', 'summer'] : []),
       growingSeasons: (_id, s) => (s === 'spring' ? ['spring', 'summer'] : s === 'summer' ? ['summer'] : []),
     };
-    let planning = Planning.from(undefined, calendar2).addPlants(['sla']);
-    planning = optimizeSeason(input(planning, 'spring')).planning;
-    planning = planning.duplicatePlanting('sla-spring', 'summer');
+    const spring: PlacementData = { id: 'spring-1', plantId: 'sla', plantingId: 'sla-spring', positionX: 10, positionY: 10 };
+    const planning = Planning.from(undefined, calendar2).addPlants(['sla']).applyPlacement('spring', [spring]).duplicatePlanting('sla-spring', 'summer');
     const summer = optimizeSeason(input(planning, 'summer')).planning;
+    assert.ok(summer.placementsIn('summer').length > 0);
     assert.ok(summer.placementsIn('summer').every((p) => p.plantingId === 'sla-summer' && p.plantId === 'sla'));
     assert.deepEqual(summer.carriedPlacementsIn('summer'), summer.placementsOf('sla-spring'));
+    assert.equal(summer.carriedPlacementsIn('summer').length, 1);
     for (const own of summer.placementsIn('summer')) {
       for (const fixed of summer.carriedPlacementsIn('summer')) {
         assert.ok(!boundsOverlap(boundsOf(own), boundsOf(fixed)));

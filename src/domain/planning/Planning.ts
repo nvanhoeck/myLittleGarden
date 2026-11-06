@@ -251,10 +251,13 @@ export class Planning {
   /**
    * Brings the planning in line with the calendar, on every load and after
    * a new frost date. Placed plantings keep everything (missing fixed
-   * seasons are filled in). An unplaced planting whose start season is no
-   * longer reachable moves to the first available season at ratio 1, or is
-   * dropped when none is left. A plant with a reachable season but no
-   * planting gets its first planting. Returns this planning when nothing changes.
+   * seasons are filled in). An unplaced planting loses its fixed seasons; when
+   * the plant reaches some season but not the planting's start season, it
+   * moves to the first available season at ratio 1, or is dropped when none
+   * is left. A plant that reaches no season (no frost date, or a window
+   * outside the year) keeps its plantings as they are. A plant with a
+   * reachable season but no planting gets its first planting. Returns this
+   * planning when nothing changes.
    */
   reconciled(): Planning {
     let next: Planning = this;
@@ -265,7 +268,11 @@ export class Planning {
         }
         continue;
       }
-      if (this.calendar.reachableSeasons(planting.plantId).includes(planting.startSeason)) {
+      if (planting.fixedSeasons !== undefined) {
+        next = next.withPlantingChanged(planting.id, (p) => next.withFrozenSeasons(p));
+      }
+      const reachable = this.calendar.reachableSeasons(planting.plantId);
+      if (reachable.length === 0 || reachable.includes(planting.startSeason)) {
         continue;
       }
       const target = next.seasonsAvailableFor(planting.id)[0];

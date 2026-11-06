@@ -213,6 +213,21 @@ describe('reconciling with a new calendar (frost-date change and every load)', (
     assert.deepEqual(Planning.from(withoutFixed, calendar).plantingById('tomaat-spring')?.fixedSeasons, ['spring', 'summer']);
   });
 
+  test('an unplaced planting that still has fixed seasons loses them', () => {
+    const data = withPlants('tomaat').applyPlacement('spring', [placement('t1', 'tomaat-spring')]).removePlacement('spring', 't1').toData();
+    assert.deepEqual(data.plantings[0].fixedSeasons, ['spring', 'summer']);
+    assert.equal(Planning.from(data, calendar).plantingById('tomaat-spring')?.fixedSeasons, undefined);
+  });
+
+  test('plantings stay as they are when the plant reaches no season at all', () => {
+    const nothing: PlantingCalendar = { hasCalendar: () => true, reachableSeasons: () => [], growingSeasons: () => [] };
+    const data = withPlants('sla').setRatio('spring', 'sla-spring', 4).toData();
+    const planning = Planning.from(data, nothing);
+    assert.notEqual(planning.plantingById('sla-spring'), undefined);
+    assert.equal(planning.ratioOf('spring', 'sla-spring'), 4);
+    assert.equal(planning.reconciled(), planning);
+  });
+
   test('a plant in the list without planting gets its first planting', () => {
     const data: PlanningData = { ...Planning.from(undefined, calendar).toData(), plants: ['boerenkool'] };
     assert.deepEqual(Planning.from(data, calendar).plantings.map((p) => p.id), ['boerenkool-summer']);
