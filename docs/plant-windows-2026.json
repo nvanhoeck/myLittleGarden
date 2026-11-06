@@ -1,0 +1,1659 @@
+{
+  "frostReference": "04-15",
+  "plants": {
+    "tomaat": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "paprika": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "komkommer": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "courgette": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "sla": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
+    },
+    "spinazie": {
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -7
+      },
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 28
+      }
+    },
+    "wortel": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 15
+      }
+    },
+    "biet": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "radijs": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 24
+      }
+    },
+    "broccoli": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "tuinboon": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      }
+    },
+    "snijboon": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "basilicum": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "peterselie": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 15
+      }
+    },
+    "bieslook": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "dille": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "knoflook": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 50
+      }
+    },
+    "aubergine": {
+      "indoorStartWindow": {
+        "fromWeeks": -9,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "ui": {
+      "indoorStartWindow": null,
+      "transplantWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      }
+    },
+    "rucola": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 24
+      }
+    },
+    "boerenkool": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "doperwt": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "sugarsnap": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "aardbei": {
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
+      "directSowWindow": null
+    },
+    "bloemkool": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "spruitjes": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "savooiekool": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 8
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      }
+    },
+    "groene-kool": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 8
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      }
+    },
+    "rode-kool": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 8
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      }
+    },
+    "andijvie": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
+    },
+    "snijsla": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 19
+      }
+    },
+    "ijsberg-sla": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
+    },
+    "romaine-sla": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
+    },
+    "snijbiet": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "chinese-kool": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 17
+      }
+    },
+    "paksoi": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 24
+      }
+    },
+    "mizuna": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 24
+      }
+    },
+    "veldsla": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 17,
+        "toWeeks": 28
+      }
+    },
+    "rauwkost": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
+    },
+    "mangold": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "snijkool": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "pommer": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "meloen": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "watermeloen": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "witte-boon": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "kapucijner": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "linzen": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      }
+    },
+    "munt": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "tijm": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      }
+    },
+    "oregano": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "rozemarijn": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "salie": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "majoraan": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "lavendel": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "cilantro": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "koriander-zaad": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "fennel": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 15
+      }
+    },
+    "dragon": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "kervel": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "bezemkruid": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "sleutelbloem": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "paardebloem": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "bladselderij": {
+      "indoorStartWindow": {
+        "fromWeeks": -9,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 15
+      }
+    },
+    "knolselderij": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "pastinaak": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "schorseneer": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      }
+    },
+    "koolrabi": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
+    },
+    "raap": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 19
+      }
+    },
+    "rammenas": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 19
+      }
+    },
+    "retichie": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "sugarloaf": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "rode-chichorei": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "witlof": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "radicchio": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "zuring": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "kruidplant": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "goudsbloemkruid": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 10
+      }
+    },
+    "chia": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "amarant": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "quinoa": {
+      "indoorStartWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      }
+    },
+    "erwtensoep": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "acker-boon": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      }
+    },
+    "dubbelboon": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "pronkboon": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "limaboon": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "schuimboon": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "asperge": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "directSowWindow": null
+    },
+    "perzik": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "kapuzijner-kers": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "eetbare-bloem": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "maggiekruid": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "bonekruid": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "bergmunt": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "anijs": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      }
+    },
+    "selderij": {
+      "indoorStartWindow": {
+        "fromWeeks": -9,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 15
+      }
+    },
+    "mandarijnkruid": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "appelmunt": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "tuinmint": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "kamille": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": null
+    },
+    "reigersbek": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "salie-rood": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "citroensalie": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "borage": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "sleutelbloem-thee": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "roodlover": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "oca": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "kaasstelen": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "skraelkool": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "stengelbiet": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      }
+    },
+    "zuringelambique": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "vogelvoet": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "studentenkruid": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "steentijm": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      }
+    },
+    "spaanse-peper": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "cherimoya": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "kleine-radijs": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 24
+      }
+    },
+    "waterkers": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      }
+    },
+    "platte-peterselie": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 15
+      }
+    },
+    "pronkerwt": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      }
+    },
+    "akkerwinde": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "vlierbes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "kers": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "blauwe-bes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "braam": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "framboos": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "kruisbes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "aalbes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "druif": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "walnoot": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "hazelnoot": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "prei": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 10
+      }
+    },
+    "aardappel": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      }
+    },
+    "artisjok": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": null
+    },
+    "maïs": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "citroenmelisse": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "bonenkruid": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "karwij": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      }
+    },
+    "komijn": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "laurier": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "pepermunt": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "tarwe": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 32
+      }
+    },
+    "gerst": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 21,
+        "toWeeks": 28
+      }
+    },
+    "rogge": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 21,
+        "toWeeks": 32
+      }
+    },
+    "haver": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      }
+    },
+    "spelt": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 32
+      }
+    },
+    "triticale": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 32
+      }
+    },
+    "boekweit": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 19
+      }
+    },
+    "cherry-tomaat": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "limoen": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "citroen": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "saffraan": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "struikboon": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      }
+    },
+    "pruimen": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "krieken": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "koriander": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      }
+    },
+    "zonnebloem": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      }
+    },
+    "augurk": {
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      }
+    },
+    "rijst": {
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "chilipeper": {
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null
+    },
+    "kastanje": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "appel": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "peer": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "abrikoos": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "vijg": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "kweepeer": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "rode-bes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "witte-bes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "bosbes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "goji-bes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "vlierbes-struik": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "aronia": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "kiwi": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "kiwi-bes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "mispel": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "moerbei": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    },
+    "japanse-wijnbes": {
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null
+    }
+  }
+}
