@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { buildPlantList, buildSeasonSections, plantingName } from './planningScreenViewModel.ts';
 import { Planning } from '../../domain/planning/Planning.ts';
 import type { PlantingCalendar } from '../../domain/planning/PlantCalendar.ts';
+import { seasonMonthsLabel } from '../shared/seasonLabels.ts';
 import type { PlacementData, Season } from '../../types/planning.types.ts';
 
 const t = (key: string, options?: Record<string, unknown>): string => (options ? `${key} ${JSON.stringify(options)}` : key);
@@ -69,5 +70,33 @@ describe('buildSeasonSections', () => {
     const shares = [{ plantId: 'sla', plantingId: 'sla-spring', count: 3, actualShare: 0.5, targetShare: 0.5 }];
     const [spring] = buildSeasonSections(placedSla, nameOf, (s) => (s === 'spring' ? shares : undefined), t);
     assert.equal(spring.ratioRows.find((r) => r.plantingId === 'sla-spring')?.resultLabel, 'seasonPlanning.result {"count":3,"actual":50,"target":50}');
+  });
+});
+
+describe('buildSeasonSections coverage', () => {
+  test('hides results when the season is not planned', () => {
+    const shares = [{ plantId: 'sla', plantingId: 'sla-spring', count: 3, actualShare: 0.5, targetShare: 0.5 }];
+    const outdated = placedSla.setRatio('spring', 'sla-spring', 2);
+    assert.notEqual(outdated.statusOf('spring'), 'planned');
+    const [spring] = buildSeasonSections(outdated, nameOf, () => shares, t);
+    assert.equal(spring.ratioRows.find((r) => r.plantingId === 'sla-spring')?.resultLabel, null);
+  });
+
+  test('labels winter months across the year end', () => {
+    assert.equal(seasonMonthsLabel('winter', t), 'season.months {"first":"planning.month.short.12","last":"planning.month.short.2"}');
+  });
+
+  test('a plant with two plantings is not the last one and has no season left to duplicate or move to', () => {
+    const [spring] = buildSeasonSections(twoSla, nameOf, () => undefined, t);
+    const sla = spring.ratioRows.find((r) => r.plantingId === 'sla-spring');
+    assert.equal(sla?.menu.isLastPlanting, false);
+    assert.deepEqual(sla?.menu.items.map((i) => i.kind), ['remove']);
+  });
+
+  test('a planting in summer can be duplicated or moved to the earlier spring', () => {
+    const inSummer = placedSla.movePlanting('sla-spring', 'summer').applyPlacement('summer', [placement('s2', 'sla-spring')]);
+    const summer = buildSeasonSections(inSummer, nameOf, () => undefined, t)[1];
+    const sla = summer.ratioRows.find((r) => r.plantingId === 'sla-spring');
+    assert.deepEqual(sla?.menu.items.map((i) => [i.kind, i.season]), [['duplicate', 'spring'], ['move', 'spring'], ['remove', 'summer']]);
   });
 });

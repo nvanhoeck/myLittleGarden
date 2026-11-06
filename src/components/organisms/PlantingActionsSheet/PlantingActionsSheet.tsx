@@ -21,7 +21,7 @@ export function PlantingActionsSheet({ visible, title, items, hint, cancelLabel,
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable className="flex-1 bg-black/50 justify-end" onPress={onClose} accessibilityRole="button" accessibilityLabel={cancelLabel}>
-        <Pressable className="bg-gray-900 rounded-t-2xl pb-6" onPress={() => undefined} testID="planting-actions-sheet">
+        <Pressable className="bg-gray-900 rounded-t-2xl pb-6" onPress={() => undefined} accessible={false} testID="planting-actions-sheet">
           <Text className="text-white font-semibold px-4 pt-4 pb-2">{title}</Text>
           {hint !== undefined && <Text className="text-gray-400 px-4 pb-2" testID="planting-actions-hint">{hint}</Text>}
           {items.map((item) => (
@@ -35,7 +35,7 @@ export function PlantingActionsSheet({ visible, title, items, hint, cancelLabel,
               <Text className={item.kind === 'remove' ? 'text-error' : 'text-white'}>{item.label}</Text>
             </Pressable>
           ))}
-          <Pressable onPress={onClose} className="h-12 px-4 justify-center border-t border-gray-800" accessibilityRole="button">
+          <Pressable onPress={onClose} className="h-12 px-4 justify-center border-t border-gray-800" accessibilityRole="button" testID="planting-actions-cancel">
             <Text className="text-gray-400">{cancelLabel}</Text>
           </Pressable>
         </Pressable>

@@ -35,6 +35,8 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
   const movePlanting = useComponentStore((state) => state.movePlanting);
   const removePlanting = useComponentStore((state) => state.removePlanting);
   const [menuFor, setMenuFor] = useState<{ season: Season; row: RatioRowView } | null>(null);
+  // Kept after closing so the sheet keeps its content while it slides out
+  const [lastMenu, setLastMenu] = useState<{ season: Season; row: RatioRowView } | null>(null);
   const [expanded, setExpanded] = useState<ReadonlySet<Season>>(new Set(['spring', 'summer', 'autumn', 'winter']));
 
   // Seasons come from the frost date; without one there is nothing to plan
@@ -180,7 +182,11 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
               expanded={expanded.has(view.season)}
               onToggle={() => toggleSection(view.season)}
               onRatioChange={(plantingId, ratio) => setRatio(componentId, year, view.season, plantingId, ratio)}
-              onOpenMenu={(row) => setMenuFor({ season: view.season, row })}
+              onOpenMenu={(row) => {
+                const opened = { season: view.season, row };
+                setLastMenu(opened);
+                setMenuFor(opened);
+              }}
             />
           ))}
         </View>
@@ -188,9 +194,9 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
 
       <PlantingActionsSheet
         visible={menuFor !== null}
-        title={menuFor ? t('seasonPlanning.menuTitle', { name: menuFor.row.name, season: t(`season.${menuFor.season}`) }) : ''}
-        items={menuFor?.row.menu.items ?? []}
-        hint={menuFor && !menuFor.row.menu.isPlaced ? t('seasonPlanning.notPlacedHint') : undefined}
+        title={lastMenu ? t('seasonPlanning.menuTitle', { name: lastMenu.row.name, season: t(`season.${lastMenu.season}`) }) : ''}
+        items={lastMenu?.row.menu.items ?? []}
+        hint={lastMenu && !lastMenu.row.menu.isPlaced ? t('seasonPlanning.notPlacedHint') : undefined}
         cancelLabel={t('common.cancel')}
         onSelect={handleMenuSelect}
         onClose={() => setMenuFor(null)}
