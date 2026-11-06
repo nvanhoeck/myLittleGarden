@@ -19,8 +19,8 @@ import {
   RectangularTower,
   CircularTower,
 } from '@/domain/component';
-import { Planning, optimizeSeason as optimizeSeasonOf, plantingAreasOf } from '@/domain/planning';
-import type { PlantingShare, Season } from '@/domain/planning';
+import { Planning, frostDayOf, optimizeSeason as optimizeSeasonOf, plantingAreasOf, plantingCalendarFor } from '@/domain/planning';
+import type { PlantingCalendar, PlantingShare, Season } from '@/domain/planning';
 import { generateId } from '@/utils/idGenerator';
 import {
   migrateComponentState,
@@ -100,8 +100,11 @@ interface ComponentState {
     heightCm: number,
     rotationDeg: number,
   ) => void;
-  /** After a new frost date: moves ratios to the plants' new start seasons */
-  reconcilePlannings: () => void;
+  /**
+   * After a new frost date: placed plantings are frozen with the calendar of the
+   * previous frost date, then ratios move to the plants' new start seasons
+   */
+  reconcilePlannings: (previousFrost: string | null) => void;
 
   // Selectors
   getComponentById: (id: string) => ComponentData | undefined;
@@ -110,6 +113,15 @@ interface ComponentState {
 
 function planningOf(component: ComponentData, year: number): Planning {
   return Planning.from(component.plannings[String(year)], plantingCalendarOfYear(year));
+}
+
+/** A stale call (e.g. a double tap) is not allowed: the planting is gone, unplaced or the season taken */
+function canRelocate(planning: Planning, plantingId: string, season: Season): boolean {
+  return planning.isPlaced(plantingId) && planning.seasonsAvailableFor(plantingId).includes(season);
+}
+
+function plantingCalendarAtFrost(year: number, lastSpringFrost: string | null): PlantingCalendar {
+  return plantingCalendarFor(year, frostDayOf(lastSpringFrost), (plantId) => usePlantStore.getState().getPlantById(plantId));
 }
 
 /** Applies a change to one component's planning of a year; unchanged plannings keep the component as it is */
@@ -242,15 +254,15 @@ export const useComponentStore = create<ComponentState>()(
       },
 
       setRatio: (componentId, year, season, plantingId, ratio) => {
-        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.setRatio(season, plantingId, ratio)) }));
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => (p.plantingById(plantingId)?.startSeason === season ? p.setRatio(season, plantingId, ratio) : p)) }));
       },
 
       duplicatePlanting: (componentId, year, plantingId, season) => {
-        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.duplicatePlanting(plantingId, season)) }));
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => (canRelocate(p, plantingId, season) ? p.duplicatePlanting(plantingId, season) : p)) }));
       },
 
       movePlanting: (componentId, year, plantingId, season) => {
-        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => p.movePlanting(plantingId, season)) }));
+        set((state) => ({ components: withPlanning(state.components, componentId, year, (p) => (canRelocate(p, plantingId, season) ? p.movePlanting(plantingId, season) : p)) }));
       },
 
       removePlanting: (componentId, year, plantingId) => {
@@ -305,11 +317,15 @@ export const useComponentStore = create<ComponentState>()(
         }));
       },
 
-      reconcilePlannings: () => {
+      reconcilePlannings: (previousFrost) => {
         set((state) => ({
           components: state.components.map((comp) => {
             const years = Object.keys(comp.plannings);
-            const reconciled = years.map((year) => [year, planningOf(comp, Number(year)).reconciled().toData()] as const);
+            const reconciled = years.map((year) => {
+              // Freeze placed plantings with the old calendar before the new one applies
+              const frozen = Planning.from(comp.plannings[year], plantingCalendarAtFrost(Number(year), previousFrost));
+              return [year, planningOf({ ...comp, plannings: { ...comp.plannings, [year]: frozen.toData() } }, Number(year)).reconciled().toData()] as const;
+            });
             const changed = reconciled.some(([year, data]) => data !== comp.plannings[year]);
             return changed ? { ...comp, plannings: Object.fromEntries(reconciled) } : comp;
           }),
@@ -437,6 +453,6 @@ export function isTower(
 // start (null to date), must not outdate the seasons.
 useEnvironmentStore.subscribe((state, previous) => {
   if (shouldReconcile(previous.lastSpringFrost, state.lastSpringFrost)) {
-    useComponentStore.getState().reconcilePlannings();
+    useComponentStore.getState().reconcilePlannings(previous.lastSpringFrost);
   }
 });

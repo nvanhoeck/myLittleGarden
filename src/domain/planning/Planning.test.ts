@@ -213,6 +213,43 @@ describe('reconciling with a new calendar (frost-date change and every load)', (
     assert.deepEqual(Planning.from(withoutFixed, calendar).plantingById('tomaat-spring')?.fixedSeasons, ['spring', 'summer']);
   });
 
+  describe('a placed planting whose start season the plant cannot reach', () => {
+    const garlic = calendarOf({ ...TABLE, knoflook: { reach: ['autumn', 'winter'], grow: { autumn: ['autumn', 'winter'], winter: ['winter'] } } });
+    const garlicData = (fixedSeasons?: Season[]): PlanningData => ({
+      plants: ['knoflook'],
+      plantings: [{ id: 'knoflook-spring', plantId: 'knoflook', startSeason: 'spring', ...(fixedSeasons ? { fixedSeasons } : {}) }],
+      seasons: {
+        spring: { ratios: { 'knoflook-spring': 3 }, placements: [placement('k1', 'knoflook-spring')], status: 'planned' },
+        summer: { ratios: {}, placements: [], status: 'notPlanned' },
+        autumn: { ratios: {}, placements: [], status: 'notPlanned' },
+        winter: { ratios: {}, placements: [], status: 'notPlanned' },
+      },
+    });
+
+    test('without fixed seasons (migrated) it is treated as unplaced and moves to the first available season', () => {
+      const planning = Planning.from(garlicData(), garlic);
+      assert.deepEqual(planning.plantings.map((p) => [p.id, p.startSeason]), [['knoflook-spring', 'autumn']]);
+      assert.deepEqual(planning.placementsIn('spring'), []);
+      assert.equal(planning.toData().seasons.spring.ratios['knoflook-spring'], undefined);
+      assert.equal(planning.ratioOf('autumn', 'knoflook-spring'), 1);
+      assert.equal(planning.statusOf('spring'), 'outdated');
+    });
+
+    test('with fixed seasons it stays in spring', () => {
+      const planning = Planning.from(garlicData(['spring', 'summer']), garlic);
+      assert.equal(planning.plantingById('knoflook-spring')?.startSeason, 'spring');
+      assert.deepEqual(planning.placementsIn('spring').map((p) => p.id), ['k1']);
+      assert.equal(planning.statusOf('spring'), 'planned');
+    });
+  });
+
+  test('a placed planting without fixed seasons, frozen with one calendar and loaded with another, keeps the first calendar seasons', () => {
+    const data = placedTomato.toData();
+    const withoutFixed: PlanningData = { ...data, plantings: data.plantings.map(({ fixedSeasons: _f, ...p }) => p) };
+    const frozen = Planning.from(withoutFixed, calendar);
+    assert.deepEqual(Planning.from(frozen.toData(), later).plantingById('tomaat-spring')?.fixedSeasons, ['spring', 'summer']);
+  });
+
   test('an unplaced planting that still has fixed seasons loses them', () => {
     const data = withPlants('tomaat').applyPlacement('spring', [placement('t1', 'tomaat-spring')]).removePlacement('spring', 't1').toData();
     assert.deepEqual(data.plantings[0].fixedSeasons, ['spring', 'summer']);

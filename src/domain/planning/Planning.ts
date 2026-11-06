@@ -251,7 +251,10 @@ export class Planning {
   /**
    * Brings the planning in line with the calendar, on every load and after
    * a new frost date. Placed plantings keep everything (missing fixed
-   * seasons are filled in). An unplaced planting loses its fixed seasons; when
+   * seasons are filled in). Exception: a placed planting without fixed
+   * seasons (migrated, never frozen) whose start season the plant cannot
+   * reach (and the plant reaches some season) is treated as unplaced: its
+   * placements and ratio go and it follows the rule below. An unplaced planting loses its fixed seasons; when
    * the plant reaches some season but not the planting's start season, it
    * moves to the first available season at ratio 1, or is dropped when none
    * is left. A plant that reaches no season (no frost date, or a window
@@ -262,7 +265,10 @@ export class Planning {
   reconciled(): Planning {
     let next: Planning = this;
     for (const planting of this.data.plantings) {
-      if (this.isPlaced(planting.id)) {
+      const reachable = this.calendar.reachableSeasons(planting.plantId);
+      const stranded =
+        planting.fixedSeasons === undefined && reachable.length > 0 && !reachable.includes(planting.startSeason);
+      if (this.isPlaced(planting.id) && !stranded) {
         if (planting.fixedSeasons === undefined) {
           next = next.withPlantingChanged(planting.id, (p) => next.withFrozenSeasons(p));
         }
@@ -271,7 +277,6 @@ export class Planning {
       if (planting.fixedSeasons !== undefined) {
         next = next.withPlantingChanged(planting.id, (p) => next.withFrozenSeasons(p));
       }
-      const reachable = this.calendar.reachableSeasons(planting.plantId);
       if (reachable.length === 0 || reachable.includes(planting.startSeason)) {
         continue;
       }
