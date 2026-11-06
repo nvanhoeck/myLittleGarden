@@ -10,7 +10,7 @@ import { placementDataSchema, plantingDataSchema } from '../../schemas/planningS
  * Version 2: canvas position and rotation removed from components.
  * Version 3: week-based planning (placed plants with growing periods, plants to plan).
  * Version 4: plants live in plannings per year and season; plantings from
- * version 3 and before are not converted.
+ * version 3 and before were dropped; version 4 plannings are converted in version 5.
  * Version 5: plants have plantings (one per start season); ratios and placements belong to plantings. v4 plannings are converted.
  */
 export const COMPONENT_STORE_VERSION = 5;
@@ -34,28 +34,23 @@ function stripCanvasFields(component: Record<string, unknown>): Record<string, u
   return rest;
 }
 
-interface SalvagedSeason {
-  readonly plan: SeasonPlanData;
-  readonly droppedAny: boolean;
-}
-
-/** Valid ratios (whole, ≥ 1) of known plantings and valid placements of known plantings */
-function salvageSeason(value: unknown, knownPlanting: (plantingId: string) => boolean): SalvagedSeason {
+/** Valid ratios (whole, ≥ 1) of known plantings and valid placements of a known planting of the same plant */
+function salvageSeason(value: unknown, plantOfPlanting: ReadonlyMap<string, string>): SeasonPlanData {
   if (!isRecord(value)) {
-    return { plan: EMPTY_SEASON, droppedAny: false };
+    return EMPTY_SEASON;
   }
   const ratioEntries = isRecord(value.ratios) ? Object.entries(value.ratios) : [];
   const ratios = Object.fromEntries(
-    ratioEntries.filter(([id, ratio]) => knownPlanting(id) && Number.isInteger(ratio) && (ratio as number) >= 1),
+    ratioEntries.filter(([id, ratio]) => plantOfPlanting.has(id) && Number.isInteger(ratio) && (ratio as number) >= 1),
   ) as Record<string, number>;
   const placementEntries = Array.isArray(value.placements) ? value.placements : [];
   const placements: PlacementData[] = placementEntries.flatMap((entry) => {
     const parsed = placementDataSchema.safeParse(entry);
-    return parsed.success && knownPlanting(parsed.data.plantingId) ? [parsed.data] : [];
+    return parsed.success && plantOfPlanting.get(parsed.data.plantingId) === parsed.data.plantId ? [parsed.data] : [];
   });
   const status = STATUSES.find((candidate) => candidate === value.status) ?? 'notPlanned';
   const droppedAny = Object.keys(ratios).length < ratioEntries.length || placements.length < placementEntries.length;
-  return { plan: { ratios, placements, status: droppedAny && status === 'planned' ? 'outdated' : status }, droppedAny };
+  return { ratios, placements, status: droppedAny && status === 'planned' ? 'outdated' : status };
 }
 
 /**
@@ -93,13 +88,15 @@ function salvagePlanning(value: unknown): PlanningData | null {
   const droppedPlant = plants.length < value.plants.length;
   const current = Array.isArray(value.plantings) ? value : withPlantingsFromV4(value, plants);
   const plantingEntries = Array.isArray(current.plantings) ? current.plantings : [];
+  const plantOfPlanting = new Map<string, string>();
   const plantings: PlantingData[] = plantingEntries.flatMap((entry) => {
     const parsed = plantingDataSchema.safeParse(entry);
-    return parsed.success ? [parsed.data] : [];
+    if (!parsed.success || plantOfPlanting.has(parsed.data.id)) return [];
+    plantOfPlanting.set(parsed.data.id, parsed.data.plantId);
+    return [parsed.data];
   });
-  const known = new Set(plantings.map((p) => p.id));
   const seasons = isRecord(current.seasons) ? current.seasons : {};
-  const salvaged = SEASONS.map((season) => salvageSeason(seasons[season], (id) => known.has(id)).plan);
+  const salvaged = SEASONS.map((season) => salvageSeason(seasons[season], plantOfPlanting));
   const outdateAll = droppedPlant || plantings.length < plantingEntries.length;
   const [spring, summer, autumn, winter] = outdateAll
     ? salvaged.map((season) => (season.status === 'planned' ? { ...season, status: 'outdated' as const } : season))
