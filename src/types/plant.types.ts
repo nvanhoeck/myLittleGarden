@@ -108,6 +108,15 @@ export interface CombativeRelationship {
 }
 
 /**
+ * A sowing or planting period in weeks relative to the last spring frost
+ * (negative = before the frost), both ends inclusive
+ */
+export interface SowingWindow {
+    readonly fromWeeks: number;
+    readonly toWeeks: number;
+}
+
+/**
  * Complete plant data structure
  */
 export interface PlantData {
@@ -135,11 +144,10 @@ export interface PlantData {
     readonly frostTolerance: FrostTolerance;
     readonly germinationDays: DayRange;
     readonly daysToHarvest: DayRange;
-    // Growing calendar - weeks relative to last spring frost
-    // Negative = before frost date, Positive = after frost date
-    readonly indoorStartWeeks: number | null;
-    readonly transplantWeeks: number | null;
-    readonly directSowWeeks: number | null;
+    // Growing calendar - windows relative to last spring frost; null when the plant is not grown this way
+    readonly indoorStartWindow: SowingWindow | null;
+    readonly transplantWindow: SowingWindow | null;
+    readonly directSowWindow: SowingWindow | null;
     readonly companions: readonly CompanionRelationship[];
     readonly combatives: readonly CombativeRelationship[];
 }

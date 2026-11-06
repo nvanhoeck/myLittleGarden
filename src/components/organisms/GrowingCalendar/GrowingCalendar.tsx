@@ -12,6 +12,7 @@ import {
   calculateGrowingCalendar,
   formatDateRangeNl,
   getYearPosition,
+  splitAtYearEnd,
   MONTH_LABELS_NL,
   CALENDAR_COLORS,
   type DateRange,
@@ -135,24 +136,18 @@ function TimelineBar({ calendar }: { calendar: GrowingCalendarData }): React.JSX
       {/* Phase bars */}
       <View className="absolute inset-0 items-center justify-center">
         <View className="w-full h-3 relative">
-          {calendar.indoorStart && (
-            <CalendarPhaseBar
-              range={calendar.indoorStart}
-              color={CALENDAR_COLORS.indoorStart}
-            />
-          )}
-          {calendar.transplant && (
-            <CalendarPhaseBar
-              range={calendar.transplant}
-              color={CALENDAR_COLORS.transplant}
-            />
-          )}
-          {calendar.directSow && (
-            <CalendarPhaseBar
-              range={calendar.directSow}
-              color={CALENDAR_COLORS.directSow}
-            />
-          )}
+          {calendar.indoorStart &&
+            splitAtYearEnd(calendar.indoorStart).map((part) => (
+              <CalendarPhaseBar key={`indoor-${part.start.getTime()}`} range={part} color={CALENDAR_COLORS.indoorStart} />
+            ))}
+          {calendar.transplant &&
+            splitAtYearEnd(calendar.transplant).map((part) => (
+              <CalendarPhaseBar key={`transplant-${part.start.getTime()}`} range={part} color={CALENDAR_COLORS.transplant} />
+            ))}
+          {calendar.directSow &&
+            splitAtYearEnd(calendar.directSow).map((part) => (
+              <CalendarPhaseBar key={`directSow-${part.start.getTime()}`} range={part} color={CALENDAR_COLORS.directSow} />
+            ))}
         </View>
       </View>
 

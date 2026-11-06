@@ -2,13 +2,13 @@
  * Growing Calendar Calculations
  * Calculates planting dates based on frost dates and plant requirements.
  *
- * Weeks relative to last spring frost:
- * - Negative values = weeks BEFORE last spring frost
- * - Positive values = weeks AFTER last spring frost
+ * Sowing windows relative to the last spring frost:
+ * - Negative weeks = BEFORE last spring frost
+ * - Positive weeks = AFTER last spring frost
  */
 
 import type { PlantData } from '../types/plant.types.ts';
-import { frostDayOf, plantingDatesOf } from '../domain/planning/PlantCalendar.ts';
+import { frostDayOf, sowingDatesOf } from '../domain/planning/PlantCalendar.ts';
 
 /**
  * Date range for a growing calendar phase
@@ -44,29 +44,9 @@ export const MONTH_NAMES_NL: readonly string[] = [
 ] as const;
 
 /**
- * Calculate a date by adding weeks to a base date
- */
-function addWeeks(date: Date, weeks: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + weeks * 7);
-  return result;
-}
-
-/**
- * Create a date range centered around a calculated date
- * Adds a 2-week window (1 week before, 1 week after)
- */
-function createDateRange(centerDate: Date): DateRange {
-  return {
-    start: addWeeks(centerDate, -1),
-    end: addWeeks(centerDate, 1),
-  };
-}
-
-/**
  * Calculate growing calendar dates for a plant based on frost dates
  *
- * @param plant - Plant data with growing week offsets
+ * @param plant - Plant data with sowing windows
  * @param lastSpringFrost - ISO date string of last spring frost
  * @returns Growing calendar data with date ranges for each phase
  */
@@ -79,15 +59,28 @@ export function calculateGrowingCalendar(
     return { indoorStart: null, transplant: null, directSow: null };
   }
 
-  // The same dates the season planning uses
-  const dates = plantingDatesOf(plant, frostDay, Number(lastSpringFrost.slice(0, 4)));
-  const around = (date: Date | null): DateRange | null => (date === null ? null : createDateRange(date));
-
+  // The same windows the season planning uses
+  const dates = sowingDatesOf(plant, frostDay, Number(lastSpringFrost.slice(0, 4)));
   return {
-    indoorStart: around(dates.indoorStart),
-    transplant: around(dates.transplant),
-    directSow: around(dates.directSow),
+    indoorStart: dates.indoorStart,
+    transplant: dates.transplant,
+    directSow: dates.directSow,
   };
+}
+
+/**
+ * A range on the one-year timeline: a range that runs past 31 December is
+ * drawn as two bars, up to the year end and from 1 January
+ */
+export function splitAtYearEnd(range: DateRange): DateRange[] {
+  const startYear = range.start.getUTCFullYear();
+  if (range.end.getUTCFullYear() === startYear) {
+    return [range];
+  }
+  return [
+    { start: range.start, end: new Date(Date.UTC(startYear, 11, 31)) },
+    { start: new Date(Date.UTC(startYear + 1, 0, 1)), end: range.end },
+  ];
 }
 
 /**

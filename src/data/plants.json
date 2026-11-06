@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "3.0.0",
   "plants": [
     {
       "id": "tomaat",
@@ -20,9 +20,15 @@
         "min": 60,
         "max": 85
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": 2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "basilicum",
@@ -114,9 +120,15 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": 3,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "basilicum",
@@ -175,9 +187,18 @@
         "min": 50,
         "max": 70
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -267,9 +288,18 @@
         "min": 50,
         "max": 65
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "basilicum",
@@ -341,9 +371,18 @@
         "min": 25,
         "max": 60
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -429,9 +468,15 @@
         "min": 25,
         "max": 48
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": -4,
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -7
+      },
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 28
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -491,9 +536,12 @@
         "min": 60,
         "max": 80
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "bieslook",
@@ -577,9 +625,18 @@
         "min": 45,
         "max": 70
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "knoflook",
@@ -620,9 +677,12 @@
         "min": 25,
         "max": 35
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -6,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 24
+      },
       "companions": [
         {
           "plantId": "sla",
@@ -687,9 +747,18 @@
         "min": 70,
         "max": 100
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -773,9 +842,12 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -10,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -810,9 +882,18 @@
         "min": 50,
         "max": 60
       },
-      "indoorStartWeeks": -2,
-      "transplantWeeks": 1,
-      "directSowWeeks": 2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -854,9 +935,18 @@
         "min": 20,
         "max": 30
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": 2,
-      "directSowWeeks": 2,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -922,9 +1012,18 @@
         "min": 45,
         "max": 70
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -990,9 +1089,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -1039,9 +1147,12 @@
         "min": 35,
         "max": 50
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "broccoli",
@@ -1114,9 +1225,12 @@
         "min": 210,
         "max": 240
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -24,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 50
+      },
       "companions": [
         {
           "plantId": "biet",
@@ -1199,9 +1313,15 @@
         "min": 70,
         "max": 85
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": 3,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -9,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "basilicum",
@@ -1260,9 +1380,15 @@
         "min": 100,
         "max": 120
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -1370,9 +1496,12 @@
         "min": 30,
         "max": 50
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 24
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -1412,9 +1541,18 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -1460,9 +1598,12 @@
         "min": 60,
         "max": 75
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -1510,9 +1651,12 @@
         "min": 60,
         "max": 70
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -1560,9 +1704,15 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "basilicum",
@@ -1633,9 +1783,18 @@
         "min": 70,
         "max": 100
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -1706,9 +1865,18 @@
         "min": 90,
         "max": 130
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": 0,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -1754,9 +1922,18 @@
         "min": 70,
         "max": 90
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -1796,9 +1973,18 @@
         "min": 70,
         "max": 100
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -1883,9 +2069,18 @@
         "min": 80,
         "max": 120
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -1925,9 +2120,18 @@
         "min": 50,
         "max": 80
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 19
+      },
+      "transplantWindow": {
+        "fromWeeks": 11,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "biet",
@@ -1968,9 +2172,12 @@
         "min": 30,
         "max": 50
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2010,9 +2217,18 @@
         "min": 60,
         "max": 80
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2052,9 +2268,18 @@
         "min": 60,
         "max": 80
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2095,9 +2320,12 @@
         "min": 30,
         "max": 50
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "knoflook",
@@ -2131,9 +2359,12 @@
         "min": 60,
         "max": 80
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 13,
+        "toWeeks": 17
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -2173,9 +2404,12 @@
         "min": 40,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 24
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2210,9 +2444,12 @@
         "min": 30,
         "max": 50
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 24
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2247,9 +2484,12 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 17,
+        "toWeeks": 28
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2284,9 +2524,18 @@
         "min": 30,
         "max": 50
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2327,9 +2576,12 @@
         "min": 50,
         "max": 70
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "knoflook",
@@ -2364,9 +2616,12 @@
         "min": 30,
         "max": 50
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -2400,9 +2655,18 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "basilicum",
@@ -2474,9 +2738,15 @@
         "min": 70,
         "max": 100
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "dille",
@@ -2510,9 +2780,15 @@
         "min": 75,
         "max": 100
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "dille",
@@ -2546,9 +2822,18 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": -2,
-      "transplantWeeks": 1,
-      "directSowWeeks": 2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -2589,9 +2874,12 @@
         "min": 70,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -2633,9 +2921,12 @@
         "min": 80,
         "max": 110
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -1,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -2670,9 +2961,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -2725,9 +3025,18 @@
         "min": 45,
         "max": 90
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "broccoli",
@@ -2774,9 +3083,15 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "broccoli",
@@ -2817,9 +3132,15 @@
         "min": 60,
         "max": 120
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "broccoli",
@@ -2884,9 +3205,15 @@
         "min": 45,
         "max": 90
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "broccoli",
@@ -2969,9 +3296,15 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "broccoli",
@@ -3012,9 +3345,15 @@
         "min": 60,
         "max": 120
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "tomaat",
@@ -3049,9 +3388,12 @@
         "min": 30,
         "max": 45
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -3099,9 +3441,12 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -3135,9 +3480,18 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -2,
-      "directSowWeeks": 0,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 15
+      },
       "companions": [],
       "combatives": [
         {
@@ -3225,9 +3579,15 @@
         "min": 45,
         "max": 90
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "tomaat",
@@ -3262,9 +3622,12 @@
         "min": 30,
         "max": 50
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "radijs",
@@ -3298,9 +3661,15 @@
         "min": 60,
         "max": 120
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -3327,9 +3696,12 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -3356,9 +3728,18 @@
         "min": 45,
         "max": 70
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -9,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -3392,9 +3773,15 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "tomaat",
@@ -3448,9 +3835,12 @@
         "min": 100,
         "max": 130
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "ui",
@@ -3485,9 +3875,12 @@
         "min": 120,
         "max": 150
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "ui",
@@ -3521,9 +3914,18 @@
         "min": 45,
         "max": 70
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -3589,9 +3991,12 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "ui",
@@ -3626,9 +4031,12 @@
         "min": 60,
         "max": 80
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "sla",
@@ -3662,9 +4070,18 @@
         "min": 50,
         "max": 80
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "biet",
@@ -3698,9 +4115,18 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "biet",
@@ -3735,9 +4161,12 @@
         "min": 100,
         "max": 150
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -8,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -3764,9 +4193,18 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 6,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "biet",
@@ -3800,9 +4238,12 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -3829,9 +4270,18 @@
         "min": 40,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -3906,9 +4356,15 @@
         "min": 120,
         "max": 150
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": 2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -3936,9 +4392,18 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": 2,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -3966,9 +4431,18 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -3995,9 +4469,12 @@
         "min": 70,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -4038,9 +4515,12 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -10,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -4074,9 +4554,18 @@
         "min": 80,
         "max": 110
       },
-      "indoorStartWeeks": -2,
-      "transplantWeeks": 1,
-      "directSowWeeks": 2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -4117,9 +4606,18 @@
         "min": 60,
         "max": 80
       },
-      "indoorStartWeeks": -2,
-      "transplantWeeks": 1,
-      "directSowWeeks": 2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -4210,9 +4708,18 @@
         "min": 70,
         "max": 90
       },
-      "indoorStartWeeks": -2,
-      "transplantWeeks": 1,
-      "directSowWeeks": 2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -4246,9 +4753,15 @@
         "min": 120,
         "max": 150
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": -6,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "peterselie",
@@ -4307,9 +4820,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -4336,9 +4849,18 @@
         "min": 25,
         "max": 45
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "broccoli",
@@ -4378,9 +4900,9 @@
         "min": 45,
         "max": 90
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -4407,9 +4929,15 @@
         "min": 60,
         "max": 120
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "tomaat",
@@ -4443,9 +4971,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 2,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "snijboon",
@@ -4479,9 +5016,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "broccoli",
@@ -4522,9 +5068,12 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -2,
-      "directSowWeeks": 0,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
       "companions": [],
       "combatives": [
         {
@@ -4558,9 +5107,15 @@
         "min": 70,
         "max": 120
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -9,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "tomaat",
@@ -4606,9 +5161,15 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "tomaat",
@@ -4649,9 +5210,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -4692,9 +5262,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -4735,9 +5314,15 @@
         "min": 45,
         "max": 70
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "knoflook",
@@ -4779,9 +5364,9 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -4808,9 +5393,15 @@
         "min": 45,
         "max": 90
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "broccoli",
@@ -4857,9 +5448,15 @@
         "min": 60,
         "max": 120
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "tomaat",
@@ -4893,9 +5490,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -4937,9 +5543,15 @@
         "min": 60,
         "max": 120
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": -6,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -15,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -4967,9 +5579,12 @@
         "min": 45,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -6,
-      "directSowWeeks": -4,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -5003,9 +5618,15 @@
         "min": 150,
         "max": 180
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5032,9 +5653,18 @@
         "min": 60,
         "max": 90
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5062,9 +5692,18 @@
         "min": 40,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": -2,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 15
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5091,9 +5730,18 @@
         "min": 45,
         "max": 90
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5120,9 +5768,15 @@
         "min": 70,
         "max": 90
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": 2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5149,9 +5803,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5179,9 +5833,12 @@
         "min": 20,
         "max": 30
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -6,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 24
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5209,9 +5866,12 @@
         "min": 25,
         "max": 40
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 19
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5238,9 +5898,18 @@
         "min": 45,
         "max": 70
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 15
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5267,9 +5936,12 @@
         "min": 70,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -8,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 6
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "climbing",
@@ -5296,9 +5968,9 @@
         "min": 60,
         "max": 120
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "climbing",
@@ -5325,9 +5997,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5354,9 +6026,9 @@
         "min": 1095,
         "max": 1825
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5383,9 +6055,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -5412,9 +6084,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -5441,9 +6113,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -5470,9 +6142,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -5499,9 +6171,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -5528,9 +6200,9 @@
         "min": 1095,
         "max": 1825
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "climbing",
@@ -5557,9 +6229,9 @@
         "min": 1825,
         "max": 3650
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5586,9 +6258,9 @@
         "min": 1095,
         "max": 1825
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5615,9 +6287,18 @@
         "min": 120,
         "max": 160
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 15
+      },
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -5682,9 +6363,12 @@
         "min": 70,
         "max": 110
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": 2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -5,
+        "toWeeks": 6
+      },
       "companions": [
         {
           "plantId": "knoflook",
@@ -5780,9 +6464,15 @@
         "min": 150,
         "max": 200
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": 2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 6
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5809,9 +6499,18 @@
         "min": 70,
         "max": 110
       },
-      "indoorStartWeeks": -2,
-      "transplantWeeks": 1,
-      "directSowWeeks": 2,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "pronkboon",
@@ -5865,9 +6564,15 @@
         "min": 45,
         "max": 70
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5894,9 +6599,15 @@
         "min": 45,
         "max": 60
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": null,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5924,9 +6635,12 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5953,9 +6667,15 @@
         "min": 120,
         "max": 150
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": 2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -5982,9 +6702,9 @@
         "min": 365,
         "max": 730
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6011,9 +6731,18 @@
         "min": 30,
         "max": 60
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": -2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "spreading",
@@ -6041,9 +6770,12 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -20,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 32
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6071,9 +6803,12 @@
         "min": 80,
         "max": 110
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -18,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 21,
+        "toWeeks": 28
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6101,9 +6836,12 @@
         "min": 100,
         "max": 140
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -22,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 21,
+        "toWeeks": 32
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6131,9 +6869,12 @@
         "min": 90,
         "max": 120
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -16,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6161,9 +6902,12 @@
         "min": 100,
         "max": 140
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -20,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 32
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6191,9 +6935,12 @@
         "min": 90,
         "max": 130
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": -20,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 24,
+        "toWeeks": 32
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6221,9 +6968,12 @@
         "min": 70,
         "max": 90
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": 2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 19
+      },
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6250,9 +7000,15 @@
         "min": 55,
         "max": 80
       },
-      "indoorStartWeeks": -8,
-      "transplantWeeks": 2,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "basilicum",
@@ -6299,9 +7055,9 @@
         "min": 365,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6328,9 +7084,9 @@
         "min": 365,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6357,9 +7113,9 @@
         "min": 45,
         "max": 60
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6386,9 +7142,12 @@
         "min": 50,
         "max": 65
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": 2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 15
+      },
       "companions": [
         {
           "plantId": "wortel",
@@ -6459,9 +7218,9 @@
         "min": 730,
         "max": 1460
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6488,9 +7247,9 @@
         "min": 730,
         "max": 1460
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6518,9 +7277,12 @@
         "min": 30,
         "max": 45
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": -4,
-      "directSowWeeks": -2,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "tomaat",
@@ -6561,9 +7323,18 @@
         "min": 80,
         "max": 110
       },
-      "indoorStartWeeks": -3,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 2,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 0,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -6622,9 +7393,18 @@
         "min": 45,
         "max": 60
       },
-      "indoorStartWeeks": -4,
-      "transplantWeeks": 1,
-      "directSowWeeks": 1,
+      "indoorStartWindow": {
+        "fromWeeks": -2,
+        "toWeeks": 6
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
       "companions": [
         {
           "plantId": "dille",
@@ -6659,9 +7439,15 @@
         "min": 120,
         "max": 180
       },
-      "indoorStartWeeks": -6,
-      "transplantWeeks": 3,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -7,
+        "toWeeks": 2
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6688,9 +7474,15 @@
         "min": 70,
         "max": 110
       },
-      "indoorStartWeeks": -10,
-      "transplantWeeks": 3,
-      "directSowWeeks": null,
+      "indoorStartWindow": {
+        "fromWeeks": -11,
+        "toWeeks": -3
+      },
+      "transplantWindow": {
+        "fromWeeks": 4,
+        "toWeeks": 10
+      },
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "basilicum",
@@ -6724,9 +7516,9 @@
         "min": 1825,
         "max": 3650
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -6753,9 +7545,9 @@
         "min": 1095,
         "max": 1825
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "peer",
@@ -6789,9 +7581,9 @@
         "min": 1095,
         "max": 1825
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "appel",
@@ -6825,9 +7617,9 @@
         "min": 730,
         "max": 1460
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "tree",
@@ -6854,9 +7646,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "spreading",
@@ -6883,9 +7675,9 @@
         "min": 730,
         "max": 1460
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "appel",
@@ -6919,9 +7711,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "framboos",
@@ -6955,9 +7747,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "rode-bes",
@@ -6991,9 +7783,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -7020,9 +7812,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "upright",
@@ -7049,9 +7841,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -7078,9 +7870,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "bush",
@@ -7107,9 +7899,9 @@
         "min": 1095,
         "max": 1460
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "climbing",
@@ -7136,9 +7928,9 @@
         "min": 1095,
         "max": 1460
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "climbing",
@@ -7165,9 +7957,9 @@
         "min": 1095,
         "max": 1825
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "appel",
@@ -7201,9 +7993,9 @@
         "min": 730,
         "max": 1460
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [
         {
           "plantId": "kamille",
@@ -7237,9 +8029,9 @@
         "min": 730,
         "max": 1095
       },
-      "indoorStartWeeks": null,
-      "transplantWeeks": null,
-      "directSowWeeks": null,
+      "indoorStartWindow": null,
+      "transplantWindow": null,
+      "directSowWindow": null,
       "companions": [],
       "combatives": [],
       "growthHabit": "climbing",

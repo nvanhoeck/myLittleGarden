@@ -114,6 +114,16 @@ export const combativeRelationshipSchema = z.object({
 export type CombativeRelationshipType = z.infer<typeof combativeRelationshipSchema>;
 
 /**
+ * Sowing window schema: whole weeks relative to the last frost, start not after end
+ */
+export const sowingWindowSchema = z
+    .object({ fromWeeks: z.number().int(), toWeeks: z.number().int() })
+    .refine((window) => window.fromWeeks <= window.toWeeks, {
+        message: 'Zaaiperiode eindigt voor ze begint',
+        path: ['toWeeks'],
+    });
+
+/**
  * Complete plant data schema
  */
 export const plantDataSchema = z.object({
@@ -134,9 +144,9 @@ export const plantDataSchema = z.object({
     frostTolerance: frostToleranceSchema,
     germinationDays: dayRangeSchema,
     daysToHarvest: dayRangeSchema,
-    indoorStartWeeks: z.number().int().nullable(),
-    transplantWeeks: z.number().int().nullable(),
-    directSowWeeks: z.number().int().nullable(),
+    indoorStartWindow: sowingWindowSchema.nullable(),
+    transplantWindow: sowingWindowSchema.nullable(),
+    directSowWindow: sowingWindowSchema.nullable(),
     companions: z.array(companionRelationshipSchema),
     combatives: z.array(combativeRelationshipSchema),
 });

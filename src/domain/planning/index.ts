@@ -6,8 +6,16 @@
 export { SEASONS, seasonContaining, seasonMonths, seasonRange, seasonsAfter } from './Season';
 export type { Season, SeasonRange, SeasonsOf } from './Season';
 
-export { frostDayOf, growingSeasonsOf, outdoorPeriodOf, plantingDatesOf, seasonsLookup } from './PlantCalendar';
-export type { FrostDay, OutdoorPeriod, PlantingDates, PlantTiming } from './PlantCalendar';
+export {
+  earliestPlantingDate,
+  frostDayOf,
+  growingSeasonsFrom,
+  plantingWindowOf,
+  reachableSeasonsOf,
+  seasonsLookup,
+  sowingDatesOf,
+} from './PlantCalendar';
+export type { DateWindow, FrostDay, PlantTiming, SowingDates } from './PlantCalendar';
 
 export {
   PlantFootprint,
