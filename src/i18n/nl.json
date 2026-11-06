@@ -253,6 +253,7 @@
   },
   "seasonPlanning": {
     "title": "Planning",
+    "removedPlant": "{{id}} (niet meer in de catalogus)",
     "subtitle": "{{name}} · {{year}}",
     "plants": "Planten",
     "addPlant": "Plant toevoegen",

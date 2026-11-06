@@ -47,7 +47,7 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
   }, [lastSpringFrost, navigation]);
 
   const nameOf = useCallback(
-    (plantId: string) => getPlantById(plantId)?.nameNl ?? t('componentDetail.unknownPlant'),
+    (plantId: string) => getPlantById(plantId)?.nameNl ?? t('seasonPlanning.removedPlant', { id: plantId }),
     [getPlantById, t],
   );
   const plantList = useMemo(() => (planning ? buildPlantList(planning, nameOf, translate) : []), [planning, nameOf, translate]);

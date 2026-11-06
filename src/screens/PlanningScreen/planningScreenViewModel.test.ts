@@ -24,7 +24,7 @@ describe('buildPlantList', () => {
   test('lists plantings by season, numbering extra ones, and flags plants without plantings', () => {
     assert.deepEqual(buildPlantList(twoSla, nameOf, t).map((i) => [i.plantId, i.detailKind, i.detail]), [
       ['tomaat', 'plantings', 'season.spring'],
-      ['sla', 'plantings', 'season.spring · season.summer (2e)'],
+      ['sla', 'plantings', 'season.spring · season.summer (2e teelt)'],
       ['knoflook', 'outsideYear', 'seasonPlanning.outsideYear'],
       ['appel', 'noCalendar', 'seasonPlanning.noCalendar'],
     ]);

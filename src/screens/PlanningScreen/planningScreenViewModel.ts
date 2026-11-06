@@ -9,7 +9,7 @@ import type { Translate } from '../shared/seasonLabels.ts';
 export interface PlantListItemView {
   readonly plantId: string;
   readonly name: string;
-  /** "Lente · Zomer (2e)", or the reason the plant has no plantings */
+  /** "Lente · Zomer (2e teelt)", or the reason the plant has no plantings */
   readonly detail: string;
   readonly detailKind: 'plantings' | 'noCalendar' | 'outsideYear';
 }
@@ -30,7 +30,7 @@ export function buildPlantList(planning: Planning, nameOf: (plantId: string) => 
     const plantings = planning.plantingsOf(plantId);
     if (plantings.length > 0) {
       const detail = plantings
-        .map((p, index) => (index === 0 ? seasonLabel(p.startSeason, t) : `${seasonLabel(p.startSeason, t)} (${index + 1}e)`))
+        .map((p, index) => (index === 0 ? seasonLabel(p.startSeason, t) : `${seasonLabel(p.startSeason, t)} (${index + 1}e teelt)`))
         .join(' · ');
       return { plantId, name: nameOf(plantId), detail, detailKind: 'plantings' };
     }
