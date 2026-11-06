@@ -1,0 +1,13 @@
+appId: com.mylittlegarden.app
+name: Plantings - an unplaced planting only offers removal, with a hint
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+- tapOn:
+    id: "planting-menu-.*-sla"
+- assertVisible:
+    id: "planting-actions-hint"
+- assertVisible:
+    id: "planting-action-remove"
+- assertNotVisible:
+    id: "planting-action-duplicate-.*"

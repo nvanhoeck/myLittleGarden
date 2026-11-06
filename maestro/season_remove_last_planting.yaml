@@ -1,0 +1,15 @@
+appId: com.mylittlegarden.app
+name: Plantings - removing the last planting removes the plant
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+- tapOn:
+    id: "planting-menu-.*-sla"
+- tapOn:
+    id: "planting-action-remove"
+- assertVisible:
+    text: "Sla wordt uit de planning verwijderd."
+- tapOn:
+    text: "Verwijderen"
+- assertNotVisible:
+    id: "planning-plant-sla"

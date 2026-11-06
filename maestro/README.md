@@ -58,7 +58,21 @@ This directory contains Maestro UI test flows for the My Little Garden Android a
 10. **season_remove_plant.yaml**
     - Removing a plant from the planning asks for confirmation (cancel keeps it, confirm removes it)
 
-Shared steps live in `subflows/` (`open_planning`, `add_plants_to_planning`, `select_season_with_plants`). Flows never hardcode a season: frost dates come from the date picker defaults and season tabs are picked through their accessibility label.
+11. **season_planting_menu_hint.yaml**
+    - An unplaced planting's menu only offers removal, with a hint
+
+12. **season_duplicate_planting.yaml**
+    - Duplicating a placed planting adds a second planting ("Sla (2e teelt)")
+
+13. **season_move_planting.yaml**
+    - Moving a placed planting asks for confirmation and marks the season it left as outdated
+
+14. **season_remove_last_planting.yaml**
+    - Removing the last planting removes the plant from the planning
+
+Duplicate and move depend on the picker-default frost date (the day the flow runs): Sla's window must reach a second season at that frost. This is true for most of the year with the researched windows; run March to November to be safe.
+
+Shared steps live in `subflows/` (`open_planning`, `add_plants_to_planning`, `select_season_with_plants`, `optimize_first_season`). Flows never hardcode a season: frost dates come from the date picker defaults and season tabs are picked through their accessibility label.
 
 ## Running Tests
 

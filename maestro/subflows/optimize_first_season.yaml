@@ -1,0 +1,22 @@
+appId: com.mylittlegarden.app
+---
+# Shared: on the Planning screen with plants added -> back -> optimize the first
+# season with plants to place -> back on the Planning screen.
+- back
+- extendedWaitUntil:
+    visible:
+      id: "component-detail-screen"
+    timeout: 5000
+- runFlow: select_season_with_plants.yaml
+- tapOn:
+    id: "optimize-button"
+- extendedWaitUntil:
+    visible:
+      id: "optimize-snackbar"
+    timeout: 15000
+- tapOn:
+    id: "open-planning-button"
+- extendedWaitUntil:
+    visible:
+      id: "planning-screen"
+    timeout: 5000
