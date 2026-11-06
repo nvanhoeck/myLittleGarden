@@ -7,3 +7,4 @@ export { DimensionInput } from './DimensionInput';
 export { PlanningButton } from './PlanningButton';
 export { Snackbar } from './Snackbar';
 export { SeasonStatusDot } from './SeasonStatusDot';
+export { PlantingRowMenuButton } from './PlantingRowMenuButton';

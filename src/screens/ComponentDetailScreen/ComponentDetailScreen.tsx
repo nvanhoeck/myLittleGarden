@@ -95,7 +95,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   const status = planning?.statusOf(season) ?? 'notPlanned';
   // A patch edit is confirmed or cancelled before the season, year or layer changes
   const editingPatch = patchEditPlantId !== null;
-  const canOptimize = (planning?.plantsStartingIn(season).length ?? 0) > 0;
+  const canOptimize = (planning?.plantingsStartingIn(season).length ?? 0) > 0;
 
   const yearRange = useMemo(
     () => planningYearRange(today.year, component ? Object.keys(component.plannings).map(Number) : []),
@@ -319,7 +319,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           carriedPlants={canvas.carriedPlants}
           showEmptyState={false}
           carriedLabelOf={(plant) => {
-            const start = planning.startSeasonOf(plant.plantId);
+            const start = planning.plantingById(plant.plantingId)?.startSeason;
             return start ? t('componentDetail.carriedFrom', { season: seasonLabel(start, translate).toLowerCase() }) : '';
           }}
           layerDimensions={isTower ? layerDimensions : undefined}

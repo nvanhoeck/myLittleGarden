@@ -1,72 +1,73 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildPlantList, buildSeasonSections } from './planningScreenViewModel.ts';
-import { seasonMonthsLabel } from '../shared/seasonLabels.ts';
+import { buildPlantList, buildSeasonSections, plantingName } from './planningScreenViewModel.ts';
 import { Planning } from '../../domain/planning/Planning.ts';
-import type { Season } from '../../types/planning.types.ts';
+import type { PlantingCalendar } from '../../domain/planning/PlantCalendar.ts';
+import type { PlacementData, Season } from '../../types/planning.types.ts';
 
-/** Echoes the key and options, so tests read what the screen would ask for */
 const t = (key: string, options?: Record<string, unknown>): string => (options ? `${key} ${JSON.stringify(options)}` : key);
-const seasonsOf = (id: string): readonly Season[] =>
-  ({ tomaat: ['spring', 'summer'], sla: ['spring'], knoflook: [] } as Record<string, readonly Season[]>)[id] ?? [];
 const nameOf = (id: string): string => id.toUpperCase();
-const planning = Planning.empty(seasonsOf).addPlants(['tomaat', 'sla', 'knoflook']).setRatio('spring', 'sla', 3);
+const REACH: Record<string, readonly Season[]> = { sla: ['spring', 'summer'], tomaat: ['spring'], knoflook: [] };
+const GROW: Record<string, readonly Season[]> = { 'sla:spring': ['spring'], 'sla:summer': ['summer'], 'tomaat:spring': ['spring', 'summer'] };
+const calendar: PlantingCalendar = {
+  hasCalendar: (id) => id in REACH,
+  reachableSeasons: (id) => REACH[id] ?? [],
+  growingSeasons: (id, s) => GROW[`${id}:${s}`] ?? [],
+};
+const placement = (id: string, plantingId: string): PlacementData => ({ id, plantId: plantingId.split('-')[0], plantingId, positionX: 1, positionY: 1 });
+const base = Planning.from(undefined, calendar).addPlants(['tomaat', 'sla', 'knoflook', 'appel']);
+const placedSla = base.applyPlacement('spring', [placement('s1', 'sla-spring'), placement('t1', 'tomaat-spring')]);
+const twoSla = placedSla.duplicatePlanting('sla-spring', 'summer');
 
 describe('buildPlantList', () => {
-  test('lists every plant with its season labels; a plant without calendar is flagged', () => {
-    assert.deepEqual(buildPlantList(planning, nameOf, t), [
-      { plantId: 'tomaat', name: 'TOMAAT', seasonLabels: ['season.spring', 'season.summer'], hasCalendar: true },
-      { plantId: 'sla', name: 'SLA', seasonLabels: ['season.spring'], hasCalendar: true },
-      { plantId: 'knoflook', name: 'KNOFLOOK', seasonLabels: [], hasCalendar: false },
+  test('lists plantings by season, numbering extra ones, and flags plants without plantings', () => {
+    assert.deepEqual(buildPlantList(twoSla, nameOf, t).map((i) => [i.plantId, i.detailKind, i.detail]), [
+      ['tomaat', 'plantings', 'season.spring'],
+      ['sla', 'plantings', 'season.spring · season.summer (2e)'],
+      ['knoflook', 'outsideYear', 'seasonPlanning.outsideYear'],
+      ['appel', 'noCalendar', 'seasonPlanning.noCalendar'],
     ]);
   });
 });
 
+describe('plantingName', () => {
+  test('the first planting is the plant name, later ones are numbered', () => {
+    assert.equal(plantingName(twoSla, 'sla-spring', nameOf, t), 'SLA');
+    assert.equal(plantingName(twoSla, 'sla-summer', nameOf, t), 'seasonPlanning.plantingNumber {"name":"SLA","number":2}');
+  });
+
+  test('after removing the first planting, the remaining one is not numbered', () => {
+    assert.equal(plantingName(twoSla.removePlanting('sla-spring'), 'sla-summer', nameOf, t), 'SLA');
+  });
+});
+
 describe('buildSeasonSections', () => {
-  test('gives the starting plants with ratio and target percent, and the carried plants', () => {
-    const [spring, summer, autumn] = buildSeasonSections(planning, nameOf, () => undefined, t);
-    assert.deepEqual(
-      spring.ratioRows.map((r) => [r.plantId, r.ratio, r.targetLabel, r.resultLabel]),
-      [['tomaat', 1, 'seasonPlanning.target {"percent":25}', null], ['sla', 3, 'seasonPlanning.target {"percent":75}', null]],
-    );
-    assert.deepEqual(summer.carriedRows, [{ plantId: 'tomaat', name: 'TOMAAT', label: 'seasonPlanning.carried {"season":"season.spring"}' }]);
-    assert.equal(autumn.isEmpty, true);
-    assert.equal(spring.status, 'notPlanned');
+  test('gives one row per planting starting in the season, with target percent', () => {
+    const [spring, summer] = buildSeasonSections(twoSla, nameOf, () => undefined, t);
+    assert.deepEqual(spring.ratioRows.map((r) => [r.plantingId, r.targetLabel]), [
+      ['tomaat-spring', 'seasonPlanning.target {"percent":50}'],
+      ['sla-spring', 'seasonPlanning.target {"percent":50}'],
+    ]);
+    assert.deepEqual(summer.ratioRows.map((r) => [r.plantingId, r.name]), [['sla-summer', 'seasonPlanning.plantingNumber {"name":"SLA","number":2}']]);
+    assert.deepEqual(summer.carriedRows.map((r) => r.plantingId), ['tomaat-spring']);
   });
 
-  test('given the last optimization of a planned season, each row shows its count and shares; zero copies does not fit', () => {
-    const shares = [
-      { plantId: 'sla', count: 12, actualShare: 0.614, targetShare: 0.75 },
-      { plantId: 'tomaat', count: 0, actualShare: 0, targetShare: 0.25 },
-    ];
-    const planned = planning.applyPlacement('spring', [{ id: 'a', plantId: 'sla', positionX: 5, positionY: 5 }]);
-    const [spring] = buildSeasonSections(planned, nameOf, (season) => (season === 'spring' ? shares : undefined), t);
-    assert.equal(spring.ratioRows[1].resultLabel, 'seasonPlanning.result {"count":12,"actual":61,"target":75}');
-    assert.equal(spring.ratioRows[0].resultLabel, 'seasonPlanning.doesNotFit');
-  });
-});
-
-describe('buildSeasonSections with a stale result', () => {
-  test('a season that is not planned shows no result, even when the last run has shares', () => {
-    const shares = [{ plantId: 'sla', count: 12, actualShare: 0.614, targetShare: 0.75 }];
-    const [spring] = buildSeasonSections(planning, nameOf, () => shares, t);
-    assert.deepEqual(spring.ratioRows.map((r) => [r.resultLabel, r.fits]), [[null, true], [null, true]]);
+  test('a placed planting offers duplicate and move to available seasons and remove; an unplaced one only remove', () => {
+    const [springPlaced] = buildSeasonSections(placedSla, nameOf, () => undefined, t);
+    const sla = springPlaced.ratioRows.find((r) => r.plantingId === 'sla-spring');
+    assert.deepEqual(sla?.menu.items.map((i) => [i.kind, i.season, i.testID]), [
+      ['duplicate', 'summer', 'planting-action-duplicate-summer'],
+      ['move', 'summer', 'planting-action-move-summer'],
+      ['remove', 'spring', 'planting-action-remove'],
+    ]);
+    assert.deepEqual([sla?.menu.isPlaced, sla?.menu.isLastPlanting], [true, true]);
+    const [springBase] = buildSeasonSections(base, nameOf, () => undefined, t);
+    assert.deepEqual(springBase.ratioRows.find((r) => r.plantingId === 'sla-spring')?.menu.items.map((i) => i.kind), ['remove']);
   });
 
-  test('a season that became outdated shows no result either', () => {
-    const shares = [{ plantId: 'sla', count: 12, actualShare: 0.614, targetShare: 0.75 }];
-    const outdated = planning.applyPlacement('spring', [{ id: 'a', plantId: 'sla', positionX: 5, positionY: 5 }]).setRatio('spring', 'sla', 2);
-    const [spring] = buildSeasonSections(outdated, nameOf, () => shares, t);
-    assert.equal(spring.status, 'outdated');
-    assert.equal(spring.ratioRows[1].resultLabel, null);
-  });
-});
-
-describe('seasonMonthsLabel', () => {
-  test('uses the short month names', () => {
-    assert.equal(
-      seasonMonthsLabel('winter', t),
-      'season.months {"first":"planning.month.short.12","last":"planning.month.short.2"}',
-    );
+  test('shows results only for a planned season, matched by planting', () => {
+    const shares = [{ plantId: 'sla', plantingId: 'sla-spring', count: 3, actualShare: 0.5, targetShare: 0.5 }];
+    const [spring] = buildSeasonSections(placedSla, nameOf, (s) => (s === 'spring' ? shares : undefined), t);
+    assert.equal(spring.ratioRows.find((r) => r.plantingId === 'sla-spring')?.resultLabel, 'seasonPlanning.result {"count":3,"actual":50,"target":50}');
   });
 });

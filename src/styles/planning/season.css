@@ -86,3 +86,31 @@
 .outdated-banner {
   @apply flex-row items-center px-4 py-2 bg-orange-900/40 border-b border-orange-700;
 }
+
+/* ⋯ on a planting row */
+.planting-menu-button {
+  @apply w-12 h-12 items-center justify-center;
+}
+.planting-menu-button__icon {
+  @apply text-gray-300 text-xl;
+}
+
+/* Bottom sheet with a planting's actions */
+.planting-sheet__backdrop {
+  @apply flex-1 bg-black/50 justify-end;
+}
+.planting-sheet__panel {
+  @apply bg-gray-900 rounded-t-2xl pb-6;
+}
+.planting-sheet__title {
+  @apply text-white font-semibold px-4 pt-4 pb-2;
+}
+.planting-sheet__hint {
+  @apply text-gray-400 px-4 pb-2;
+}
+.planting-sheet__item {
+  @apply h-12 px-4 justify-center border-t border-gray-800;
+}
+.planting-sheet__item--destructive {
+  @apply text-error;
+}

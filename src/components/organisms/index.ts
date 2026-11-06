@@ -7,3 +7,4 @@ export { GrowingCalendar } from './GrowingCalendar';
 export { CompanionList } from './CompanionList';
 export { LayerOverviewModal } from './LayerOverviewModal';
 export { SeasonPlanSection } from './SeasonPlanSection';
+export { PlantingActionsSheet } from './PlantingActionsSheet';

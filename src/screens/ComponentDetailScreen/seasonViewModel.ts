@@ -1,6 +1,6 @@
 import type { Planning } from '../../domain/planning/Planning.ts';
 import { SEASONS } from '../../domain/planning/Season.ts';
-import type { PlantShare } from '../../domain/planning/SeasonPlacement.ts';
+import type { PlantingShare } from '../../domain/planning/SeasonOptimization.ts';
 import type { Season, SeasonStatus } from '../../types/planning.types.ts';
 import { seasonLabel, seasonMonthsLabel } from '../shared/seasonLabels.ts';
 import type { Translate } from '../shared/seasonLabels.ts';
@@ -33,8 +33,8 @@ export function planningYearRange(currentYear: number, plannedYears: readonly nu
 export function buildSeasonTabs(planning: Planning, t: Translate): SeasonTabView[] {
   return SEASONS.map((season) => {
     const status = planning.statusOf(season);
-    const startingCount = planning.plantsStartingIn(season).length;
-    const carriedCount = planning.plantsCarriedInto(season).length;
+    const startingCount = planning.plantingsStartingIn(season).length;
+    const carriedCount = planning.plantingsCarriedInto(season).length;
     const label = seasonLabel(season, t);
     const monthsLabel = seasonMonthsLabel(season, t);
     return {
@@ -56,7 +56,7 @@ export function buildSeasonTabs(planning: Planning, t: Translate): SeasonTabView
 }
 
 /** "12 planten geplaatst · Tomaat past niet" */
-export function optimizeResultMessage(shares: readonly PlantShare[], nameOf: (plantId: string) => string, t: Translate): string {
+export function optimizeResultMessage(shares: readonly PlantingShare[], nameOf: (plantId: string) => string, t: Translate): string {
   const placed = shares.reduce((sum, share) => sum + share.count, 0);
   const notFitting = shares.filter((share) => share.count === 0).map((share) => nameOf(share.plantId));
   const message = t('componentDetail.optimized', { count: placed });

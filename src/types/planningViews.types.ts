@@ -4,7 +4,25 @@ import type { Season, SeasonStatus } from './planning.types.ts';
  * View-model output types of the planning screens: what the components draw
  */
 
+export interface PlantingMenuItemView {
+  readonly key: string;
+  readonly label: string;
+  readonly kind: 'duplicate' | 'move' | 'remove';
+  /** Target season of duplicate and move; the planting's own season for remove */
+  readonly season: Season;
+  readonly testID: string;
+}
+
+export interface PlantingMenuView {
+  /** Duplicate and move need a placed planting */
+  readonly isPlaced: boolean;
+  /** Removing the last planting of a plant removes the plant from the planning */
+  readonly isLastPlanting: boolean;
+  readonly items: readonly PlantingMenuItemView[];
+}
+
 export interface RatioRowView {
+  readonly plantingId: string;
   readonly plantId: string;
   readonly name: string;
   readonly ratio: number;
@@ -13,9 +31,11 @@ export interface RatioRowView {
   /** What the last optimization gave; null when the season is not planned or was not optimized in this session */
   readonly resultLabel: string | null;
   readonly fits: boolean;
+  readonly menu: PlantingMenuView;
 }
 
 export interface CarriedRowView {
+  readonly plantingId: string;
   readonly plantId: string;
   readonly name: string;
   readonly label: string;

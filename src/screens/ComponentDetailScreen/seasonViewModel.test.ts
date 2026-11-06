@@ -2,10 +2,16 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSeasonTabs, defaultSeasonFor, optimizeResultMessage, planningYearRange } from './seasonViewModel.ts';
 import { Planning } from '../../domain/planning/Planning.ts';
+import type { PlantingCalendar } from '../../domain/planning/PlantCalendar.ts';
 import type { Season } from '../../types/planning.types.ts';
 
 const t = (key: string, options?: Record<string, unknown>): string => (options ? `${key} ${JSON.stringify(options)}` : key);
-const seasonsOf = (id: string): readonly Season[] => (id === 'tomaat' ? ['spring', 'summer'] : ['spring']);
+const growingOf = (id: string): readonly Season[] => (id === 'tomaat' ? ['spring', 'summer'] : ['spring']);
+const calendar: PlantingCalendar = {
+  hasCalendar: () => true,
+  reachableSeasons: () => ['spring'],
+  growingSeasons: (id) => growingOf(id),
+};
 
 describe('defaultSeasonFor', () => {
   test('in the current planning year, today\'s season; in another year, spring', () => {
@@ -23,7 +29,7 @@ describe('planningYearRange', () => {
 
 describe('buildSeasonTabs', () => {
   test('gives each season its label, months, status and the number of plants to place', () => {
-    const planning = Planning.empty(seasonsOf).addPlants(['tomaat', 'sla']);
+    const planning = Planning.from(undefined, calendar).addPlants(['tomaat', 'sla']);
     const [spring, summer] = buildSeasonTabs(planning, t);
     assert.deepEqual([spring.season, spring.label, spring.status, spring.startingCount], ['spring', 'season.spring', 'notPlanned', 2]);
     assert.deepEqual([summer.startingCount, summer.carriedCount], [0, 1]);
@@ -34,8 +40,8 @@ describe('buildSeasonTabs', () => {
 describe('optimizeResultMessage', () => {
   test('counts the placed plants and names the plants that did not fit', () => {
     const shares = [
-      { plantId: 'sla', count: 12, actualShare: 0.6, targetShare: 0.5 },
-      { plantId: 'tomaat', count: 0, actualShare: 0, targetShare: 0.5 },
+      { plantId: 'sla', plantingId: 'sla-spring', count: 12, actualShare: 0.6, targetShare: 0.5 },
+      { plantId: 'tomaat', plantingId: 'tomaat-spring', count: 0, actualShare: 0, targetShare: 0.5 },
     ];
     assert.equal(
       optimizeResultMessage(shares, (id) => id.toUpperCase(), t),

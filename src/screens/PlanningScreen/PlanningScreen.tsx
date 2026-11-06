@@ -13,8 +13,9 @@ import { useEnvironmentStore } from '@/stores/environmentStore';
 import { usePlantStore } from '@/stores/plantStore';
 import { usePlanningStore } from '@/stores/planningStore';
 import { usePlanning } from '@/stores/planningContext';
+import { PlantingActionsSheet } from '@/components/organisms/PlantingActionsSheet';
 import { SeasonPlanSection } from '@/components/organisms/SeasonPlanSection';
-import type { Season } from '@/types';
+import type { PlantingMenuItemView, RatioRowView, Season } from '@/types';
 import { buildPlantList, buildSeasonSections } from './planningScreenViewModel';
 import type { Translate } from '../shared/seasonLabels';
 
@@ -30,6 +31,10 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
   const sharesOf = usePlanningStore((state) => state.sharesOf);
   const removePlantFromPlanning = useComponentStore((state) => state.removePlantFromPlanning);
   const setRatio = useComponentStore((state) => state.setRatio);
+  const duplicatePlanting = useComponentStore((state) => state.duplicatePlanting);
+  const movePlanting = useComponentStore((state) => state.movePlanting);
+  const removePlanting = useComponentStore((state) => state.removePlanting);
+  const [menuFor, setMenuFor] = useState<{ season: Season; row: RatioRowView } | null>(null);
   const [expanded, setExpanded] = useState<ReadonlySet<Season>>(new Set(['spring', 'summer', 'autumn', 'winter']));
 
   // Seasons come from the frost date; without one there is nothing to plan
@@ -60,6 +65,41 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
       ]);
     },
     [nameOf, t, year, removePlantFromPlanning, componentId],
+  );
+
+  const handleMenuSelect = useCallback(
+    (item: PlantingMenuItemView) => {
+      if (!menuFor) return;
+      const { row, season } = menuFor;
+      setMenuFor(null);
+      const lower = (s: Season) => t(`season.${s}`).toLowerCase();
+      if (item.kind === 'duplicate') {
+        duplicatePlanting(componentId, year, row.plantingId, item.season);
+        return;
+      }
+      if (item.kind === 'move') {
+        Alert.alert(
+          t('seasonPlanning.moveTitle', { name: row.name, season: lower(item.season) }),
+          t('seasonPlanning.moveMessage', { name: row.name, from: lower(season) }),
+          [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('seasonPlanning.moveConfirm'), onPress: () => movePlanting(componentId, year, row.plantingId, item.season) },
+          ],
+        );
+        return;
+      }
+      Alert.alert(
+        t('seasonPlanning.removePlantingTitle', { name: row.name, season: lower(season) }),
+        row.menu.isLastPlanting
+          ? t('seasonPlanning.removeLastPlantingMessage', { name: row.name })
+          : t('seasonPlanning.removePlantingMessage', { name: row.name, season: lower(season) }),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('common.delete'), style: 'destructive', onPress: () => removePlanting(componentId, year, row.plantingId) },
+        ],
+      );
+    },
+    [menuFor, t, duplicatePlanting, movePlanting, removePlanting, componentId, year],
   );
 
   const toggleSection = useCallback((season: Season) => {
@@ -118,9 +158,7 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
           <View key={item.plantId} className="flex-row items-center py-2 border-b border-gray-800" testID={`planning-plant-${item.plantId}`}>
             <View className="flex-1">
               <Text className="text-white">{item.name}</Text>
-              <Text className={`text-xs ${item.hasCalendar ? 'text-gray-400' : 'text-orange-400'}`}>
-                {item.hasCalendar ? item.seasonLabels.join(' · ') : t('seasonPlanning.noCalendar')}
-              </Text>
+              <Text className={`text-xs ${item.detailKind === 'plantings' ? 'text-gray-400' : 'text-orange-400'}`}>{item.detail}</Text>
             </View>
             <Pressable
               onPress={() => handleRemove(item.plantId)}
@@ -141,11 +179,22 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
               view={view}
               expanded={expanded.has(view.season)}
               onToggle={() => toggleSection(view.season)}
-              onRatioChange={(plantId, ratio) => setRatio(componentId, year, view.season, plantId, ratio)}
+              onRatioChange={(plantingId, ratio) => setRatio(componentId, year, view.season, plantingId, ratio)}
+              onOpenMenu={(row) => setMenuFor({ season: view.season, row })}
             />
           ))}
         </View>
       </ScrollView>
+
+      <PlantingActionsSheet
+        visible={menuFor !== null}
+        title={menuFor ? t('seasonPlanning.menuTitle', { name: menuFor.row.name, season: t(`season.${menuFor.season}`) }) : ''}
+        items={menuFor?.row.menu.items ?? []}
+        hint={menuFor && !menuFor.row.menu.isPlaced ? t('seasonPlanning.notPlacedHint') : undefined}
+        cancelLabel={t('common.cancel')}
+        onSelect={handleMenuSelect}
+        onClose={() => setMenuFor(null)}
+      />
     </SafeAreaView>
   );
 }

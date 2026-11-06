@@ -270,7 +270,21 @@
     "removePlant": "{{name}} verwijderen",
     "removeTitle": "{{name}} verwijderen?",
     "removeMessage": "{{name}} en al zijn plaatsingen verdwijnen uit de planning van {{year}}.",
-    "sectionA11y": "{{season}}, {{months}}, {{status}}"
+    "sectionA11y": "{{season}}, {{months}}, {{status}}",
+    "outsideYear": "valt buiten dit planningsjaar",
+    "plantingNumber": "{{name}} ({{number}}e teelt)",
+    "menuButton": "Acties voor {{name}}",
+    "menuTitle": "{{name}} — {{season}}",
+    "duplicateTo": "Ook planten in {{season}}",
+    "moveTo": "Verplaatsen naar {{season}}",
+    "removeFrom": "Verwijderen uit {{season}}",
+    "notPlacedHint": "Optimaliseer eerst dit seizoen om te dupliceren of te verplaatsen.",
+    "moveTitle": "{{name}} verplaatsen naar {{season}}?",
+    "moveMessage": "De plaatsingen van {{name}} in {{from}} worden verwijderd.",
+    "moveConfirm": "Verplaatsen",
+    "removePlantingTitle": "{{name}} verwijderen uit {{season}}?",
+    "removePlantingMessage": "De plaatsingen van {{name}} in {{season}} worden verwijderd.",
+    "removeLastPlantingMessage": "{{name}} wordt uit de planning verwijderd."
   },
   "accessibility": {
     "stepProgress": "Stap {{current}} van {{total}}",
