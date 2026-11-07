@@ -9,11 +9,11 @@
  * Purely presentational: every change goes out through a callback.
  *
  * BEM contract (src/styles/planning/season.css): .season-area-canvas, __drawing, __layer;
- * .season-area, --dimmed, --selected, __label, __label-text, __carried-label, __icon,
+ * .season-area, --dimmed, --selected, --warning, __warning, __label, __label-text, __carried-label, __icon,
  * __resize-handle, __resize-preview, __edge-marker, --companion, --combative;
  * .season-area-toolbar, __button, __button--active, __text
  */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -160,8 +160,9 @@ const AreaItem = React.memo(function AreaItem({
   latest.current = { area, scale, editable, onPress, onMove };
   const refusedCheck = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // A moved area keeps its drag offset until it is drawn at its new place: no flicker back
-  useEffect(() => {
+  // A moved area keeps its drag offset until it is drawn at its new place: no flicker back.
+  // Reset before paint, so the new place is never drawn with the old offset on top
+  useLayoutEffect(() => {
     pan.setValue({ x: 0, y: 0 });
   }, [area.rects, pan]);
 
@@ -215,7 +216,7 @@ const AreaItem = React.memo(function AreaItem({
         <View
           key={index}
           {...responder.panHandlers}
-          className={`absolute rounded-md overflow-hidden ${selected ? 'border-2 border-white' : 'border border-white/30'}`}
+          className={`absolute rounded-md overflow-hidden ${selected ? 'border-2 border-white' : area.warningLabel !== null ? 'border-2 border-red-500' : 'border border-white/30'}`}
           style={{
             left: piece.xCm * scale,
             top: piece.yCm * scale,
@@ -225,13 +226,22 @@ const AreaItem = React.memo(function AreaItem({
           }}
           accessible={index === 0}
           accessibilityRole="button"
-          accessibilityLabel={area.locked ? `${area.label}${lockedLabel}` : area.label}
+          accessibilityLabel={`${area.label}${area.locked ? lockedLabel : ''}${area.warningLabel !== null ? `, ${area.warningLabel}` : ''}`}
           accessibilityState={{ selected }}
           testID={index === 0 ? testID : undefined}
         >
           {index === 0 && (
             <>
               <View className="flex-row items-center self-start m-0.5 px-1 rounded bg-black/50">
+                {area.warningLabel !== null && (
+                  <Text
+                    className="text-red-400 text-[10px] font-bold mr-0.5"
+                    accessibilityLabel={area.warningLabel}
+                    testID={`area-warning-${area.plantId}`}
+                  >
+                    ⚠
+                  </Text>
+                )}
                 {(area.icons.length === 0 || iconPx === null) && <AreaPlantIcon plantId={area.plantId} category={area.category} size={10} />}
                 <Text className="text-white text-[10px] font-medium" numberOfLines={1}>
                   {area.locked ? '🔒 ' : ''}

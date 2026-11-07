@@ -138,6 +138,13 @@
 .season-area--selected {
   @apply border-2 border-white;
 }
+/* Overlaps another area or leaves the layer: red outline and a ⚠ in the label */
+.season-area--warning {
+  @apply border-2 border-red-500;
+}
+.season-area__warning {
+  @apply text-red-400 text-[10px] font-bold mr-0.5;
+}
 .season-area__label {
   @apply flex-row items-center self-start m-0.5 px-1 rounded bg-black/50;
 }

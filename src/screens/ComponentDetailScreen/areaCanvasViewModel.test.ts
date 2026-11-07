@@ -128,6 +128,39 @@ describe('buildAreaCanvas relations at edges', () => {
   });
 });
 
+describe('buildAreaCanvas warnings', () => {
+  test('areas that overlap each other, also a carried one, are flagged; touching ones are not', () => {
+    const { areas } = canvasOf(
+      [area('a', 'ui', [piece(0, 0, 100, 100)]), area('b', 'tomaat', [piece(50, 50, 100, 100)]), area('c', 'ui', [piece(150, 0, 50, 50)])],
+      [area('old', 'spinazie', [piece(400, 0, 100, 100)]), area('d', 'ui', [piece(0, 300, 10, 10)])],
+    );
+    const own = canvasOf([area('e', 'ui', [piece(410, 10, 20, 20)])], [area('old', 'spinazie', [piece(400, 0, 100, 100)])]).areas;
+    assert.deepEqual(areas.map((a) => [a.id, a.overlaps, a.outsideLayer]), [
+      ['old', false, false],
+      ['d', false, false],
+      ['a', true, false],
+      ['b', true, false],
+      ['c', false, false],
+    ]);
+    assert.deepEqual(own.map((a) => [a.id, a.overlaps]), [['old', true], ['e', true]]);
+    assert.equal(areas[2].warningLabel, 'componentDetail.areaWarningOverlap');
+    assert.equal(areas[4].warningLabel, null);
+  });
+
+  test('an area with a piece outside the layer, e.g. after shrinking the component, is flagged', () => {
+    const { areas } = canvasOf([area('a', 'ui', [piece(0, 0, 100, 100), piece(950, 0, 100, 100)]), area('b', 'ui', [piece(900, 900, 100, 100)])]);
+    assert.deepEqual(areas.map((a) => [a.id, a.overlaps, a.outsideLayer, a.warningLabel]), [
+      ['a', false, true, 'componentDetail.areaWarningOutside'],
+      ['b', false, false, null],
+    ]);
+  });
+
+  test('overlapping and outside: both reasons in the warning', () => {
+    const { areas } = canvasOf([area('a', 'ui', [piece(-10, 0, 100, 100)]), area('b', 'ui', [piece(50, 0, 100, 100)])]);
+    assert.equal(areas[0].warningLabel, 'componentDetail.areaWarningOverlap · componentDetail.areaWarningOutside');
+  });
+});
+
 describe('snappedResize', () => {
   const bounds = { widthCm: 300, lengthCm: 200 };
 

@@ -109,11 +109,40 @@ function relationsAt(areaId: string, markers: readonly EdgeMarkerView[]): AreaRe
   });
 }
 
+/** True when the pieces share a positive area; touching edges do not count */
+function piecesOverlap(a: AreaPiece, b: AreaPiece): boolean {
+  return a.xCm < b.xCm + b.widthCm - EPSILON_CM && b.xCm < a.xCm + a.widthCm - EPSILON_CM
+    && a.yCm < b.yCm + b.lengthCm - EPSILON_CM && b.yCm < a.yCm + a.lengthCm - EPSILON_CM;
+}
+
+/** The indexes of the areas with a piece overlapping a piece of another area */
+function overlappingAreas(areas: readonly AreaData[]): Set<number> {
+  const flagged = new Set<number>();
+  for (let i = 0; i < areas.length; i++) {
+    for (let j = i + 1; j < areas.length; j++) {
+      if (areas[i].pieces.some((p) => areas[j].pieces.some((q) => piecesOverlap(p, q)))) {
+        flagged.add(i);
+        flagged.add(j);
+      }
+    }
+  }
+  return flagged;
+}
+
+/** True when a piece leaves the layer's bounding box (pieces of a round layer lie in its bounding square) */
+function isOutside(pieces: readonly AreaPiece[], layer: PlantingArea): boolean {
+  const widthCm = layer.shape === 'rectangle' ? layer.widthCm : layer.diameterCm;
+  const lengthCm = layer.shape === 'rectangle' ? layer.lengthCm : layer.diameterCm;
+  return pieces.some((p) => p.xCm < -EPSILON_CM || p.yCm < -EPSILON_CM
+    || p.xCm + p.widthCm > widthCm + EPSILON_CM || p.yCm + p.lengthCm > lengthCm + EPSILON_CM);
+}
+
 /**
  * What the season canvas draws on one layer: each area with its label,
  * plant icons (only up to ICON_LIMIT plants per area and ICON_TOTAL_LIMIT on
- * the canvas, so a large area costs one element), carried areas dimmed, and
- * relation markers where areas touch.
+ * the canvas, so a large area costs one element), carried areas dimmed,
+ * relation markers where areas touch, and a warning on areas that overlap
+ * another (carried ones included) or leave the layer.
  */
 export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
   const { layer, t } = input;
@@ -124,6 +153,7 @@ export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
   const plants = all.map((area) => knownPlant(input.plantOf(area.plantId)));
   const counts = all.map((area, i) => plantCountOf(area, plants[i], layer));
   const drawn = areasWithIcons(counts);
+  const overlapping = overlappingAreas(all);
 
   const areas = all.map((area, i): AreaView => {
     const plant = plants[i];
@@ -131,6 +161,12 @@ export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
     const name = input.nameOf(area.plantId);
     const spacingCm = 2 * plant.spacingRadiusCm;
     const dimmed = carriedIds.has(area.id);
+    const overlaps = overlapping.has(i);
+    const outsideLayer = isOutside(area.pieces, layer);
+    const warnings = [
+      ...(overlaps ? [t('componentDetail.areaWarningOverlap')] : []),
+      ...(outsideLayer ? [t('componentDetail.areaWarningOutside')] : []),
+    ];
     return {
       id: area.id,
       plantingId: area.plantingId,
@@ -146,6 +182,9 @@ export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
       locked: area.locked === true,
       relationsAtEdges: relationsAt(area.id, edgeMarkers),
       resizeStepCm: stepOf(plant),
+      overlaps,
+      outsideLayer,
+      warningLabel: warnings.length > 0 ? warnings.join(' · ') : null,
     };
   });
 

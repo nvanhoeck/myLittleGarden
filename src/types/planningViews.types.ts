@@ -83,6 +83,12 @@ export interface AreaView {
   readonly relationsAtEdges: readonly AreaRelationView[];
   /** A resize snaps to whole multiples of this (cm) */
   readonly resizeStepCm: number;
+  /** A piece overlaps a piece of another area of the season (carried ones included) */
+  readonly overlaps: boolean;
+  /** A piece lies outside the layer, e.g. after the component was made smaller */
+  readonly outsideLayer: boolean;
+  /** "Overlapt met een ander vak · Valt (deels) buiten de plantruimte" when overlapping or outside; null otherwise */
+  readonly warningLabel: string | null;
 }
 
 /** A companion or combative marker where two areas touch, at the middle of the shared edge (cm) */

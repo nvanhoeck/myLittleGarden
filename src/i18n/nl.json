@@ -215,6 +215,8 @@
     "areaCount": "{{name}} · {{count}}",
     "areaSown": "{{name}} · zaaivlak",
     "areaLocked": ", vergrendeld",
+    "areaWarningOverlap": "Overlapt met een ander vak",
+    "areaWarningOutside": "Valt (deels) buiten de plantruimte",
     "edit": "Bewerken",
     "editDone": "Klaar",
     "resizeArea": "Vlak vergroten of verkleinen",
