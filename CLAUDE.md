@@ -57,14 +57,14 @@ UI components follow Atomic Design and are purely presentational (dumb component
 ### Growing Calendar
 Based on user's frost dates, calculates: indoor start dates, transplant dates, outdoor sowing dates
 
-Sowing windows (from–to weeks around the last frost) decide which seasons a planting can start in; a plant can have one planting per season, placed in its start season and carried (fixed) into the later ones.
+Sowing windows (from–to weeks around the last frost) decide which seasons a planting can start in; a plant can have one planting per season, placed in its start season and carried (fixed) into the later ones. Each planting gets one area (strips or blocks) filled with a plant grid.
 
 ## Key Screens
 
 1. **Splash Screen**: Logo display (assets/splash.png)
 2. **Environment Screen**: First-time setup for sun direction and frost dates
 3. **Home Screen**: Garden view with draggable/rotatable components, pannable canvas
-4. **Component Detail Screen**: Zoomed view of one season (year bar, Lente/Zomer/Herfst/Winter tabs), optimizer, draggable plants with companion indicators; plants carried over from an earlier season are dimmed
+4. **Component Detail Screen**: Zoomed view of one season (year bar, Lente/Zomer/Herfst/Winter tabs), optimizer, one season as areas per planting (drag, resize, lock), plant counts, carried areas dimmed
 5. **Add Plant Screen**: Grid selection (multi-select) to add plants to a component's planning; no quantities
 6. **Planning Screen**: Per component and year: plant list with its plantings (lente · zomer (2e)), and per season a ratio row per planting with a ⋯ menu to duplicate, move or remove a placed planting
 7. **Plant Details Screen**: Full plant information including growing calendar, companions, care instructions

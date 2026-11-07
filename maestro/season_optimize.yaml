@@ -23,4 +23,4 @@ name: Season planning - optimizing a season fills the canvas
 - assertVisible:
     text: "[1-9]\\d* (plant|planten) geplaatst.*"
 - assertVisible:
-    id: "planning-footprint-.*"
+    id: "season-area-(?!canvas|resize).*"
