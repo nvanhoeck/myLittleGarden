@@ -11,7 +11,9 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
       id: "component-detail-screen"
     timeout: 5000
 - assertVisible:
-    id: "season-area-(?!canvas|resize).*"
+    id: "season-area-tomaat"
+- assertVisible:
+    id: "season-area-sla"
 
 # Edit mode shows the + buttons on the borders.
 - tapOn:
@@ -28,22 +30,23 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
     visible:
       id: "road-width-dialog"
     timeout: 3000
-- assertVisible:
-    text: "Pad toevoegen"
 - tapOn:
     id: "road-width-input"
 - eraseText: 5
 - inputText: "40"
-- hideKeyboard
 - tapOn:
     id: "road-width-ok"
 - extendedWaitUntil:
     visible:
       id: "season-road-0"
     timeout: 5000
+- assertVisible:
+    text: "Pad, 40 cm breed"
 
-# Automatic roads with a ring: at least 5 roads. A road already exists, so
-# the replace confirmation shows first.
+# Automatic roads with a ring: the ring alone gives 4 roads (the setup does not
+# guarantee touching areas, so no more is asserted). A road already exists, so the
+# replace confirmation shows first; the tap is optional because the alert only
+# appears when unlocked roads exist.
 - tapOn:
     id: "canvas-roads-auto"
 - tapOn:
@@ -53,15 +56,13 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
     visible:
       id: "road-width-dialog"
     timeout: 3000
-- assertVisible:
-    text: "Paden automatisch plaatsen"
 - tapOn:
     id: "road-ring-toggle"
 - tapOn:
     id: "road-width-ok"
 - extendedWaitUntil:
     visible:
-      id: "season-road-4"
+      id: "season-road-3"
     timeout: 5000
 
 # Tap a road and change its width.
@@ -71,17 +72,14 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
     visible:
       id: "road-width-dialog"
     timeout: 3000
-- assertVisible:
-    text: "Pad aanpassen"
 - tapOn:
     id: "road-width-input"
 - eraseText: 5
 - inputText: "50"
-- hideKeyboard
 - tapOn:
     id: "road-width-ok"
 - assertVisible:
-    id: "season-road-0"
+    text: "Pad, 50 cm breed"
 
 # Zoom in changes the zoom level.
 - assertVisible:

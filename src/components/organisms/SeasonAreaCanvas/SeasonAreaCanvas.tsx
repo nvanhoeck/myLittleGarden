@@ -510,7 +510,7 @@ export function SeasonAreaCanvas({
             scrollEnabled={needsScrolling}
             showsVerticalScrollIndicator={needsScrolling}
             nestedScrollEnabled
-            testID="season-area-scroll"
+            testID="area-canvas-scroll"
           >
             <ScrollView
               ref={horizontalScroll}

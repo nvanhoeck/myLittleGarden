@@ -70,6 +70,9 @@ This directory contains Maestro UI test flows for the My Little Garden Android a
 14. **season_remove_last_planting.yaml**
     - Removing the last planting removes the plant from the planning
 
+15. **roads.yaml**
+    - Roads on a garden box: add a road with a width, automatic roads with ring, change a road width, zoom
+
 Duplicate and move plan only Sla (`add_sla_to_planning`), so Sla is the first plant to place. They depend on the picker-default frost date (the day the flow runs): Sla's window must reach a second season at that frost. This is true for most of the year with the researched windows; run March to November to be safe.
 
 Shared steps live in `subflows/` (`open_planning`, `add_plants_to_planning`, `add_sla_to_planning`, `select_season_with_plants`, `optimize_first_season`). Flows never hardcode a season: frost dates come from the date picker defaults and season tabs are picked through their accessibility label.
