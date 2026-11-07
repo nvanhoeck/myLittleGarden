@@ -118,7 +118,9 @@ export function buildSeasonSections(
 ): SeasonSectionView[] {
   return SEASONS.map((season) => {
     const starting = planning.plantingsStartingIn(season);
-    const totalRatio = starting.reduce((sum, p) => sum + planning.ratioOf(season, p.id), 0);
+    // As in the optimizer: a planting with a locked area is not laid out again, so its ratio does not count
+    const isLocked = (plantingId: string) => planning.areaOf(plantingId)?.locked === true;
+    const totalRatio = starting.filter((p) => !isLocked(p.id)).reduce((sum, p) => sum + planning.ratioOf(season, p.id), 0);
     const status = planning.statusOf(season);
     // The last run only says something about a season that is still planned
     const shares = status === 'planned' ? sharesOf(season) : undefined;
@@ -133,7 +135,7 @@ export function buildSeasonSections(
         plantId: planting.plantId,
         name: plantingName(planning, planting.id, nameOf, t),
         ratio,
-        targetLabel: t('seasonPlanning.target', { percent: Math.round((ratio / totalRatio) * 100) }),
+        targetLabel: isLocked(planting.id) ? '' : t('seasonPlanning.target', { percent: Math.round((ratio / totalRatio) * 100) }),
         resultLabel: resultLabelOf(share, area, plantCountOfArea, t),
         fits,
         menu: menuOf(planning, planting, t),

@@ -99,6 +99,17 @@ describe('buildSeasonSections', () => {
     assert.equal(labelOf('tomaat-spring'), 'seasonPlanning.locked {"count":200}');
     assert.equal(labelOf('sla-spring'), 'seasonPlanning.lockedSown {"m2":"2"}');
   });
+
+  test('the target percent leaves out plantings with a locked area, as the optimizer does', () => {
+    const planning = base.addPlants([]).setRatio('spring', 'sla-spring', 3)
+      .applyAreas('spring', [area('s1', 'sla-spring'), area('t1', 'tomaat-spring', 100)])
+      .toggleLock('spring', 't1');
+    const [spring] = buildSeasonSections(planning, nameOf, noShares, countOf, t);
+    assert.deepEqual(spring.ratioRows.map((r) => [r.plantingId, r.targetLabel]), [
+      ['tomaat-spring', ''],
+      ['sla-spring', 'seasonPlanning.target {"percent":100}'],
+    ]);
+  });
 });
 
 describe('buildSeasonSections coverage', () => {
