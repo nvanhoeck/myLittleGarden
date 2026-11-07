@@ -1,6 +1,6 @@
 /**
  * Season planning exports
- * Season planning: seasons, plant calendar, plannings, footprints and placement
+ * Season planning: seasons, plant calendar, plannings, footprints and area layout
  */
 
 export { SEASONS, seasonContaining, seasonMonths, seasonRange, seasonsAfter } from './Season';
@@ -37,11 +37,16 @@ export type { PlantRelation, PlantRelations } from './PlantRelations';
 export { plantingAreaOf, plantingAreasOf } from './ComponentArea';
 
 export { Planning } from './Planning';
+export type { LayerBounds } from './Planning';
 
-export { fillByRatio } from './SeasonPlacement';
-export type { FixedPlacement, NewPlacement, PlantShare, RatioPlant, SeasonPlacementRequest, SeasonPlacementResult } from './SeasonPlacement';
+export { freeRectangles, layerBounds } from './FreeSpace';
+export { orderForNeighbours } from './AreaOrder';
+export { gridPositions, plantCountOf } from './AreaGrid';
+export { plantCountOfArea, plantCountOfAreas } from './AreaPlantCount';
+export { layoutAreas } from './AreaLayout';
+export type { AreaLayoutRequest, AreaLayoutResult, AreaShare, LaidOutArea } from './AreaLayout';
 
 export { optimizeSeason } from './SeasonOptimization';
-export type { PlantingShare, SeasonOptimizationInput, SeasonOptimizationOutcome } from './SeasonOptimization';
+export type { SeasonOptimizationInput, SeasonOptimizationOutcome } from './SeasonOptimization';
 
-export { placementsGrowingOn } from './CurrentPlacements';
+export { areasGrowingOn } from './CurrentAreas';

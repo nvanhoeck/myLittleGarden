@@ -6,12 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { HomeScreenProps } from '@/navigation/navigationTypes';
 import { useAllComponents, useComponentStore } from '@/stores';
 import { usePlantStore } from '@/stores/plantStore';
-import { useCurrentPlacementsById } from '@/stores/planningContext';
+import { useCurrentAreasById } from '@/stores/planningContext';
+import { plantCountOfAreas } from '@/domain/planning';
 import { ComponentCreationModal, ComponentSlide } from '@/components/organisms';
 import { ComponentListRow } from '@/components/molecules';
-import type { ComponentData } from '@/types';
+import type { AreaData, ComponentData } from '@/types';
 
 const VIEWABILITY_CONFIG = { itemVisiblePercentThreshold: 60 };
+const NO_AREAS: readonly AreaData[] = [];
 
 /**
  * HomeScreen - paged slider of components with a synced list below.
@@ -28,7 +30,12 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
     [allComponents],
   );
 
-  const placementsById = useCurrentPlacementsById(components);
+  const areasById = useCurrentAreasById(components);
+  // Plants growing today per component: the plant counts of its areas together
+  const plantCountById = useMemo(
+    () => new Map(components.map((c) => [c.id, plantCountOfAreas(c, areasById.get(c.id) ?? [], getPlantById)])),
+    [components, areasById, getPlantById],
+  );
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isCreationModalVisible, setIsCreationModalVisible] = useState(false);
@@ -129,7 +136,8 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
     ({ item }: { item: ComponentData }) => (
       <ComponentSlide
         component={item}
-        plants={placementsById.get(item.id) ?? []}
+        areas={areasById.get(item.id) ?? NO_AREAS}
+        plantCount={plantCountById.get(item.id) ?? 0}
         getPlantById={getPlantById}
         slideWidth={windowWidth}
         onOpen={handleOpen}
@@ -137,19 +145,19 @@ export function HomeScreen({ navigation }: HomeScreenProps): React.JSX.Element {
         onDelete={handleDelete}
       />
     ),
-    [placementsById, getPlantById, windowWidth, handleOpen, handleEdit, handleDelete],
+    [areasById, plantCountById, getPlantById, windowWidth, handleOpen, handleEdit, handleDelete],
   );
 
   const renderRow = useCallback(
     ({ item, index }: { item: ComponentData; index: number }) => (
       <ComponentListRow
         component={item}
-        plantCount={placementsById.get(item.id)?.length ?? 0}
+        plantCount={plantCountById.get(item.id) ?? 0}
         isActive={index === clampedIndex}
         onPress={handleRowPress}
       />
     ),
-    [placementsById, clampedIndex, handleRowPress],
+    [plantCountById, clampedIndex, handleRowPress],
   );
 
   const keyExtractor = useCallback((item: ComponentData) => item.id, []);

@@ -18,4 +18,4 @@ name: Season planning - a plant growing on is shown dimmed in the next season
 - tapOn:
     text: ".*, [1-9]\\d* doorlopend"
 - assertVisible:
-    id: "carried-plant-.*"
+    id: "carried-area-.*"

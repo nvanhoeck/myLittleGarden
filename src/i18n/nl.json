@@ -209,6 +209,18 @@
     "optimized_one": "{{count}} plant geplaatst",
     "optimized_other": "{{count}} planten geplaatst",
     "doesNotFit": "{{names}} past niet",
+    "sownAreas_one": "{{count}} zaaivlak",
+    "sownAreas_other": "{{count}} zaaivlakken",
+    "areaCount": "{{name}} · {{count}}",
+    "areaSown": "{{name}} · zaaivlak",
+    "areaLocked": ", vergrendeld",
+    "edit": "Bewerken",
+    "editDone": "Klaar",
+    "resizeArea": "Vlak vergroten of verkleinen",
+    "deleteArea": "Verwijderen",
+    "lockArea": "Vergrendelen",
+    "unlockArea": "Ontgrendelen",
+    "removeAreaMessage": "Het vlak van {{name}} verwijderen? De teelt blijft in de planning, zonder plaats.",
     "tabA11y_one": "{{season}}, {{months}}, {{status}}, {{count}} plant om te plaatsen, {{carried}} doorlopend",
     "tabA11y_other": "{{season}}, {{months}}, {{status}}, {{count}} planten om te plaatsen, {{carried}} doorlopend"
   },
@@ -227,16 +239,9 @@
         "7": "juli", "8": "augustus", "9": "september", "10": "oktober", "11": "november", "12": "december"
       }
     },
-    "conflict": {
-      "warning": "Overlap met een andere plant"
-    },
-    "outOfBounds": {
-      "patch": "Vak steekt buiten de randen.",
-      "plant": "Te dicht bij de rand. Minimale afstand: {{spacing}} cm."
-    },
     "hint": {
-      "edit": "Sleep planten om te verplaatsen • Tik om te vergrendelen/verwijderen",
-      "view": "Druk op ✏️ Bewerken om planten te verplaatsen"
+      "edit": "Sleep een vlak om te verplaatsen • Tik om te selecteren • ◢ om te vergroten",
+      "view": "Druk op ✏️ Bewerken om vlakken te verplaatsen"
     }
   },
   "season": {
@@ -262,8 +267,12 @@
     "emptySeason": "Geen planten in dit seizoen",
     "carried": "doorlopend uit {{season}}",
     "target": "{{percent}}%",
-    "result_one": "{{count}} plant · {{actual}}% (doel {{target}}%)",
-    "result_other": "{{count}} planten · {{actual}}% (doel {{target}}%)",
+    "result_one": "≈ {{count}} plant · {{actual}}% (doel {{target}}%)",
+    "result_other": "≈ {{count}} planten · {{actual}}% (doel {{target}}%)",
+    "resultSown": "zaaivlak · {{m2}} m²",
+    "locked_one": "vergrendeld · ≈ {{count}} plant",
+    "locked_other": "vergrendeld · ≈ {{count}} planten",
+    "lockedSown": "vergrendeld · zaaivlak · {{m2}} m²",
     "doesNotFit": "Past niet",
     "ratioDecrease": "Verhouding van {{name}} verlagen",
     "ratioIncrease": "Verhouding van {{name}} verhogen",

@@ -13,6 +13,7 @@ import { useEnvironmentStore } from '@/stores/environmentStore';
 import { usePlantStore } from '@/stores/plantStore';
 import { usePlanningStore } from '@/stores/planningStore';
 import { usePlanning } from '@/stores/planningContext';
+import { plantCountOfArea } from '@/domain/planning';
 import { PlantingActionsSheet } from '@/components/organisms/PlantingActionsSheet';
 import { SeasonPlanSection } from '@/components/organisms/SeasonPlanSection';
 import type { PlantingMenuItemView, RatioRowView, Season } from '@/types';
@@ -52,10 +53,19 @@ export function PlanningScreen({ navigation, route }: PlanningScreenProps): Reac
   );
   const plantList = useMemo(() => (planning ? buildPlantList(planning, nameOf, translate) : []), [planning, nameOf, translate]);
   const sections = useMemo(
-    () => (planning ? buildSeasonSections(planning, nameOf, (season) => sharesOf({ componentId, year, season }), translate) : []),
+    () =>
+      planning && component
+        ? buildSeasonSections(
+            planning,
+            nameOf,
+            (season) => sharesOf({ componentId, year, season }),
+            (area) => plantCountOfArea(component, area, getPlantById(area.plantId)),
+            translate,
+          )
+        : [],
     // lastShares makes the rows update after an optimization
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [planning, nameOf, sharesOf, componentId, year, translate, lastShares],
+    [planning, component, nameOf, sharesOf, getPlantById, componentId, year, translate, lastShares],
   );
 
   const handleRemove = useCallback(

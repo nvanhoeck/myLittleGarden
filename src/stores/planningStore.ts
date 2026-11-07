@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Season } from '../types/planning.types.ts';
-import type { PlantingShare } from '../domain/planning/SeasonOptimization.ts';
+import type { AreaShare } from '../domain/planning/AreaLayout.ts';
 
 /** One season of one component's planning */
 export interface SeasonKey {
@@ -11,9 +11,9 @@ export interface SeasonKey {
 
 interface PlanningState {
   /** The shares of the last optimization per season; not persisted */
-  lastShares: Readonly<Record<string, readonly PlantingShare[]>>;
-  setLastShares: (key: SeasonKey, shares: readonly PlantingShare[]) => void;
-  sharesOf: (key: SeasonKey) => readonly PlantingShare[] | undefined;
+  lastShares: Readonly<Record<string, readonly AreaShare[]>>;
+  setLastShares: (key: SeasonKey, shares: readonly AreaShare[]) => void;
+  sharesOf: (key: SeasonKey) => readonly AreaShare[] | undefined;
   forgetComponent: (componentId: string) => void;
 }
 

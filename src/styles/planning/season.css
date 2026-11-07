@@ -114,3 +114,68 @@
 .planting-sheet__item--destructive {
   @apply text-error;
 }
+
+/*
+ * Season area canvas (Component Detail): the layer scaled to fit, one
+ * rounded, category-tinted rectangle per area piece. Geometry and tint come
+ * from inline styles; plant icons only when an area holds at most 50 plants.
+ */
+.season-area-canvas {
+  @apply flex-1;
+}
+.season-area-canvas__drawing {
+  @apply flex-1 items-center justify-center;
+}
+.season-area-canvas__layer {
+  @apply border border-green-700 bg-black/25;
+}
+.season-area {
+  @apply absolute rounded-md border border-white/30 overflow-hidden;
+}
+.season-area--dimmed {
+  @apply opacity-40;
+}
+.season-area--selected {
+  @apply border-2 border-white;
+}
+.season-area__label {
+  @apply flex-row items-center self-start m-0.5 px-1 rounded bg-black/50;
+}
+.season-area__label-text {
+  @apply text-white text-[10px] font-medium;
+}
+.season-area__carried-label {
+  @apply text-gray-200 text-[9px] italic px-1;
+}
+.season-area__icon {
+  @apply absolute items-center justify-center;
+}
+.season-area__resize-handle {
+  @apply absolute w-7 h-7 rounded-full bg-white items-center justify-center;
+}
+.season-area__resize-preview {
+  @apply absolute border-2 border-dashed border-white rounded-md;
+}
+/* Where two areas touch: green companion, red hostile */
+.season-area__edge-marker {
+  @apply absolute w-3 h-3 rounded-full border border-white;
+}
+.season-area__edge-marker--companion {
+  @apply bg-green-500;
+}
+.season-area__edge-marker--combative {
+  @apply bg-red-500;
+}
+/* Lock all / unlock all / edit toggle under the canvas */
+.season-area-toolbar {
+  @apply flex-row flex-wrap gap-2 mt-2;
+}
+.season-area-toolbar__button {
+  @apply flex-row items-center px-3 h-10 rounded-lg bg-black/60;
+}
+.season-area-toolbar__button--active {
+  @apply bg-green-700/40 border border-green-600;
+}
+.season-area-toolbar__text {
+  @apply text-white text-xs font-medium;
+}

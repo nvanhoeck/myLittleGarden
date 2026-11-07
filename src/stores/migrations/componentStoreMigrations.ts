@@ -3,8 +3,8 @@
  * Pure: no Zustand, no AsyncStorage, no "@/" runtime imports.
  */
 import type { ComponentData } from '../../types/component.types';
-import type { PlacementData, PlanningData, PlantingData, Season, SeasonPlanData, SeasonStatus } from '../../types/planning.types';
-import { placementDataSchema, plantingDataSchema } from '../../schemas/planningSchema.ts';
+import type { AreaData, AreaPiece, PlanningData, PlantingData, Season, SeasonPlanData, SeasonStatus } from '../../types/planning.types';
+import { areaDataSchema, areaPieceSchema, plantingDataSchema } from '../../schemas/planningSchema.ts';
 
 /**
  * Version 2: canvas position and rotation removed from components.
@@ -12,8 +12,9 @@ import { placementDataSchema, plantingDataSchema } from '../../schemas/planningS
  * Version 4: plants live in plannings per year and season; plantings from
  * version 3 and before were dropped; version 4 plannings are converted in version 5.
  * Version 5: plants have plantings (one per start season); ratios and placements belong to plantings. v4 plannings are converted.
+ * Version 6: plantings get areas instead of placements; placements are dropped and planned seasons become outdated.
  */
-export const COMPONENT_STORE_VERSION = 5;
+export const COMPONENT_STORE_VERSION = 6;
 
 export interface PersistedComponentState {
   components: ComponentData[];
@@ -23,7 +24,7 @@ const EMPTY_STATE: PersistedComponentState = { components: [] };
 const YEAR_KEY = /^\d{4}$/;
 const SEASONS: readonly Season[] = ['spring', 'summer', 'autumn', 'winter'];
 const STATUSES: readonly SeasonStatus[] = ['notPlanned', 'planned', 'outdated'];
-const EMPTY_SEASON: SeasonPlanData = { ratios: {}, placements: [], status: 'notPlanned' };
+const EMPTY_SEASON: SeasonPlanData = { ratios: {}, areas: [], status: 'notPlanned' };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -34,8 +35,38 @@ function stripCanvasFields(component: Record<string, unknown>): Record<string, u
   return rest;
 }
 
-/** Valid ratios (whole, ≥ 1) of known plantings and valid placements of a known planting of the same plant */
-function salvageSeason(value: unknown, plantOfPlanting: ReadonlyMap<string, string>): SeasonPlanData {
+/** The valid pieces of a stored area (at most three), or null when none is valid */
+function salvagePieces(value: unknown): AreaPiece[] | null {
+  const entries = Array.isArray(value) ? value : [];
+  const pieces = entries.flatMap((entry) => {
+    const parsed = areaPieceSchema.safeParse(entry);
+    return parsed.success ? [parsed.data] : [];
+  });
+  return pieces.length === 0 ? null : pieces.slice(0, 3);
+}
+
+/** Valid areas of known plantings of the same plant; at most one per planting; invalid pieces dropped */
+function salvageAreas(value: unknown, plantOfPlanting: ReadonlyMap<string, string>): { areas: AreaData[]; droppedAny: boolean } {
+  const entries = Array.isArray(value) ? value : [];
+  const areas: AreaData[] = [];
+  let droppedAny = false;
+  for (const entry of entries) {
+    const base = isRecord(entry) ? areaDataSchema.omit({ pieces: true }).safeParse(entry) : null;
+    const pieces = isRecord(entry) ? salvagePieces(entry.pieces) : null;
+    const usable =
+      base !== null && base.success && pieces !== null && plantOfPlanting.get(base.data.plantingId) === base.data.plantId && !areas.some((area) => area.plantingId === base.data.plantingId);
+    if (!usable) {
+      droppedAny = true;
+      continue;
+    }
+    if (pieces.length < (entry as { pieces: unknown[] }).pieces.length) droppedAny = true;
+    areas.push({ ...base.data, pieces });
+  }
+  return { areas, droppedAny };
+}
+
+/** Valid ratios (whole, >= 1) of known plantings; areas are salvaged from v6 data and dropped from older data */
+function salvageSeason(value: unknown, plantOfPlanting: ReadonlyMap<string, string>, legacy: boolean): SeasonPlanData {
   if (!isRecord(value)) {
     return EMPTY_SEASON;
   }
@@ -43,14 +74,10 @@ function salvageSeason(value: unknown, plantOfPlanting: ReadonlyMap<string, stri
   const ratios = Object.fromEntries(
     ratioEntries.filter(([id, ratio]) => plantOfPlanting.has(id) && Number.isInteger(ratio) && (ratio as number) >= 1),
   ) as Record<string, number>;
-  const placementEntries = Array.isArray(value.placements) ? value.placements : [];
-  const placements: PlacementData[] = placementEntries.flatMap((entry) => {
-    const parsed = placementDataSchema.safeParse(entry);
-    return parsed.success && plantOfPlanting.get(parsed.data.plantingId) === parsed.data.plantId ? [parsed.data] : [];
-  });
+  const { areas, droppedAny: droppedArea } = legacy ? { areas: [], droppedAny: true } : salvageAreas(value.areas, plantOfPlanting);
   const status = STATUSES.find((candidate) => candidate === value.status) ?? 'notPlanned';
-  const droppedAny = Object.keys(ratios).length < ratioEntries.length || placements.length < placementEntries.length;
-  return { ratios, placements, status: droppedAny && status === 'planned' ? 'outdated' : status };
+  const droppedAny = Object.keys(ratios).length < ratioEntries.length || droppedArea;
+  return { ratios, areas, status: droppedAny && status === 'planned' ? 'outdated' : status };
 }
 
 /**
@@ -80,7 +107,7 @@ function withPlantingsFromV4(value: Record<string, unknown>, plants: string[]): 
 }
 
 /** Salvages one year: null when it has no usable plants list or seasons */
-function salvagePlanning(value: unknown): PlanningData | null {
+function salvagePlanning(value: unknown, legacy: boolean): PlanningData | null {
   if (!isRecord(value) || !Array.isArray(value.plants) || !isRecord(value.seasons)) {
     return null;
   }
@@ -96,7 +123,7 @@ function salvagePlanning(value: unknown): PlanningData | null {
     return [parsed.data];
   });
   const seasons = isRecord(current.seasons) ? current.seasons : {};
-  const salvaged = SEASONS.map((season) => salvageSeason(seasons[season], plantOfPlanting));
+  const salvaged = SEASONS.map((season) => salvageSeason(seasons[season], plantOfPlanting, legacy));
   const outdateAll = droppedPlant || plantings.length < plantingEntries.length;
   const [spring, summer, autumn, winter] = outdateAll
     ? salvaged.map((season) => (season.status === 'planned' ? { ...season, status: 'outdated' as const } : season))
@@ -105,22 +132,22 @@ function salvagePlanning(value: unknown): PlanningData | null {
 }
 
 /** The stored plannings that can be salvaged, entry by entry; others are dropped */
-function validPlannings(value: unknown): Record<string, PlanningData> {
+function validPlannings(value: unknown, legacy: boolean): Record<string, PlanningData> {
   if (!isRecord(value)) {
     return {};
   }
   return Object.fromEntries(
     Object.entries(value).flatMap(([year, data]): [string, PlanningData][] => {
-      const planning = YEAR_KEY.test(year) ? salvagePlanning(data) : null;
+      const planning = YEAR_KEY.test(year) ? salvagePlanning(data, legacy) : null;
       return planning === null ? [] : [[year, planning]];
     }),
   );
 }
 
 /** Drops the week-planning fields and keeps only valid plannings */
-function withPlannings(component: Record<string, unknown>): Record<string, unknown> {
+function withPlannings(component: Record<string, unknown>, legacy: boolean): Record<string, unknown> {
   const { plants: _plants, plantsToPlan: _plantsToPlan, plannings, ...rest } = component;
-  return { ...rest, plannings: validPlannings(plannings) };
+  return { ...rest, plannings: validPlannings(plannings, legacy) };
 }
 
 export function migrateComponentState(persistedState: unknown, version: number): PersistedComponentState {
@@ -129,7 +156,7 @@ export function migrateComponentState(persistedState: unknown, version: number):
   }
   const components = persistedState.components.filter(isRecord);
   const withoutCanvas = version < 2 ? components.map(stripCanvasFields) : components;
-  return { components: withoutCanvas.map(withPlannings) as unknown as ComponentData[] };
+  return { components: withoutCanvas.map((component) => withPlannings(component, version < 6)) as unknown as ComponentData[] };
 }
 
 /**

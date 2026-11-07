@@ -38,15 +38,27 @@ describe('buildSeasonTabs', () => {
 });
 
 describe('optimizeResultMessage', () => {
-  test('counts the placed plants and names the plants that did not fit', () => {
+  test('counts the plants of the areas and names the plants that did not fit', () => {
     const shares = [
-      { plantId: 'sla', plantingId: 'sla-spring', count: 12, actualShare: 0.6, targetShare: 0.5 },
-      { plantId: 'tomaat', plantingId: 'tomaat-spring', count: 0, actualShare: 0, targetShare: 0.5 },
+      { plantId: 'sla', plantingId: 'sla-spring', plantCount: 12, fits: true, actualShare: 0.4, targetShare: 0.3 },
+      { plantId: 'ui', plantingId: 'ui-spring', plantCount: 780, fits: true, actualShare: 0.3, targetShare: 0.3 },
+      { plantId: 'tomaat', plantingId: 'tomaat-spring', plantCount: 0, fits: false, actualShare: 0, targetShare: 0.4 },
     ];
     assert.equal(
       optimizeResultMessage(shares, (id) => id.toUpperCase(), t),
-      'componentDetail.optimized {"count":12} · componentDetail.doesNotFit {"names":"TOMAAT"}',
+      'componentDetail.optimized {"count":792} · componentDetail.doesNotFit {"names":"TOMAAT"}',
     );
     assert.equal(optimizeResultMessage(shares.slice(0, 1), (id) => id, t), 'componentDetail.optimized {"count":12}');
+  });
+
+  test('mentions the sown areas, which have no plant count', () => {
+    const shares = [
+      { plantId: 'sla', plantingId: 'sla-spring', plantCount: 12, fits: true, actualShare: 0.5, targetShare: 0.5 },
+      { plantId: 'spinazie', plantingId: 'spinazie-spring', plantCount: null, fits: true, actualShare: 0.5, targetShare: 0.5 },
+    ];
+    assert.equal(
+      optimizeResultMessage(shares, (id) => id, t),
+      'componentDetail.optimized {"count":12} · componentDetail.sownAreas {"count":1}',
+    );
   });
 });

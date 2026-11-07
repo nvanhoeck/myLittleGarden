@@ -1,6 +1,6 @@
 /**
  * LayerOverviewModal
- * Modal showing all tower layers stacked with plants and their labels visible.
+ * Modal showing all tower layers stacked with their planting areas and plant names.
  */
 
 import React, { useMemo } from 'react';
@@ -11,31 +11,31 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Image,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import type { ComponentData, PlacedPlantData, PlantData } from '@/types';
-import { PLANT_CATEGORIES } from '@/types/plant.types';
+import type { AreaData, ComponentData, PlantData } from '@/types';
 import {
   isRectangularTower,
   isCircularTower,
 } from '@/stores/componentStore';
 import { usePlantStore } from '@/stores/plantStore';
-import { getPlantIcon, hasPlantIcon } from '@/assets';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
+import { AreaShapes } from '@/components/molecules/AreaShapes';
+import { plantCountOfAreas } from '@/domain/planning';
 
 interface LayerOverviewModalProps {
   visible: boolean;
   onClose: () => void;
   component: ComponentData;
-  /** The plants of the season shown on the detail screen */
-  plants: readonly PlacedPlantData[];
+  /** The areas of the season shown on the detail screen, every layer */
+  areas: readonly AreaData[];
 }
 
 interface LayerViewProps {
+  component: ComponentData;
   layerIndex: number;
   numberOfLayers: number;
-  plants: PlacedPlantData[];
+  areas: readonly AreaData[];
   getPlantById: (id: string) => PlantData | undefined;
   widthCm: number;
   heightCm: number;
@@ -43,45 +43,13 @@ interface LayerViewProps {
 }
 
 /**
- * Get the category icon emoji for a plant (fallback)
- */
-function getCategoryIconEmoji(plantData: PlantData | undefined): string {
-  if (!plantData) return '🌱';
-  const categoryInfo = PLANT_CATEGORIES.find((cat) => cat.key === plantData.category);
-  return categoryInfo?.icon ?? '🌱';
-}
-
-/**
- * Plant icon display for layer overview
- */
-function PlantIconInLayer({ plantData }: { plantData: PlantData | undefined }): React.JSX.Element {
-  if (!plantData) {
-    return <Text style={styles.plantIconText}>🌱</Text>;
-  }
-
-  const plantIcon = getPlantIcon(plantData.id);
-  const hasIcon = hasPlantIcon(plantData.id);
-
-  if (hasIcon && plantIcon) {
-    return (
-      <Image
-        source={plantIcon}
-        style={styles.plantIconImage}
-        resizeMode="contain"
-      />
-    );
-  }
-
-  return <Text style={styles.plantIconText}>{getCategoryIconEmoji(plantData)}</Text>;
-}
-
-/**
- * Single layer view showing plants with labels
+ * Single layer view showing its areas and the names of its plants
  */
 function LayerView({
+  component,
   layerIndex,
   numberOfLayers,
-  plants,
+  areas,
   getPlantById,
   widthCm,
   heightCm,
@@ -94,8 +62,11 @@ function LayerView({
 
   const layerDimensions = getTowerLayerDimensions(widthCm, heightCm, layerIndex);
 
-  // Filter plants for this layer
-  const layerPlants = plants.filter((p) => (p.layerIndex ?? 0) === layerIndex);
+  // Areas on this layer
+  const layerAreas = areas.filter((a) => (a.layerIndex ?? 0) === layerIndex);
+  const plantCount = plantCountOfAreas(component, layerAreas, getPlantById);
+  const shapes = layerAreas.map((a) => ({ id: a.id, plantId: a.plantId, category: getPlantById(a.plantId)?.category, pieces: a.pieces }));
+  const names = layerAreas.map((a) => getPlantById(a.plantId)?.nameNl ?? '?').join(' · ');
 
   // Scale to fit in container
   const maxContainerWidth = 280;
@@ -138,37 +109,11 @@ function LayerView({
             },
           ]}
         >
-          {/* Plants on this layer */}
-          {layerPlants.map((plant) => {
-            const plantData = getPlantById(plant.plantId);
-            const plantX = (plant.positionX / layerDimensions.width) * containerWidth;
-            const plantY = (plant.positionY / layerDimensions.height) * containerHeight;
-
-            return (
-              <View
-                key={plant.id}
-                style={[
-                  styles.plantDot,
-                  {
-                    left: plantX - 12,
-                    top: plantY - 12,
-                  },
-                ]}
-              >
-                <View style={styles.plantIconContainer}>
-                  <PlantIconInLayer plantData={plantData} />
-                </View>
-                <View style={styles.plantLabelContainer}>
-                  <Text style={styles.plantLabel} numberOfLines={1}>
-                    {plantData?.nameNl ?? '?'}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
+          {/* Areas on this layer */}
+          <AreaShapes areas={shapes} scale={scale} />
 
           {/* Empty state */}
-          {layerPlants.length === 0 && (
+          {layerAreas.length === 0 && (
             <View style={styles.emptyLayer}>
               <Text style={styles.emptyLayerText}>
                 {t('componentDetail.emptyLayer')}
@@ -178,9 +123,14 @@ function LayerView({
         </View>
       </View>
 
-      {/* Plant count */}
+      {/* Plants and plant count */}
+      {names.length > 0 && (
+        <Text style={styles.plantNames} numberOfLines={2}>
+          {names}
+        </Text>
+      )}
       <Text style={styles.plantCount}>
-        {layerPlants.length} {layerPlants.length === 1 ? 'plant' : 'planten'}
+        {t('component.plantCount', { count: plantCount })}
       </Text>
     </View>
   );
@@ -193,7 +143,7 @@ export function LayerOverviewModal({
   visible,
   onClose,
   component,
-  plants,
+  areas,
 }: LayerOverviewModalProps): React.JSX.Element | null {
   const { t } = useTranslation();
   const getPlantById = usePlantStore((state) => state.getPlantById);
@@ -262,7 +212,8 @@ export function LayerOverviewModal({
                 key={layerIndex}
                 layerIndex={layerIndex}
                 numberOfLayers={numberOfLayers}
-                plants={plants as PlacedPlantData[]}
+                component={component}
+                areas={areas}
                 getPlantById={getPlantById}
                 widthCm={baseDimensions.width}
                 heightCm={baseDimensions.height}
@@ -393,41 +344,11 @@ const styles = StyleSheet.create({
     borderColor: '#8B4513',
     position: 'relative',
   },
-  plantDot: {
-    position: 'absolute',
-    alignItems: 'center',
-  },
-  plantIconContainer: {
-    width: 24,
-    height: 24,
-    backgroundColor: '#16a34a',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  plantIconText: {
+  plantNames: {
+    color: '#e5e7eb',
     fontSize: 12,
     textAlign: 'center',
-  },
-  plantIconImage: {
-    width: 20,
-    height: 20,
-  },
-  plantLabelContainer: {
-    position: 'absolute',
-    top: 26,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    minWidth: 60,
-    alignItems: 'center',
-  },
-  plantLabel: {
-    color: '#ffffff',
-    fontSize: 10,
-    fontWeight: '500',
+    marginBottom: 2,
   },
   emptyLayer: {
     flex: 1,

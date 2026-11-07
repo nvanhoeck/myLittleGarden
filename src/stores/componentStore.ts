@@ -20,7 +20,7 @@ import {
   CircularTower,
 } from '@/domain/component';
 import { Planning, frostDayOf, optimizeSeason as optimizeSeasonOf, plantingAreasOf, plantingCalendarFor } from '@/domain/planning';
-import type { PlantingCalendar, PlantingShare, Season } from '@/domain/planning';
+import type { AreaShare, LayerBounds, PlantingCalendar, Season } from '@/domain/planning';
 import { generateId } from '@/utils/idGenerator';
 import {
   migrateComponentState,
@@ -81,25 +81,19 @@ interface ComponentState {
   setRatio: (componentId: string, year: number, season: Season, plantingId: string, ratio: number) => void;
   /** Plants a placed planting again in another available season, at ratio 1 */
   duplicatePlanting: (componentId: string, year: number, plantingId: string, season: Season) => void;
-  /** Moves a placed planting to another available season; its placements go */
+  /** Moves a placed planting to another available season; its area goes */
   movePlanting: (componentId: string, year: number, plantingId: string, season: Season) => void;
   /** Removes one planting; the plant leaves the planning with its last planting */
   removePlanting: (componentId: string, year: number, plantingId: string) => void;
   /** Places the plants starting in the season by ratio; null when the component is gone */
-  optimizeSeason: (componentId: string, year: number, season: Season) => readonly PlantingShare[] | null;
-  movePlacement: (componentId: string, year: number, season: Season, placementId: string, xCm: number, yCm: number) => void;
-  removePlacement: (componentId: string, year: number, season: Season, placementId: string) => void;
-  togglePlacementLock: (componentId: string, year: number, season: Season, placementId: string) => void;
-  setAllPlacementsLocked: (componentId: string, year: number, season: Season, locked: boolean) => void;
-  resizePatch: (
-    componentId: string,
-    year: number,
-    season: Season,
-    placementId: string,
-    widthCm: number,
-    heightCm: number,
-    rotationDeg: number,
-  ) => void;
+  optimizeSeason: (componentId: string, year: number, season: Season) => readonly AreaShare[] | null;
+  /** Moves all pieces of an area by (dx, dy) cm; refused when it would leave the layer or overlap another area */
+  moveArea: (componentId: string, year: number, season: Season, areaId: string, dxCm: number, dyCm: number) => void;
+  /** Gives one piece of an area a new size; refused like moveArea */
+  resizeArea: (componentId: string, year: number, season: Season, areaId: string, pieceIndex: number, widthCm: number, lengthCm: number) => void;
+  removeArea: (componentId: string, year: number, season: Season, areaId: string) => void;
+  toggleAreaLock: (componentId: string, year: number, season: Season, areaId: string) => void;
+  setAllAreasLocked: (componentId: string, year: number, season: Season, locked: boolean) => void;
   /**
    * After a new frost date: placed plantings are frozen with the calendar of the
    * previous frost date, then ratios move to the plants' new start seasons
@@ -118,6 +112,25 @@ function planningOf(component: ComponentData, year: number): Planning {
 /** A stale call (e.g. a double tap) is not allowed: the planting is gone, unplaced or the season taken */
 function canRelocate(planning: Planning, plantingId: string, season: Season): boolean {
   return planning.isPlaced(plantingId) && planning.seasonsAvailableFor(plantingId).includes(season);
+}
+
+/** The planting area of each layer of a component (layer 0 for components without layers) */
+function layerBoundsOf(component: ComponentData): LayerBounds {
+  const areas = plantingAreasOf(component);
+  return (layerIndex) => areas[layerIndex] ?? areas[0];
+}
+
+/** Applies an area change of one component's season; a component that is gone changes nothing */
+function withAreaChange(
+  components: ComponentData[],
+  componentId: string,
+  year: number,
+  change: (planning: Planning, bounds: LayerBounds) => Planning,
+): ComponentData[] {
+  const component = components.find((comp) => comp.id === componentId);
+  if (!component) return components;
+  const bounds = layerBoundsOf(component);
+  return withPlanning(components, componentId, year, (planning) => change(planning, bounds));
 }
 
 function plantingCalendarAtFrost(year: number, lastSpringFrost: string | null): PlantingCalendar {
@@ -285,35 +298,35 @@ export const useComponentStore = create<ComponentState>()(
         return outcome.shares;
       },
 
-      movePlacement: (componentId, year, season, placementId, xCm, yCm) => {
+      moveArea: (componentId, year, season, areaId, dxCm, dyCm) => {
         set((state) => ({
-          components: withPlanning(state.components, componentId, year, (p) => p.movePlacement(season, placementId, xCm, yCm)),
+          components: withAreaChange(state.components, componentId, year, (p, bounds) => p.moveArea(season, areaId, dxCm, dyCm, bounds)),
         }));
       },
 
-      removePlacement: (componentId, year, season, placementId) => {
+      resizeArea: (componentId, year, season, areaId, pieceIndex, widthCm, lengthCm) => {
         set((state) => ({
-          components: withPlanning(state.components, componentId, year, (p) => p.removePlacement(season, placementId)),
+          components: withAreaChange(state.components, componentId, year, (p, bounds) =>
+            p.resizeArea(season, areaId, pieceIndex, widthCm, lengthCm, bounds),
+          ),
         }));
       },
 
-      togglePlacementLock: (componentId, year, season, placementId) => {
+      removeArea: (componentId, year, season, areaId) => {
         set((state) => ({
-          components: withPlanning(state.components, componentId, year, (p) => p.toggleLock(season, placementId)),
+          components: withPlanning(state.components, componentId, year, (p) => p.removeArea(season, areaId)),
         }));
       },
 
-      setAllPlacementsLocked: (componentId, year, season, locked) => {
+      toggleAreaLock: (componentId, year, season, areaId) => {
+        set((state) => ({
+          components: withPlanning(state.components, componentId, year, (p) => p.toggleLock(season, areaId)),
+        }));
+      },
+
+      setAllAreasLocked: (componentId, year, season, locked) => {
         set((state) => ({
           components: withPlanning(state.components, componentId, year, (p) => p.setAllLocked(season, locked)),
-        }));
-      },
-
-      resizePatch: (componentId, year, season, placementId, widthCm, heightCm, rotationDeg) => {
-        set((state) => ({
-          components: withPlanning(state.components, componentId, year, (p) =>
-            p.resizePatch(season, placementId, widthCm, heightCm, rotationDeg),
-          ),
         }));
       },
 
@@ -411,11 +424,11 @@ export function useComponentActions() {
       movePlanting: state.movePlanting,
       removePlanting: state.removePlanting,
       optimizeSeason: state.optimizeSeason,
-      movePlacement: state.movePlacement,
-      removePlacement: state.removePlacement,
-      togglePlacementLock: state.togglePlacementLock,
-      setAllPlacementsLocked: state.setAllPlacementsLocked,
-      resizePatch: state.resizePatch,
+      moveArea: state.moveArea,
+      resizeArea: state.resizeArea,
+      removeArea: state.removeArea,
+      toggleAreaLock: state.toggleAreaLock,
+      setAllAreasLocked: state.setAllAreasLocked,
     }))
   );
 }

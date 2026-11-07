@@ -1,1 +1,0 @@
-export { RelationshipIndicator } from './RelationshipIndicator';

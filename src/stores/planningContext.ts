@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Planning, frostDayOf, placementsGrowingOn, plantingCalendarFor } from '@/domain/planning';
+import { Planning, frostDayOf, areasGrowingOn, plantingCalendarFor } from '@/domain/planning';
 import type { PlantingCalendar } from '@/domain/planning';
-import type { ComponentData, PlacedPlantData } from '@/types';
+import type { ComponentData, AreaData } from '@/types';
 import { useEnvironmentStore } from './environmentStore';
 import { usePlantStore } from './plantStore';
 
@@ -27,12 +27,12 @@ export function usePlanning(component: ComponentData | undefined, year: number):
 }
 
 /** What grows today in each component, by component id */
-export function useCurrentPlacementsById(components: readonly ComponentData[]): ReadonlyMap<string, readonly PlacedPlantData[]> {
+export function useCurrentAreasById(components: readonly ComponentData[]): ReadonlyMap<string, readonly AreaData[]> {
   const lastSpringFrost = useEnvironmentStore((state) => state.lastSpringFrost);
   const getPlantById = usePlantStore((state) => state.getPlantById);
   return useMemo(() => {
     const today = new Date();
     const calendarOfYear = (year: number): PlantingCalendar => plantingCalendarFor(year, frostDayOf(lastSpringFrost), getPlantById);
-    return new Map(components.map((component) => [component.id, placementsGrowingOn(component, today, calendarOfYear)]));
+    return new Map(components.map((component) => [component.id, areasGrowingOn(component, today, calendarOfYear)]));
   }, [components, lastSpringFrost, getPlantById]);
 }

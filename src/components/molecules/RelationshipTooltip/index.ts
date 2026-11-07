@@ -1,1 +1,0 @@
-export { RelationshipTooltip } from './RelationshipTooltip';

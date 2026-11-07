@@ -1,5 +1,5 @@
 /**
- * Planning type definitions: seasons, ratios and placements per component and year
+ * Planning type definitions: seasons, ratios and areas per component and year
  */
 
 /**
@@ -12,8 +12,9 @@ export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 export type SeasonStatus = 'notPlanned' | 'planned' | 'outdated';
 
 /**
- * One plant placed in a component, in the season it is planted.
- * Positions are cm from the top-left of the inner area (border excluded).
+ * One plant at a position in a component, cm from the top-left of the inner
+ * area (border excluded). No longer stored in a planning (areas replaced
+ * placements); kept for the footprint helpers and the screens until they move to areas.
  */
 export interface PlacementData {
   readonly id: string;
@@ -29,11 +30,30 @@ export interface PlacementData {
   readonly patchRotationDeg?: number;
 }
 
-/** Ratios and placements of the plants that start in one season */
+/** One rectangle of an area, cm from the top-left of the inner area (a circle's bounding square) */
+export interface AreaPiece {
+  readonly xCm: number;
+  readonly yCm: number;
+  readonly widthCm: number;
+  readonly lengthCm: number;
+}
+
+/** The space a planting gets in its start season: 1..3 pieces on one layer */
+export interface AreaData {
+  readonly id: string;
+  readonly plantingId: string;
+  readonly plantId: string;
+  readonly layerIndex?: number; // Tower layer (0 = bottom), undefined for components without layers
+  readonly pieces: readonly AreaPiece[];
+  readonly locked?: boolean; // Locked areas are never moved by the optimizer
+}
+
+/** Ratios and areas of the plantings that start in one season */
 export interface SeasonPlanData {
   /** Relative share of the free area per planting id; a missing planting has ratio 1 */
   readonly ratios: Readonly<Record<string, number>>;
-  readonly placements: readonly PlacementData[];
+  /** At most one area per planting */
+  readonly areas: readonly AreaData[];
   readonly status: SeasonStatus;
 }
 

@@ -1,6 +1,6 @@
 import type { Planning } from '../../domain/planning/Planning.ts';
 import { SEASONS } from '../../domain/planning/Season.ts';
-import type { PlantingShare } from '../../domain/planning/SeasonOptimization.ts';
+import type { AreaShare } from '../../domain/planning/AreaLayout.ts';
 import type { Season, SeasonStatus } from '../../types/planning.types.ts';
 import { seasonLabel, seasonMonthsLabel } from '../shared/seasonLabels.ts';
 import type { Translate } from '../shared/seasonLabels.ts';
@@ -55,10 +55,14 @@ export function buildSeasonTabs(planning: Planning, t: Translate): SeasonTabView
   });
 }
 
-/** "12 planten geplaatst · Tomaat past niet" */
-export function optimizeResultMessage(shares: readonly PlantingShare[], nameOf: (plantId: string) => string, t: Translate): string {
-  const placed = shares.reduce((sum, share) => sum + share.count, 0);
-  const notFitting = shares.filter((share) => share.count === 0).map((share) => nameOf(share.plantId));
-  const message = t('componentDetail.optimized', { count: placed });
-  return notFitting.length === 0 ? message : `${message} · ${t('componentDetail.doesNotFit', { names: notFitting.join(', ') })}`;
+/** "792 planten geplaatst · 1 zaaivlak · Tomaat past niet" */
+export function optimizeResultMessage(shares: readonly AreaShare[], nameOf: (plantId: string) => string, t: Translate): string {
+  const placed = shares.filter((share) => share.fits);
+  const plants = placed.reduce((sum, share) => sum + (share.plantCount ?? 0), 0);
+  const sown = placed.filter((share) => share.plantCount === null).length;
+  const notFitting = shares.filter((share) => !share.fits).map((share) => nameOf(share.plantId));
+  const parts = [t('componentDetail.optimized', { count: plants })];
+  if (sown > 0) parts.push(t('componentDetail.sownAreas', { count: sown }));
+  if (notFitting.length > 0) parts.push(t('componentDetail.doesNotFit', { names: notFitting.join(', ') }));
+  return parts.join(' · ');
 }
