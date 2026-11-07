@@ -45,6 +45,11 @@ export function minimumPatchSideCm(plant: Pick<PlantData, 'spacingRadiusCm'> & P
   return 2 * (plant.sowingSpacingCm ?? plant.spacingRadiusCm);
 }
 
+/** The smallest side an area piece may have: the minimum patch side for sown plants, else twice the spacing radius */
+export function minimumAreaSideOf(traits: FootprintTraits): number {
+  return isSownOverArea(traits) ? minimumPatchSideCm(traits) : 2 * traits.spacingRadiusCm;
+}
+
 /**
  * PlantFootprint is a value object for the space a plant claims: an
  * axis-aligned rectangle (width x length in cm) centred on the plant position.

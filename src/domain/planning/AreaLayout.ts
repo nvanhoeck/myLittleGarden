@@ -2,7 +2,7 @@ import type { AreaPiece } from '../../types/planning.types.ts';
 import { plantCountOf } from './AreaGrid.ts';
 import { orderForNeighbours } from './AreaOrder.ts';
 import { freeRectangles } from './FreeSpace.ts';
-import { minimumPatchSideCm } from './PlantFootprint.ts';
+import { minimumAreaSideOf } from './PlantFootprint.ts';
 import type { FootprintTraits } from './PlantFootprint.ts';
 import type { PlantingArea } from './PlantingArea.ts';
 import type { PlantRelations } from './PlantRelations.ts';
@@ -69,11 +69,6 @@ interface Claim {
 
 function isSownOverArea(traits: FootprintTraits): boolean {
   return traits.plantingStyle === 'patch' || traits.plantingStyle === 'thinning';
-}
-
-/** The smallest side a piece may have */
-function minimumSideOf(traits: FootprintTraits): number {
-  return isSownOverArea(traits) ? minimumPatchSideCm(traits) : 2 * traits.spacingRadiusCm;
 }
 
 /** The grid spacing pieces snap to; null for plants sown over the area */
@@ -168,7 +163,7 @@ function partitionFitting(
     const pieces = partition(rectangle, remaining, spacingOf);
     const tooSmall = remaining.filter((claim) => {
       const piece = pieces.get(claim.plantingId)!;
-      return Math.min(piece.widthCm, piece.lengthCm) < minimumSideOf(byId.get(claim.plantingId)!.traits) - EPSILON_CM;
+      return Math.min(piece.widthCm, piece.lengthCm) < minimumAreaSideOf(byId.get(claim.plantingId)!.traits) - EPSILON_CM;
     });
     if (tooSmall.length === 0) return pieces;
     const dropped = tooSmall.reduce((smallest, claim) => (claim.weight < smallest.weight ? claim : smallest));
@@ -324,7 +319,7 @@ interface Refill {
  */
 function refillLeftovers({ layer, fixed, group, byId, targetOf, piecesOf }: Refill): void {
   const traitsOf = (id: string) => byId.get(id)!.traits;
-  const smallestSide = Math.min(...group.map((id) => minimumSideOf(traitsOf(id))));
+  const smallestSide = Math.min(...group.map((id) => minimumAreaSideOf(traitsOf(id))));
   const rank = new Map(group.map((id, index) => [id, index]));
   const deficitOf = (id: string) => targetOf(id) - sumOf((piecesOf.get(id) ?? []).map(areaOf));
   const add = (id: string, piece: AreaPiece) => piecesOf.set(id, [...(piecesOf.get(id) ?? []), piece]);
@@ -337,7 +332,7 @@ function refillLeftovers({ layer, fixed, group, byId, targetOf, piecesOf }: Refi
 
     for (const leftover of leftovers) {
       const takesNewPiece = (id: string) => (piecesOf.get(id)?.length ?? 0) < MAX_PIECES
-        && Math.min(leftover.widthCm, leftover.lengthCm) >= minimumSideOf(traitsOf(id)) - EPSILON_CM;
+        && Math.min(leftover.widthCm, leftover.lengthCm) >= minimumAreaSideOf(traitsOf(id)) - EPSILON_CM;
       const byDeficit = [...group].sort((a, b) => deficitOf(b) - deficitOf(a) || rank.get(a)! - rank.get(b)!);
       const withRoom = byDeficit.filter((id) => takesNewPiece(id) && deficitOf(id) > EPSILON_CM);
 
@@ -388,7 +383,7 @@ export function layoutAreas(request: AreaLayoutRequest): AreaLayoutResult {
   }
   if (byId.size === 0) return { areas: [], shares: [] };
 
-  const smallestSide = Math.min(...[...byId.values()].map((p) => minimumSideOf(p.traits)));
+  const smallestSide = Math.min(...[...byId.values()].map((p) => minimumAreaSideOf(p.traits)));
   const fixedOn = (layerIndex: number) => request.fixed.filter((f) => f.layerIndex === layerIndex).map((f) => f.piece);
   const freeByLayer = request.layers.map((layer, layerIndex) => freeRectangles(layer, fixedOn(layerIndex), smallestSide)
     .sort((a, b) => areaOf(b) - areaOf(a) || a.yCm - b.yCm || a.xCm - b.xCm));
@@ -401,7 +396,7 @@ export function layoutAreas(request: AreaLayoutRequest): AreaLayoutResult {
 
   const order = orderForNeighbours([...byId.keys()], (a, b) => request.relations(byId.get(a)!.plantId, byId.get(b)!.plantId));
   const widestSides = freeByLayer.map((rectangles) => Math.max(0, ...rectangles.map((r) => Math.min(r.widthCm, r.lengthCm))));
-  const layerOf = groupByLayer(order, ratioOf, (id) => minimumSideOf(byId.get(id)!.traits), capacities, widestSides);
+  const layerOf = groupByLayer(order, ratioOf, (id) => minimumAreaSideOf(byId.get(id)!.traits), capacities, widestSides);
   const piecesOf = new Map<string, AreaPiece[]>();
 
   request.layers.forEach((layer, layerIndex) => {

@@ -25,6 +25,16 @@ export interface BaseComponentData {
   readonly plannings: Readonly<Record<string, PlanningData>>; // Planning per year, keyed "2026"
 }
 
+/** A road (path) in a garden box: a rectangle in cm from the top-left of the box inner area; the short side is its width */
+export interface RoadData {
+  readonly id: string;
+  readonly xCm: number;
+  readonly yCm: number;
+  readonly widthCm: number;
+  readonly lengthCm: number;
+  readonly locked?: boolean; // Locked roads are never moved by the automatic roads
+}
+
 /**
  * Garden box component - rectangular growing area
  */
@@ -32,6 +42,7 @@ export interface GardenBoxData extends BaseComponentData {
   readonly type: 'gardenBox';
   readonly widthInCm: number;
   readonly lengthInCm: number;
+  readonly roads?: readonly RoadData[];
 }
 
 /**
