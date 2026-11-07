@@ -44,14 +44,11 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
     text: "Pad, 40 cm breed"
 
 # Automatic roads with a ring: the ring alone gives 4 roads (the setup does not
-# guarantee touching areas, so no more is asserted). A road already exists, so the
-# replace confirmation shows first; the tap is optional because the alert only
-# appears when unlocked roads exist.
+# guarantee touching areas, so no more is asserted). The replace confirmation
+# shows after OK in the dialog, and only when unlocked roads exist (the road
+# added above is one), so the "Vervangen" tap after OK is optional.
 - tapOn:
     id: "canvas-roads-auto"
-- tapOn:
-    text: "Vervangen"
-    optional: true
 - extendedWaitUntil:
     visible:
       id: "road-width-dialog"
@@ -60,6 +57,9 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
     id: "road-ring-toggle"
 - tapOn:
     id: "road-width-ok"
+- tapOn:
+    text: "Vervangen"
+    optional: true
 - extendedWaitUntil:
     visible:
       id: "season-road-3"
@@ -81,7 +81,7 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
 - assertVisible:
     text: "Pad, 50 cm breed"
 
-# Zoom in changes the zoom level.
+# Zoom in and back out changes the zoom level.
 - assertVisible:
     id: "canvas-zoom-level"
     text: "100%"
@@ -90,3 +90,8 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
 - assertVisible:
     id: "canvas-zoom-level"
     text: "125%"
+- tapOn:
+    id: "canvas-zoom-out"
+- assertVisible:
+    id: "canvas-zoom-level"
+    text: "100%"
