@@ -125,4 +125,38 @@ describe('optimizeSeason', () => {
     assert.deepEqual(summer.carriedAreasIn('summer'), [spring]);
     assert.ok(!areasOverlap(summer.areasIn('summer')[0], spring));
   });
+
+  test('keeps clear of a locked area in a later season the plantings grow into', () => {
+    const base = Planning.from(undefined, calendar).addPlants(['tomaat', 'boerenkool', 'sla']);
+    // Kale alone fills the summer; locked, the tomato (spring → summer) has no room left
+    const full = optimizeSeason(input(base, 'summer')).planning;
+    const fullKale = full.areasIn('summer')[0];
+    const blocked = optimizeSeason(input(full.toggleLock('summer', fullKale.id), 'spring'));
+    assert.ok(blocked.planning.areasIn('spring').every((a) => !areasOverlap(a, fullKale)));
+    assert.equal(blocked.shares.find((s) => s.plantId === 'tomaat')?.fits, false);
+
+    // A locked half: the tomato is laid out in the other half
+    const kale: AreaData = { id: 'kale', plantId: 'boerenkool', plantingId: 'boerenkool-summer', pieces: [{ xCm: 0, yCm: 0, widthCm: 200, lengthCm: 100 }] };
+    const half = base.applyAreas('summer', [kale]).toggleLock('summer', 'kale');
+    const tomato = optimizeSeason(input(half, 'spring')).planning.areasIn('spring').find((a) => a.plantId === 'tomaat');
+    assert.ok(tomato !== undefined);
+    assert.ok(!areasOverlap(tomato, kale));
+    // Re-optimizing the summer keeps both where they are, without overlap
+    const summer = optimizeSeason(input(optimizeSeason(input(half, 'spring')).planning, 'summer')).planning;
+    assert.ok(!summer.carriedAreasIn('summer').some((carried) => summer.areasIn('summer').some((own) => areasOverlap(own, carried))));
+  });
+
+  test('keeps clear of an area carried into a later season from another start season', () => {
+    const calendar3: PlantingCalendar = {
+      hasCalendar: () => true,
+      reachableSeasons: (id) => (id === 'tomaat' ? ['spring'] : ['summer']),
+      growingSeasons: (id, s) => (id === 'tomaat' && s === 'spring' ? ['spring', 'summer', 'autumn']
+        : id === 'boerenkool' && s === 'summer' ? ['summer', 'autumn'] : []),
+    };
+    // Kale starts in summer and grows into autumn; tomato (spring) also grows into autumn
+    const kale: AreaData = { id: 'kale', plantId: 'boerenkool', plantingId: 'boerenkool-summer', pieces: [{ xCm: 0, yCm: 0, widthCm: 200, lengthCm: 100 }] };
+    const planning = Planning.from(undefined, calendar3).addPlants(['tomaat', 'boerenkool']).applyAreas('summer', [kale]);
+    const tomato = optimizeSeason(input(planning, 'spring')).planning.areasIn('spring')[0];
+    assert.ok(!areasOverlap(tomato, kale));
+  });
 });

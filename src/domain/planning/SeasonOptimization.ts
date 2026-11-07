@@ -23,8 +23,22 @@ export interface SeasonOptimizationOutcome {
 }
 
 /**
+ * Areas the season's plantings would run into later on: in every later season
+ * a planting starting in this season grows in, the locked areas of that season
+ * and the areas carried into it from other start seasons.
+ */
+function fixedAreasInLaterSeasons(planning: Planning, season: Season): AreaData[] {
+  const later = new Set(planning.plantingsStartingIn(season)
+    .flatMap((planting) => planning.growingSeasonsOf(planting))
+    .filter((grown) => grown !== season));
+  return [...later].flatMap((laterSeason) => planning.fixedAreasIn(laterSeason)
+    .filter((area) => planning.plantingById(area.plantingId)?.startSeason !== season));
+}
+
+/**
  * Optimize one season: the plantings starting in it get an area by ratio in
- * the space left by the carried-over and locked areas. Unlocked areas of the
+ * the space left by the carried-over and locked areas, also those of the later
+ * seasons its plantings grow into. Unlocked areas of the
  * season are replaced; a planting with a locked area keeps it and is not laid
  * out again. Plantings of plants missing from the catalog are skipped.
  * Relations are looked up by plant, so two plantings of one plant are laid out
@@ -34,10 +48,12 @@ export function optimizeSeason(input: SeasonOptimizationInput): SeasonOptimizati
   const { planning, season, plantOf } = input;
   const fixedAreas = planning.fixedAreasIn(season);
   const keptPlantings = new Set(fixedAreas.map((area) => area.plantingId));
+  const blockingAreas = [...fixedAreas, ...fixedAreasInLaterSeasons(planning, season)]
+    .filter((area, index, all) => all.findIndex((other) => other.id === area.id) === index);
 
   const result = layoutAreas({
     layers: input.areas,
-    fixed: fixedAreas.flatMap((area) => area.pieces.map((piece) => ({ layerIndex: area.layerIndex ?? 0, piece }))),
+    fixed: blockingAreas.flatMap((area) => area.pieces.map((piece) => ({ layerIndex: area.layerIndex ?? 0, piece }))),
     plantings: planning.plantingsStartingIn(season)
       .filter((planting) => !keptPlantings.has(planting.id))
       .flatMap((planting) => {
