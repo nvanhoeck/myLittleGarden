@@ -96,11 +96,43 @@ describe('placeAutomaticRoadsIn', () => {
     assert.ok(areasOf(box, '2027').flatMap((a) => a.pieces).every((p) => p.xCm + p.widthCm <= road.xCm + 0.001 || p.xCm >= road.xCm + road.widthCm - 0.001));
   });
 
-  test('running twice does not add or duplicate roads', () => {
-    const once = placeAutomaticRoadsIn(makeBox(), { ...context, year: 2026, season: 'spring', widthCm: 20, withRing: true });
-    const twice = placeAutomaticRoadsIn(once, { ...context, year: 2026, season: 'spring', widthCm: 20, withRing: true });
-    assert.ok((twice.roads?.length ?? 0) <= (once.roads?.length ?? 0));
+  const geometry = (box: GardenBoxData): string[] =>
+    (box.roads ?? []).map((r) => `${r.xCm},${r.yCm},${r.widthCm},${r.lengthCm},${r.locked === true}`).sort();
+  const run = (box: GardenBoxData, widthCm: number, withRing = true): GardenBoxData =>
+    placeAutomaticRoadsIn(box, { ...context, year: 2026, season: 'spring', widthCm, withRing });
+
+  test('running twice with the same width gives the same roads', () => {
+    const once = run(makeBox(), 20);
+    const twice = run(once, 20);
+    assert.deepEqual(geometry(twice), geometry(once));
+    assert.equal(once.roads?.length, 5);
     assert.equal(new Set(twice.roads?.map((r) => r.id)).size, twice.roads?.length);
+  });
+
+  test('running again with another width keeps the between road on its centre line', () => {
+    const once = run(makeBox(), 20);
+    const between = once.roads!.find((r) => r.xCm === 40)!;
+    const again = run(once, 30);
+    const kept = again.roads!.find((r) => r.id === between.id)!;
+    assert.equal(kept.widthCm, 30);
+    assert.equal(kept.xCm + kept.widthCm / 2, between.xCm + between.widthCm / 2);
+  });
+
+  test('with a locked road, running twice keeps it, the between roads and adds no duplicates', () => {
+    const locked = { id: 'keep', xCm: 0, yCm: 0, widthCm: 20, lengthCm: 100, locked: true };
+    const start: GardenBoxData = { ...makeBox(), roads: [locked] };
+    const once = run(start, 20, false);
+    const twice = run(once, 20, false);
+    assert.deepEqual(twice.roads?.find((r) => r.id === 'keep'), locked);
+    assert.deepEqual(geometry(twice), geometry(once));
+    assert.ok(twice.roads!.length >= 2);
+  });
+
+  test('an invalid width changes nothing', () => {
+    const box = makeBox();
+    assert.equal(run(box, 5), box);
+    assert.equal(run(box, 20.5), box);
+    assert.equal(run(box, 250), box);
   });
 
   test('a locked road survives and is not duplicated', () => {
@@ -133,6 +165,18 @@ describe('road edits', () => {
   test('set all locked sets every road', () => {
     const box = setAllRoadsLockedIn({ ...withRoad(), roads: [...withRoad().roads!, { id: 's', xCm: 0, yCm: 0, widthCm: 10, lengthCm: 100 }] }, true);
     assert.deepEqual(box.roads?.map((r) => r.locked), [true, true]);
+  });
+
+  test('an invalid width changes nothing', () => {
+    const box = withRoad();
+    assert.equal(setRoadWidthIn(box, 'r', { ...context, widthCm: 7 }), box);
+    const border = { orientation: 'vertical' as const, lineCm: 50, fromCm: 0, toCm: 100, kind: 'between' as const };
+    assert.equal(addRoadTo(makeBox(), { ...context, border, widthCm: 12.5 }).roads?.length, 0);
+  });
+
+  test('a width change that cuts nothing keeps the same box', () => {
+    const box = setRoadWidthIn(withRoad(), 'r', { ...context, widthCm: 20 });
+    assert.equal(setRoadWidthIn(box, 'r', { ...context, widthCm: 20 }), box);
   });
 
   test('unknown road ids change nothing', () => {
