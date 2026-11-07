@@ -15,8 +15,8 @@ The area canvas also lost its zoom and scrolling when it replaced the plant canv
 
 | Term | Meaning |
 |---|---|
-| **Road** | A rectangle `{ id, xCm, yCm, widthCm, lengthCm, locked? }` in a garden box, cm from the top-left of the inner area (same space as area pieces). Part of the box itself: it holds in every season and every year. |
-| **Road width** | The road's short side, in cm, as asked in the dialog. |
+| **Road** | A rectangle `{ id, xCm, yCm, widthCm, lengthCm, orientation, locked? }` in a garden box, cm from the top-left of the inner area (same space as area pieces). Part of the box itself: it holds in every season and every year. |
+| **Road width** | Across the line the road runs along, in cm, as asked in the dialog: `widthCm` for a vertical road, `lengthCm` for a horizontal one (not its short side: a road on a short border stretch can be wider than long). |
 | **Border** | A segment where two areas of the shown season touch (shared edge, overlap length > 0), or where an area touches the box edge. |
 | **Ring** | Four roads along the inside of the box edge (optional in the automatic dialog). |
 | **Cut back** | Subtracting roads from an area's pieces. |
@@ -41,11 +41,13 @@ GardenBoxData
 RoadData
   id: string
   xCm, yCm, widthCm, lengthCm: number   // inside the inner area, widthCm/lengthCm > 0
+  orientation: 'vertical' | 'horizontal' // vertical = runs along x = constant (its width is widthCm)
   locked?: boolean
 ```
 
 Store version 7. Migration v6 → v7: garden boxes get `roads: []`; nothing else changes. Invalid roads (outside the box,
-non-positive size) are dropped by the per-entry salvage. Export to JSON carries the roads.
+non-positive size, unknown orientation, duplicate id) are dropped by the per-entry salvage; a road stored without
+orientation (early v7 data) gets it from its aspect ratio. Export to JSON carries the roads.
 
 ## 5. Domain rules (`src/domain/roads/`)
 
