@@ -14,15 +14,16 @@ import { usePlantStore } from '@/stores/plantStore';
 import { usePlanning } from '@/stores/planningContext';
 import { isGardenBox, isPot, isRectangularTower, isCircularTower } from '@/stores/componentStore';
 import { SeasonAreaCanvas, LayerOverviewModal } from '@/components/organisms';
-import { SeasonTabs, TowerLayerTabs, YearBar } from '@/components/molecules';
+import { RoadWidthDialog, SeasonTabs, TowerLayerTabs, YearBar } from '@/components/molecules';
 import { PlanningButton, Snackbar } from '@/components/atoms';
 import { layerBounds, plantingAreaOf, relationsFromCatalog, seasonContaining } from '@/domain/planning';
 import type { PlantRelations } from '@/domain/planning';
-import type { AreaCanvasView, AreaData, AreaPiece, AreaView, ComponentData, Season } from '@/types';
+import { ringFitsIn } from '@/domain/roads';
+import type { AreaCanvasView, AreaData, AreaPiece, AreaView, ComponentData, RoadSlotView, RoadView, Season } from '@/types';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
 import { CanvasEditActions } from './CanvasEditActions';
-import { buildAreaCanvas, iconPxFor, resizeHandlePoint, snappedResize } from './areaCanvasViewModel';
+import { buildAreaCanvas, iconPxFor, resizeHandlePoint, roadWidthFrom, snappedResize } from './areaCanvasViewModel';
 import { buildSeasonTabs, defaultSeasonFor, optimizeResultMessage, planningYearRange } from './seasonViewModel';
 import { seasonLabel } from '../shared/seasonLabels';
 import type { Translate } from '../shared/seasonLabels';
@@ -31,7 +32,13 @@ import type { Translate } from '../shared/seasonLabels';
 const SNACKBAR_DURATION_MS = 4000;
 /** Lets the busy spinner render before the optimizer takes the JS thread */
 const OPTIMIZE_DEFER_MS = 50;
-const NO_AREAS: AreaCanvasView = { areas: [], edgeMarkers: [] };
+const NO_AREAS: AreaCanvasView = { areas: [], edgeMarkers: [], roads: [], roadSlots: [] };
+/** The road width the dialogs start with until one is used */
+const DEFAULT_ROAD_WIDTH_CM = 30;
+
+/** The open road dialog: a new road on a border, the automatic roads, or an existing road */
+type RoadDialog = { readonly kind: 'add'; readonly slot: RoadSlotView } | { readonly kind: 'automatic' } | { readonly kind: 'edit'; readonly roadId: string };
+
 const NO_RELATIONS: PlantRelations = () => 'neutral';
 
 function getComponentDimensions(component: ComponentData): { width: number; height: number } {
@@ -64,6 +71,11 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
       removeArea: state.removeArea,
       toggleAreaLock: state.toggleAreaLock,
       setAllAreasLocked: state.setAllAreasLocked,
+      addRoad: state.addRoad,
+      placeAutomaticRoads: state.placeAutomaticRoads,
+      setRoadWidth: state.setRoadWidth,
+      toggleRoadLock: state.toggleRoadLock,
+      removeRoad: state.removeRoad,
     })),
   );
 
@@ -79,6 +91,8 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   const optimizeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const snackbarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [roadDialog, setRoadDialog] = useState<RoadDialog | null>(null);
+  const [lastRoadWidthCm, setLastRoadWidthCm] = useState(DEFAULT_ROAD_WIDTH_CM);
 
   const isTower = component ? isRectangularTower(component) || isCircularTower(component) : false;
   const numberOfLayers = component && (isRectangularTower(component) || isCircularTower(component)) ? component.numberOfLayers : 1;
@@ -107,8 +121,10 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
         return start ? t('componentDetail.carriedFrom', { season: seasonLabel(start, translate).toLowerCase() }) : '';
       },
       t: translate,
+      gardenBoxRoads: component && isGardenBox(component) ? component.roads ?? [] : undefined,
+      isEditMode,
     });
-  }, [planning, layer, season, planningLayer, getPlantById, nameOf, relations, t, translate]);
+  }, [component, planning, layer, season, planningLayer, getPlantById, nameOf, relations, t, translate, isEditMode]);
 
   // Every layer's areas of the season, for the tower layer overview
   const seasonAreas = useMemo(
@@ -150,6 +166,13 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
     [today],
   );
 
+  /** Shows a message in the snackbar for a while */
+  const showMessage = useCallback((message: string) => {
+    setResultMessage(message);
+    if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
+    snackbarTimer.current = setTimeout(() => setResultMessage(null), SNACKBAR_DURATION_MS);
+  }, []);
+
   // Show the spinner first, then run the layout on the JS thread
   const handleOptimize = useCallback(() => {
     if (optimizingRef.current) return;
@@ -159,15 +182,13 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
       try {
         const shares = actions.optimizeSeason(componentId, year, season);
         if (shares === null) return;
-        setResultMessage(optimizeResultMessage(shares, nameOf, translate));
-        if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
-        snackbarTimer.current = setTimeout(() => setResultMessage(null), SNACKBAR_DURATION_MS);
+        showMessage(optimizeResultMessage(shares, nameOf, translate));
       } finally {
         optimizingRef.current = false;
         setOptimizing(false);
       }
     }, OPTIMIZE_DEFER_MS);
-  }, [actions, componentId, year, season, nameOf, translate]);
+  }, [actions, componentId, year, season, nameOf, translate, showMessage]);
 
   const handleOpenChat = useCallback(() => {
     const store = useAiChatStore.getState();
@@ -240,6 +261,72 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   const handleLockAll = useCallback(() => actions.setAllAreasLocked(componentId, year, season, true), [actions, componentId, year, season]);
   const handleUnlockAll = useCallback(() => actions.setAllAreasLocked(componentId, year, season, false), [actions, componentId, year, season]);
 
+  // Roads (garden box only)
+  const editedRoad = roadDialog?.kind === 'edit' ? canvasView.roads.find((road) => road.id === roadDialog.roadId) : undefined;
+  const closeRoadDialog = useCallback(() => setRoadDialog(null), []);
+  const handleRoadSlotPress = useCallback((slot: RoadSlotView) => setRoadDialog({ kind: 'add', slot }), []);
+  const handleRoadPress = useCallback((road: RoadView) => setRoadDialog({ kind: 'edit', roadId: road.id }), []);
+  const handleAutomaticRoads = useCallback(() => setRoadDialog({ kind: 'automatic' }), []);
+
+  const placeAutomaticRoads = useCallback(
+    (widthCm: number, withRing: boolean) => {
+      // A ring that does not fit is left out; the user is told so
+      const ringLeftOut = withRing && component !== undefined && isGardenBox(component) && !ringFitsIn(component, widthCm);
+      const place = (): void => {
+        actions.placeAutomaticRoads(componentId, year, season, widthCm, withRing);
+        if (ringLeftOut) showMessage(t('componentDetail.roadRingTooWide', { width: widthCm }));
+      };
+      if (!canvasView.roads.some((road) => !road.locked)) {
+        place();
+        return;
+      }
+      Alert.alert(t('componentDetail.roadsReplaceTitle'), t('componentDetail.roadsReplaceMessage'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('componentDetail.roadsReplaceConfirm'), style: 'destructive', onPress: place },
+      ]);
+    },
+    [actions, component, componentId, year, season, canvasView.roads, t, showMessage],
+  );
+
+  const handleRoadDialogConfirm = useCallback(
+    (widthCm: number, withRing: boolean) => {
+      const dialog = roadDialog;
+      setRoadDialog(null);
+      setLastRoadWidthCm(widthCm);
+      if (dialog === null) return;
+      if (dialog.kind === 'add') actions.addRoad(componentId, year, season, dialog.slot.border, widthCm);
+      else if (dialog.kind === 'automatic') placeAutomaticRoads(widthCm, withRing);
+      else if (editedRoad !== undefined && widthCm !== Math.round(editedRoad.widthCm)) actions.setRoadWidth(componentId, editedRoad.id, widthCm);
+    },
+    [roadDialog, editedRoad, actions, componentId, year, season, placeAutomaticRoads],
+  );
+
+  const handleToggleRoadLock = useCallback(() => {
+    if (editedRoad !== undefined) actions.toggleRoadLock(componentId, editedRoad.id);
+  }, [editedRoad, actions, componentId]);
+
+  // The road dialog closes for the confirmation and comes back when the user cancels
+  const handleRemoveRoad = useCallback(() => {
+    if (editedRoad === undefined) return;
+    const roadId = editedRoad.id;
+    const reopen = (): void => setRoadDialog({ kind: 'edit', roadId });
+    setRoadDialog(null);
+    Alert.alert(
+      t('componentDetail.roadRemove'),
+      t('componentDetail.roadRemoveMessage'),
+      [
+        { text: t('common.cancel'), style: 'cancel', onPress: reopen },
+        { text: t('common.delete'), style: 'destructive', onPress: () => actions.removeRoad(componentId, roadId) },
+      ],
+      { cancelable: true, onDismiss: reopen },
+    );
+  }, [editedRoad, actions, componentId, t]);
+
+  // A road that is gone (removed elsewhere) closes its dialog
+  useEffect(() => {
+    if (roadDialog?.kind === 'edit' && editedRoad === undefined) setRoadDialog(null);
+  }, [roadDialog, editedRoad]);
+
   if (!component || !planning || !layer) {
     return (
       <SafeAreaView className="flex-1 bg-background items-center justify-center">
@@ -253,6 +340,10 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
 
   const dimensions = getComponentDimensions(component);
   const hasAreas = canvasView.areas.length > 0;
+  const hasRoads = isGardenBox(component);
+  const roadDialogTitle = roadDialog?.kind === 'automatic'
+    ? t('componentDetail.roadsAutoTitle')
+    : roadDialog?.kind === 'edit' ? t('componentDetail.roadEditTitle') : t('componentDetail.roadAdd');
 
   return (
     <SafeAreaView className="flex-1 bg-background" testID="component-detail-screen">
@@ -355,6 +446,9 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           onToggleEditMode={handleToggleEditMode}
           onLockAll={handleLockAll}
           onUnlockAll={handleUnlockAll}
+          onRoadPress={hasRoads ? handleRoadPress : undefined}
+          onRoadSlotPress={hasRoads ? handleRoadSlotPress : undefined}
+          onAutomaticRoads={hasRoads ? handleAutomaticRoads : undefined}
         />
         {!hasAreas && (
           <View pointerEvents="none" className="absolute top-3 left-4 right-4 items-center">
@@ -400,6 +494,21 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           testID="optimize-button"
         />
       </View>
+
+      {hasRoads && (
+        <RoadWidthDialog
+          visible={roadDialog !== null}
+          title={roadDialogTitle}
+          initialWidthCm={editedRoad !== undefined ? Math.round(editedRoad.widthCm) : lastRoadWidthCm}
+          widthFrom={roadWidthFrom}
+          showRingToggle={roadDialog?.kind === 'automatic'}
+          locked={editedRoad?.locked ?? false}
+          onToggleLock={editedRoad !== undefined ? handleToggleRoadLock : undefined}
+          onRemove={editedRoad !== undefined ? handleRemoveRoad : undefined}
+          onConfirm={handleRoadDialogConfirm}
+          onCancel={closeRoadDialog}
+        />
+      )}
 
       {isTower && (
         <LayerOverviewModal

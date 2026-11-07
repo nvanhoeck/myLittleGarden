@@ -21,6 +21,7 @@ export {
   PlantFootprint,
   boundsOverlap,
   footprintsConflict,
+  minimumAreaSideOf,
   minimumPatchSideCm,
   plantDistanceCm,
 } from './PlantFootprint';

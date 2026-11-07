@@ -1,5 +1,5 @@
 import type { PlantData } from '../../types/plant.types.ts';
-import type { AreaData, Season } from '../../types/planning.types.ts';
+import type { AreaData, AreaPiece, Season } from '../../types/planning.types.ts';
 import { layoutAreas } from './AreaLayout.ts';
 import type { AreaShare } from './AreaLayout.ts';
 import type { Planning } from './Planning.ts';
@@ -15,6 +15,8 @@ export interface SeasonOptimizationInput {
   readonly hasLayers: boolean;
   readonly plantOf: (plantId: string) => PlantData | undefined;
   readonly newId: () => string;
+  /** Roads of the component: nothing is planted on them (layer 0) */
+  readonly roads?: readonly AreaPiece[];
 }
 
 export interface SeasonOptimizationOutcome {
@@ -53,7 +55,10 @@ export function optimizeSeason(input: SeasonOptimizationInput): SeasonOptimizati
 
   const result = layoutAreas({
     layers: input.areas,
-    fixed: blockingAreas.flatMap((area) => area.pieces.map((piece) => ({ layerIndex: area.layerIndex ?? 0, piece }))),
+    fixed: [
+      ...blockingAreas.flatMap((area) => area.pieces.map((piece) => ({ layerIndex: area.layerIndex ?? 0, piece }))),
+      ...(input.roads ?? []).map((piece) => ({ layerIndex: 0, piece })),
+    ],
     plantings: planning.plantingsStartingIn(season)
       .filter((planting) => !keptPlantings.has(planting.id))
       .flatMap((planting) => {

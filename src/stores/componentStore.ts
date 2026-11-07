@@ -12,6 +12,7 @@ import type {
   RectangularLayerDimensions,
   CircularLayerDimensions,
   SunDirection,
+  RoadData,
 } from '@/types';
 import {
   GardenBox,
@@ -19,8 +20,10 @@ import {
   RectangularTower,
   CircularTower,
 } from '@/domain/component';
-import { Planning, frostDayOf, optimizeSeason as optimizeSeasonOf, plantingAreasOf, plantingCalendarFor } from '@/domain/planning';
+import { Planning, frostDayOf, minimumAreaSideOf, optimizeSeason as optimizeSeasonOf, plantingAreasOf, plantingCalendarFor } from '@/domain/planning';
 import type { AreaShare, LayerBounds, PlantingCalendar, Season } from '@/domain/planning';
+import { addRoadTo, placeAutomaticRoadsIn, removeRoadFrom, setAllRoadsLockedIn, setRoadWidthIn, toggleRoadLockIn } from '@/domain/roads';
+import type { Border, RoadContext } from '@/domain/roads';
 import { generateId } from '@/utils/idGenerator';
 import {
   migrateComponentState,
@@ -94,6 +97,15 @@ interface ComponentState {
   removeArea: (componentId: string, year: number, season: Season, areaId: string) => void;
   toggleAreaLock: (componentId: string, year: number, season: Season, areaId: string) => void;
   setAllAreasLocked: (componentId: string, year: number, season: Season, locked: boolean) => void;
+
+  // Actions - Roads (garden boxes only; every change cuts back the areas of every year and season)
+  /** A road on the border, widthCm thick; the year and season are the ones shown */
+  addRoad: (componentId: string, year: number, season: Season, border: Border, widthCm: number) => void;
+  /** Replaces the unlocked roads by roads between the areas of the shown season, optionally with a ring along the edges */
+  placeAutomaticRoads: (componentId: string, year: number, season: Season, widthCm: number, withRing: boolean) => void;
+  setRoadWidth: (componentId: string, roadId: string, widthCm: number) => void;
+  toggleRoadLock: (componentId: string, roadId: string) => void;
+  removeRoad: (componentId: string, roadId: string) => void;
   /**
    * After a new frost date: placed plantings are frozen with the calendar of the
    * previous frost date, then ratios move to the plants' new start seasons
@@ -114,6 +126,27 @@ function canRelocate(planning: Planning, plantingId: string, season: Season): bo
   return planning.isPlaced(plantingId) && planning.seasonsAvailableFor(plantingId).includes(season);
 }
 
+/** The roads of a garden box as the pieces areas keep clear of; pots and towers have none */
+function roadPiecesOf(component: ComponentData): readonly RoadData[] {
+  return component.type === 'gardenBox' ? component.roads ?? [] : [];
+}
+
+/** The smallest area side of a plant; 1 for a plant that is not in the catalog */
+function minSideOf(plantId: string): number {
+  const plant = usePlantStore.getState().getPlantById(plantId);
+  return plant === undefined ? 1 : minimumAreaSideOf(plant);
+}
+
+const roadContext: RoadContext = { calendarOf: plantingCalendarOfYear, minSideOf, newId: generateId };
+
+/** Changes the roads of one garden box; anything else (or a missing component) stays as it is */
+function withBoxChange(components: ComponentData[], componentId: string, change: (box: GardenBoxData) => GardenBoxData): ComponentData[] {
+  return components.map((comp) => {
+    if (comp.id !== componentId || comp.type !== 'gardenBox') return comp;
+    return change(comp);
+  });
+}
+
 /** The planting area of each layer of a component (layer 0 for components without layers) */
 function layerBoundsOf(component: ComponentData): LayerBounds {
   const areas = plantingAreasOf(component);
@@ -125,12 +158,13 @@ function withAreaChange(
   components: ComponentData[],
   componentId: string,
   year: number,
-  change: (planning: Planning, bounds: LayerBounds) => Planning,
+  change: (planning: Planning, bounds: LayerBounds, roads: readonly RoadData[]) => Planning,
 ): ComponentData[] {
   const component = components.find((comp) => comp.id === componentId);
   if (!component) return components;
   const bounds = layerBoundsOf(component);
-  return withPlanning(components, componentId, year, (planning) => change(planning, bounds));
+  const roads = roadPiecesOf(component);
+  return withPlanning(components, componentId, year, (planning) => change(planning, bounds, roads));
 }
 
 function plantingCalendarAtFrost(year: number, lastSpringFrost: string | null): PlantingCalendar {
@@ -292,6 +326,7 @@ export const useComponentStore = create<ComponentState>()(
           hasLayers: isTower(component),
           plantOf: (plantId) => usePlantStore.getState().getPlantById(plantId),
           newId: generateId,
+          roads: roadPiecesOf(component),
         });
         set((state) => ({ components: withPlanning(state.components, componentId, year, () => outcome.planning) }));
         usePlanningStore.getState().setLastShares({ componentId, year, season }, outcome.shares);
@@ -300,14 +335,14 @@ export const useComponentStore = create<ComponentState>()(
 
       moveArea: (componentId, year, season, areaId, dxCm, dyCm) => {
         set((state) => ({
-          components: withAreaChange(state.components, componentId, year, (p, bounds) => p.moveArea(season, areaId, dxCm, dyCm, bounds)),
+          components: withAreaChange(state.components, componentId, year, (p, bounds, roads) => p.moveArea(season, areaId, dxCm, dyCm, bounds, roads)),
         }));
       },
 
       resizeArea: (componentId, year, season, areaId, pieceIndex, widthCm, lengthCm) => {
         set((state) => ({
-          components: withAreaChange(state.components, componentId, year, (p, bounds) =>
-            p.resizeArea(season, areaId, pieceIndex, widthCm, lengthCm, bounds),
+          components: withAreaChange(state.components, componentId, year, (p, bounds, roads) =>
+            p.resizeArea(season, areaId, pieceIndex, widthCm, lengthCm, bounds, roads),
           ),
         }));
       },
@@ -326,8 +361,34 @@ export const useComponentStore = create<ComponentState>()(
 
       setAllAreasLocked: (componentId, year, season, locked) => {
         set((state) => ({
-          components: withPlanning(state.components, componentId, year, (p) => p.setAllLocked(season, locked)),
+          components: withBoxChange(
+            withPlanning(state.components, componentId, year, (p) => p.setAllLocked(season, locked)),
+            componentId,
+            (box) => setAllRoadsLockedIn(box, locked),
+          ),
         }));
+      },
+
+      addRoad: (componentId, _year, _season, border, widthCm) => {
+        set((state) => ({ components: withBoxChange(state.components, componentId, (box) => addRoadTo(box, { ...roadContext, border, widthCm })) }));
+      },
+
+      placeAutomaticRoads: (componentId, year, season, widthCm, withRing) => {
+        set((state) => ({
+          components: withBoxChange(state.components, componentId, (box) => placeAutomaticRoadsIn(box, { ...roadContext, year, season, widthCm, withRing })),
+        }));
+      },
+
+      setRoadWidth: (componentId, roadId, widthCm) => {
+        set((state) => ({ components: withBoxChange(state.components, componentId, (box) => setRoadWidthIn(box, roadId, { ...roadContext, widthCm })) }));
+      },
+
+      toggleRoadLock: (componentId, roadId) => {
+        set((state) => ({ components: withBoxChange(state.components, componentId, (box) => toggleRoadLockIn(box, roadId)) }));
+      },
+
+      removeRoad: (componentId, roadId) => {
+        set((state) => ({ components: withBoxChange(state.components, componentId, (box) => removeRoadFrom(box, roadId)) }));
       },
 
       reconcilePlannings: (previousFrost) => {
@@ -429,6 +490,11 @@ export function useComponentActions() {
       removeArea: state.removeArea,
       toggleAreaLock: state.toggleAreaLock,
       setAllAreasLocked: state.setAllAreasLocked,
+      addRoad: state.addRoad,
+      placeAutomaticRoads: state.placeAutomaticRoads,
+      setRoadWidth: state.setRoadWidth,
+      toggleRoadLock: state.toggleRoadLock,
+      removeRoad: state.removeRoad,
     }))
   );
 }

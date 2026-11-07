@@ -1,8 +1,9 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildAreaCanvas, iconPxFor, resizeHandlePoint, snappedResize } from './areaCanvasViewModel.ts';
+import { buildAreaCanvas, iconPxFor, resizeHandlePoint, roadWidthFrom, snappedResize } from './areaCanvasViewModel.ts';
 import type { AreaCanvasInput, AreaCanvasPlant } from './areaCanvasViewModel.ts';
 import type { AreaData, AreaPiece } from '../../types/planning.types.ts';
+import type { RoadData } from '../../types/component.types.ts';
 import type { PlantRelations } from '../../domain/planning/PlantRelations.ts';
 
 const t = (key: string, options?: Record<string, unknown>): string => (options ? `${key} ${JSON.stringify(options)}` : key);
@@ -218,5 +219,103 @@ describe('resizeHandlePoint', () => {
 
   test('in a circle, the corner nearest the centre when the whole piece is outside', () => {
     assert.deepEqual(resizeHandlePoint(piece(90, 90, 10, 10), { shape: 'circle', diameterCm: 100 }, 5), { xCm: 90, yCm: 90 });
+  });
+});
+
+describe('buildAreaCanvas roads', () => {
+  const left = (): AreaData => area('a', 'ui', [piece(0, 0, 100, 100)]);
+  const right = (): AreaData => area('b', 'tomaat', [piece(100, 0, 100, 100)]);
+  const road = (id: string, xCm: number, yCm: number, widthCm: number, lengthCm: number, locked?: boolean, orientation?: RoadData['orientation']): RoadData => ({
+    id,
+    xCm,
+    yCm,
+    widthCm,
+    lengthCm,
+    orientation: orientation ?? (widthCm <= lengthCm ? 'vertical' : 'horizontal'),
+    ...(locked === undefined ? {} : { locked }),
+  });
+
+  function roadCanvasOf(options: {
+    own: AreaData[];
+    carried?: AreaData[];
+    roads?: RoadData[];
+    isEditMode: boolean;
+  }): ReturnType<typeof buildAreaCanvas> {
+    return buildAreaCanvas({
+      own: options.own,
+      carried: options.carried ?? [],
+      layer: { shape: 'rectangle', widthCm: 200, lengthCm: 100 },
+      plantOf: (id) => PLANTS[id],
+      nameOf: (id) => id.toUpperCase(),
+      relations,
+      carriedLabelOf: () => 'uit lente',
+      t,
+      gardenBoxRoads: options.roads,
+      isEditMode: options.isEditMode,
+    });
+  }
+
+  test('maps each road of a garden box to its rectangle, width and lock', () => {
+    const { roads } = roadCanvasOf({
+      own: [left()],
+      roads: [road('r1', 95, 0, 10, 100, true), road('r2', 0, 0, 200, 10)],
+      isEditMode: false,
+    });
+    assert.deepEqual(roads, [
+      { id: 'r1', rect: piece(95, 0, 10, 100), widthCm: 10, locked: true },
+      { id: 'r2', rect: piece(0, 0, 200, 10), widthCm: 10, locked: false },
+    ]);
+  });
+
+  test('the width of a road comes from its orientation, not from its short side', () => {
+    const { roads } = roadCanvasOf({ own: [left()], roads: [road('e', 0, 50, 30, 20, false, 'vertical')], isEditMode: false });
+    assert.equal(roads[0].widthCm, 30);
+  });
+
+  test('a component that is not a garden box has no roads and no slots', () => {
+    const { roads, roadSlots } = roadCanvasOf({ own: [left(), right()], isEditMode: true });
+    assert.deepEqual(roads, []);
+    assert.deepEqual(roadSlots, []);
+  });
+
+  test('slots only in edit mode', () => {
+    assert.deepEqual(roadCanvasOf({ own: [left(), right()], roads: [], isEditMode: false }).roadSlots, []);
+    assert.ok(roadCanvasOf({ own: [left(), right()], roads: [], isEditMode: true }).roadSlots.length > 0);
+  });
+
+  test('one slot per border, at its midpoint, in border order', () => {
+    const { roadSlots } = roadCanvasOf({ own: [left(), right()], roads: [], isEditMode: true });
+    assert.deepEqual(roadSlots.map((s) => [s.border.orientation, s.border.kind, s.xCm, s.yCm]), [
+      ['vertical', 'edge', 0, 50],
+      ['vertical', 'between', 100, 50],
+      ['vertical', 'edge', 200, 50],
+      ['horizontal', 'edge', 100, 0],
+      ['horizontal', 'edge', 100, 100],
+    ]);
+    assert.deepEqual(roadSlots[1].border, { orientation: 'vertical', lineCm: 100, fromCm: 0, toCm: 100, kind: 'between' });
+    assert.equal(new Set(roadSlots.map((s) => s.key)).size, roadSlots.length);
+  });
+
+  test('no slot for a border a road already covers', () => {
+    const { roadSlots } = roadCanvasOf({ own: [left(), right()], roads: [road('r1', 95, 0, 10, 100)], isEditMode: true });
+    assert.ok(!roadSlots.some((s) => s.border.kind === 'between'));
+    assert.ok(!roadSlots.some((s) => s.border.orientation === 'vertical' && s.border.lineCm === 100));
+  });
+
+  test('borders with carried areas count too', () => {
+    const { roadSlots } = roadCanvasOf({ own: [right()], carried: [left()], roads: [], isEditMode: true });
+    assert.deepEqual(roadSlots.filter((s) => s.border.kind === 'between').map((s) => [s.xCm, s.yCm]), [[100, 50]]);
+  });
+});
+
+describe('roadWidthFrom', () => {
+  test('a whole number of cm from 10 to 200 is a width', () => {
+    assert.equal(roadWidthFrom('30'), 30);
+    assert.equal(roadWidthFrom(' 10 '), 10);
+    assert.equal(roadWidthFrom('200'), 200);
+  });
+
+  test('anything else is no width', () => {
+    for (const text of ['', '9', '201', '30.5', '30,5', 'abc', '-30', '3e1']) assert.equal(roadWidthFrom(text), null, text);
   });
 });

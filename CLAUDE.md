@@ -46,6 +46,7 @@ UI components follow Atomic Design and are purely presentational (dumb component
 ### Core Entities
 - **Garden**: Contains size (meters), sun direction (16 cardinal directions), frost dates (spring/fall)
 - **Component**: Garden boxes, pots, rectangular towers, circular towers - each with name, creation timestamp, size, coordinates, border width
+  - Garden boxes can have **roads** (fixed paths, all seasons/years) that cut back areas
 - **Tower Layers**: Towers have multiple layers with decreasing sizes from bottom to top
 - **Plant**: Placed within components, has spacing radius, companion/hostile relationships
 
@@ -64,7 +65,7 @@ Sowing windows (from–to weeks around the last frost) decide which seasons a pl
 1. **Splash Screen**: Logo display (assets/splash.png)
 2. **Environment Screen**: First-time setup for sun direction and frost dates
 3. **Home Screen**: Garden view with draggable/rotatable components, pannable canvas
-4. **Component Detail Screen**: Zoomed view of one season (year bar, Lente/Zomer/Herfst/Winter tabs), optimizer, one season as areas per planting (drag, resize, lock), plant counts, carried areas dimmed
+4. **Component Detail Screen**: Zoomed view of one season (year bar, Lente/Zomer/Herfst/Winter tabs), optimizer, one season as areas per planting (drag, resize, lock), plant counts, carried areas dimmed, roads (+ per border, automatic with width and optional ring), zoom
 5. **Add Plant Screen**: Grid selection (multi-select) to add plants to a component's planning; no quantities
 6. **Planning Screen**: Per component and year: plant list with its plantings (lente · zomer (2e)), and per season a ratio row per planting with a ⋯ menu to duplicate, move or remove a placed planting
 7. **Plant Details Screen**: Full plant information including growing calendar, companions, care instructions

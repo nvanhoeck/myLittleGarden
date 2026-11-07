@@ -404,3 +404,61 @@ describe('changing one area', () => {
     assert.equal(locked.toggleLock('spring', 't1').areaOf('tomaat-spring')?.locked, false);
   });
 });
+
+describe('roads', () => {
+  const box: PlantingArea = { shape: 'rectangle', widthCm: 100, lengthCm: 100 };
+  const bounds = (): PlantingArea => box;
+  const minSide = (): number => 5;
+  // Tomato (spring, carried into summer) at 10,10 20x20; lettuce at 10,50; kale (summer) at 50,10
+  const planned = withPlants('tomaat', 'boerenkool', 'sla')
+    .applyAreas('spring', [area('t1', 'tomaat-spring'), area('s1', 'sla-spring', { pieces: [piece(10, 50)] })])
+    .applyAreas('summer', [area('b1', 'boerenkool-summer', { pieces: [piece(50, 10)] })]);
+
+  test('a road across an area cuts it back in its season and the carried season keeps its status', () => {
+    const road = piece(0, 18, 100, 20); // y 18..38 cuts tomato (y 10..30) to y 10..18
+    const cut = planned.cutBackByRoads([road], minSide);
+    assert.deepEqual(cut.areaOf('tomaat-spring')?.pieces, [piece(10, 10, 20, 8)]);
+    assert.deepEqual(cut.carriedAreasIn('summer').map((a) => a.pieces), [[piece(10, 10, 20, 8)]]);
+    assert.deepEqual(['spring', 'summer'].map((s) => cut.statusOf(s as Season)), ['planned', 'planned']);
+    assert.equal(cut.isPlaced('tomaat-spring'), true);
+  });
+
+  test('a road over a whole area removes it like removeArea and outdates its season', () => {
+    const road = piece(0, 0, 100, 40); // covers the tomato completely, not the lettuce
+    const cut = planned.cutBackByRoads([road], minSide);
+    const removed = planned.removeArea('spring', 't1');
+    assert.equal(cut.areaOf('tomaat-spring'), undefined);
+    assert.equal(cut.isPlaced('tomaat-spring'), false);
+    assert.equal(cut.plantingById('tomaat-spring')?.fixedSeasons, undefined);
+    assert.equal(cut.statusOf('spring'), 'outdated');
+    assert.equal(cut.statusOf('summer'), removed.statusOf('summer'));
+    assert.equal(cut.statusOf('summer'), 'outdated');
+    assert.deepEqual(cut.areasIn('spring').map((a) => a.id), ['s1']);
+  });
+
+  test('a locked area shrinks and stays locked', () => {
+    const locked = planned.toggleLock('spring', 't1');
+    const cut = locked.cutBackByRoads([piece(0, 18, 100, 20)], minSide);
+    assert.equal(cut.areaOf('tomaat-spring')?.locked, true);
+    assert.deepEqual(cut.areaOf('tomaat-spring')?.pieces, [piece(10, 10, 20, 8)]);
+  });
+
+  test('a leftover thinner than the plant minimum is dropped', () => {
+    const cut = planned.cutBackByRoads([piece(0, 18, 100, 20)], (plantId) => (plantId === 'tomaat' ? 10 : 5));
+    assert.equal(cut.areaOf('tomaat-spring'), undefined);
+    assert.equal(cut.statusOf('spring'), 'outdated');
+  });
+
+  test('roads that touch nothing return the same planning', () => {
+    assert.equal(planned.cutBackByRoads([piece(80, 80, 10, 10)], minSide), planned);
+    assert.equal(planned.cutBackByRoads([], minSide), planned);
+  });
+
+  test('moving or resizing an area onto a road is refused, beside it is accepted', () => {
+    const road = [piece(40, 0, 5, 100)]; // x 40..45
+    assert.equal(planned.moveArea('spring', 't1', 20, 0, bounds, road), planned); // x 30..50
+    assert.notEqual(planned.moveArea('spring', 't1', 10, 0, bounds, road), planned); // x 20..40 touches
+    assert.equal(planned.resizeArea('spring', 't1', 0, 40, 20, bounds, road), planned); // x 10..50
+    assert.notEqual(planned.resizeArea('spring', 't1', 0, 30, 20, bounds, road), planned); // x 10..40
+  });
+});

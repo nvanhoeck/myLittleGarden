@@ -1,0 +1,97 @@
+appId: com.mylittlegarden.app
+name: Season planning - roads on a garden box (add, automatic with ring, edit, zoom)
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+# Optimize places Tomaat and Sla, then come back to the component detail screen.
+- runFlow: subflows/optimize_first_season.yaml
+- back
+- extendedWaitUntil:
+    visible:
+      id: "component-detail-screen"
+    timeout: 5000
+- assertVisible:
+    id: "season-area-tomaat"
+- assertVisible:
+    id: "season-area-sla"
+
+# Edit mode shows the + buttons on the borders.
+- tapOn:
+    id: "canvas-edit-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "road-add-0"
+    timeout: 5000
+
+# Add one road of 40 cm.
+- tapOn:
+    id: "road-add-0"
+- extendedWaitUntil:
+    visible:
+      id: "road-width-dialog"
+    timeout: 3000
+- tapOn:
+    id: "road-width-input"
+- eraseText: 5
+- inputText: "40"
+- tapOn:
+    id: "road-width-ok"
+- extendedWaitUntil:
+    visible:
+      id: "season-road-0"
+    timeout: 5000
+- assertVisible:
+    text: "Pad, 40 cm breed"
+
+# Automatic roads with a ring: the ring alone gives 4 roads (the setup does not
+# guarantee touching areas, so no more is asserted). The replace confirmation
+# shows after OK in the dialog, and only when unlocked roads exist (the road
+# added above is one), so the "Vervangen" tap after OK is optional.
+- tapOn:
+    id: "canvas-roads-auto"
+- extendedWaitUntil:
+    visible:
+      id: "road-width-dialog"
+    timeout: 3000
+- tapOn:
+    id: "road-ring-toggle"
+- tapOn:
+    id: "road-width-ok"
+- tapOn:
+    text: "Vervangen"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "season-road-3"
+    timeout: 5000
+
+# Tap a road and change its width.
+- tapOn:
+    id: "season-road-0"
+- extendedWaitUntil:
+    visible:
+      id: "road-width-dialog"
+    timeout: 3000
+- tapOn:
+    id: "road-width-input"
+- eraseText: 5
+- inputText: "50"
+- tapOn:
+    id: "road-width-ok"
+- assertVisible:
+    text: "Pad, 50 cm breed"
+
+# Zoom in and back out changes the zoom level.
+- assertVisible:
+    id: "canvas-zoom-level"
+    text: "100%"
+- tapOn:
+    id: "canvas-zoom-in"
+- assertVisible:
+    id: "canvas-zoom-level"
+    text: "125%"
+- tapOn:
+    id: "canvas-zoom-out"
+- assertVisible:
+    id: "canvas-zoom-level"
+    text: "100%"

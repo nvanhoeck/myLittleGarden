@@ -1,4 +1,5 @@
 import type { AreaData, AreaPiece, PlantingData, PlanningData, Season, SeasonPlanData, SeasonStatus } from '../../types/planning.types.ts';
+import { cutBack } from '../roads/CutBack.ts';
 import { layerBounds } from './FreeSpace.ts';
 import type { PlantingCalendar } from './PlantCalendar.ts';
 import type { PlantingArea } from './PlantingArea.ts';
@@ -232,13 +233,13 @@ export class Planning {
   /**
    * Moves all pieces of an area. Refused (this planning is returned) when a
    * piece would leave its layer's bounding box or overlap another area of
-   * the season or an area carried into it.
+   * the season or an area carried into it, or overlap a road.
    */
-  moveArea(season: Season, areaId: string, dxCm: number, dyCm: number, bounds: LayerBounds): Planning {
+  moveArea(season: Season, areaId: string, dxCm: number, dyCm: number, bounds: LayerBounds, roads: readonly AreaPiece[] = []): Planning {
     if (dxCm === 0 && dyCm === 0) {
       return this;
     }
-    return this.changeArea(season, areaId, bounds, (area) => ({
+    return this.changeArea(season, areaId, bounds, roads, (area) => ({
       ...area,
       pieces: area.pieces.map((p) => ({ ...p, xCm: p.xCm + dxCm, yCm: p.yCm + dyCm })),
     }));
@@ -249,11 +250,19 @@ export class Planning {
    * Refused like moveArea, and when the size is not positive or the piece
    * does not exist; the area's own pieces may not overlap either.
    */
-  resizeArea(season: Season, areaId: string, pieceIndex: number, widthCm: number, lengthCm: number, bounds: LayerBounds): Planning {
+  resizeArea(
+    season: Season,
+    areaId: string,
+    pieceIndex: number,
+    widthCm: number,
+    lengthCm: number,
+    bounds: LayerBounds,
+    roads: readonly AreaPiece[] = [],
+  ): Planning {
     if (!(widthCm > 0) || !(lengthCm > 0)) {
       return this;
     }
-    return this.changeArea(season, areaId, bounds, (area) =>
+    return this.changeArea(season, areaId, bounds, roads, (area) =>
       pieceIndex >= 0 && pieceIndex < area.pieces.length
         ? { ...area, pieces: area.pieces.map((p, i) => (i === pieceIndex ? { ...p, widthCm, lengthCm } : p)) }
         : area);
@@ -269,6 +278,31 @@ export class Planning {
     return removed
       .withPlantingChanged(area.plantingId, (p) => removed.withFrozenSeasons(p))
       .markedOutdated(this.laterSeasonsOf(area.plantingId));
+  }
+
+  /**
+   * Cuts every area of every season back from the roads. An area with nothing
+   * usable left is removed exactly like removeArea and its season becomes
+   * outdated; an area that only shrank keeps its season's status. A plant
+   * unknown to minSideOf is given a minimum side of 1. Returns this planning
+   * when no road touches an area.
+   */
+  cutBackByRoads(roads: readonly AreaPiece[], minSideOf: (plantId: string) => number): Planning {
+    let next: Planning = this;
+    for (const season of SEASONS) {
+      for (const area of this.areasIn(season)) {
+        const pieces = cutBack(area.pieces, roads, minSideOf(area.plantId) ?? 1);
+        if (pieces === null) {
+          next = next.removeArea(season, area.id).markedOutdated([season]);
+        } else if (pieces !== area.pieces) {
+          next = next.withSeason(season, (plan) => ({
+            ...plan,
+            areas: plan.areas.map((a) => (a.id === area.id ? { ...a, pieces } : a)),
+          }));
+        }
+      }
+    }
+    return next;
   }
 
   toggleLock(season: Season, areaId: string): Planning {
@@ -433,13 +467,19 @@ export class Planning {
   }
 
   /** Applies a change to one area when the result is valid (see moveArea); later seasons it grows in become outdated */
-  private changeArea(season: Season, areaId: string, bounds: LayerBounds, change: (area: AreaData) => AreaData): Planning {
+  private changeArea(
+    season: Season,
+    areaId: string,
+    bounds: LayerBounds,
+    roads: readonly AreaPiece[],
+    change: (area: AreaData) => AreaData,
+  ): Planning {
     const area = this.areasIn(season).find((a) => a.id === areaId);
     if (area === undefined) {
       return this;
     }
     const changed = change(area);
-    if (changed === area || !this.fitsBeside(season, changed, bounds)) {
+    if (changed === area || !this.fitsBeside(season, changed, bounds, roads)) {
       return this;
     }
     return this.withSeason(season, (plan) => ({
@@ -451,9 +491,9 @@ export class Planning {
   /**
    * Whether the area lies inside its layer's bounding box, clear of its own
    * other pieces and of every other area on its layer in the season and in
-   * the later seasons its planting grows in
+   * the later seasons its planting grows in, and clear of the roads
    */
-  private fitsBeside(season: Season, area: AreaData, bounds: LayerBounds): boolean {
+  private fitsBeside(season: Season, area: AreaData, bounds: LayerBounds, roads: readonly AreaPiece[]): boolean {
     const layerIndex = area.layerIndex ?? 0;
     const box = layerBounds(bounds(layerIndex));
     const seasons = [season, ...this.laterSeasonsOf(area.plantingId)];
@@ -464,7 +504,8 @@ export class Planning {
     return area.pieces.every((piece, index) =>
       isInside(piece, box)
       && area.pieces.every((sibling, i) => i === index || !piecesOverlap(piece, sibling))
-      && others.every((other) => !piecesOverlap(piece, other)));
+      && others.every((other) => !piecesOverlap(piece, other))
+      && roads.every((road) => !piecesOverlap(piece, road)));
   }
 }
 
