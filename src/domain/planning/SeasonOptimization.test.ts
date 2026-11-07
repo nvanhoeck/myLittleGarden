@@ -160,3 +160,14 @@ describe('optimizeSeason', () => {
     assert.ok(!areasOverlap(tomato, kale));
   });
 });
+
+describe('optimizeSeason with roads', () => {
+  test('no area overlaps a road across the middle of the box', () => {
+    const road: AreaPiece = { xCm: 0, yCm: 90, widthCm: 200, lengthCm: 20 };
+    const planning = Planning.from(undefined, calendar).addPlants(['tomaat', 'sla']);
+    const outcome = optimizeSeason({ ...input(planning, 'spring'), roads: [road] });
+    const areas = outcome.planning.areasIn('spring');
+    assert.equal(areas.length, 2);
+    assert.ok(areas.every((a) => a.pieces.every((p) => !overlap(p, road))));
+  });
+});
