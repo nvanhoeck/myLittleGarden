@@ -9,3 +9,13 @@ export type { Border } from './Borders.ts';
 export { automaticRoads, ringRoads, roadOnBorder, withWidth } from './RoadPlacement.ts';
 export type { AutomaticRoadsInput } from './RoadPlacement.ts';
 export { cutBack } from './CutBack.ts';
+export {
+  addRoadTo,
+  innerSizeOf,
+  placeAutomaticRoadsIn,
+  removeRoadFrom,
+  setAllRoadsLockedIn,
+  setRoadWidthIn,
+  toggleRoadLockIn,
+} from './GardenBoxRoads.ts';
+export type { AutomaticRoadsRequest, RoadContext } from './GardenBoxRoads.ts';

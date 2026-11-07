@@ -6,8 +6,8 @@ const emptySeason = { ratios: {}, areas: [], status: 'notPlanned' };
 const planning = { plants: ['tomaat'], plantings: [{ id: 'tomaat-spring', plantId: 'tomaat', startSeason: 'spring' }], seasons: { spring: emptySeason, summer: emptySeason, autumn: emptySeason, winter: emptySeason } };
 
 describe('migrateComponentState', () => {
-  test('the current version is 6', () => {
-    assert.equal(COMPONENT_STORE_VERSION, 6);
+  test('the current version is 7', () => {
+    assert.equal(COMPONENT_STORE_VERSION, 7);
   });
 
   test('given version 1, canvas fields go and an empty planning map is added', () => {
@@ -183,6 +183,32 @@ describe('migrating a v5 planning to areas', () => {
     for (const data of [null, 3, 'x', [], {}, { plants: [], plantings: 'x', seasons: [] }, { plants: ['a'], plantings: [], seasons: { spring: { ratios: 'x', placements: 5, areas: 'y', status: 3 } } }]) {
       assert.doesNotThrow(() => migrated(data));
     }
+  });
+});
+
+describe('migrateComponentState v6 to v7 (roads)', () => {
+  const road = { id: 'r1', xCm: 0, yCm: 0, widthCm: 20, lengthCm: 100 };
+  const migrate = (components: unknown[]): ReturnType<typeof migrateComponentState> => migrateComponentState({ components }, 6);
+
+  test('a garden box gets empty roads; a tower is untouched', () => {
+    const migrated = migrate([{ id: 'b', type: 'gardenBox', plannings: {} }, { id: 't', type: 'rectangularTower', plannings: {} }]);
+    assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, []);
+    assert.equal('roads' in migrated.components[1], false);
+  });
+
+  test('garbage roads become empty roads', () => {
+    const migrated = migrate([{ id: 'b', type: 'gardenBox', roads: 'x', plannings: {} }]);
+    assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, []);
+  });
+
+  test('an invalid road is dropped among valid ones', () => {
+    const migrated = migrate([{ id: 'b', type: 'gardenBox', roads: [road, { id: 'bad', xCm: 0, yCm: 0, widthCm: 0, lengthCm: 5 }, { ...road, id: 'r2', locked: true }, 7], plannings: {} }]);
+    assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, [road, { ...road, id: 'r2', locked: true }]);
+  });
+
+  test('roads on a component that is not a garden box are dropped', () => {
+    const migrated = migrate([{ id: 'p', type: 'pot', roads: [road], plannings: {} }]);
+    assert.equal('roads' in migrated.components[0], false);
   });
 });
 

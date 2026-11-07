@@ -5,6 +5,7 @@
 import type { ComponentData } from '../../types/component.types';
 import type { AreaData, AreaPiece, PlanningData, PlantingData, Season, SeasonPlanData, SeasonStatus } from '../../types/planning.types';
 import { areaDataSchema, areaPieceSchema, plantingDataSchema } from '../../schemas/planningSchema.ts';
+import { roadDataSchema } from '../../schemas/roadSchema.ts';
 
 /**
  * Version 2: canvas position and rotation removed from components.
@@ -13,8 +14,9 @@ import { areaDataSchema, areaPieceSchema, plantingDataSchema } from '../../schem
  * version 3 and before were dropped; version 4 plannings are converted in version 5.
  * Version 5: plants have plantings (one per start season); ratios and placements belong to plantings. v4 plannings are converted.
  * Version 6: plantings get areas instead of placements; placements are dropped and planned seasons become outdated.
+ * Version 7: garden boxes have roads; invalid roads are dropped.
  */
-export const COMPONENT_STORE_VERSION = 6;
+export const COMPONENT_STORE_VERSION = 7;
 
 export interface PersistedComponentState {
   components: ComponentData[];
@@ -150,13 +152,29 @@ function withPlannings(component: Record<string, unknown>, legacy: boolean): Rec
   return { ...rest, plannings: validPlannings(plannings, legacy) };
 }
 
+/** The valid roads of a garden box, one entry at a time, without duplicate ids; other components have none */
+function withRoads(component: Record<string, unknown>): Record<string, unknown> {
+  const { roads, ...rest } = component;
+  if (component.type !== 'gardenBox') {
+    return rest;
+  }
+  const seen = new Set<string>();
+  const salvaged = (Array.isArray(roads) ? roads : []).flatMap((entry) => {
+    const parsed = roadDataSchema.safeParse(entry);
+    if (!parsed.success || seen.has(parsed.data.id)) return [];
+    seen.add(parsed.data.id);
+    return [parsed.data];
+  });
+  return { ...rest, roads: salvaged };
+}
+
 export function migrateComponentState(persistedState: unknown, version: number): PersistedComponentState {
   if (!isRecord(persistedState) || !Array.isArray(persistedState.components)) {
     return EMPTY_STATE;
   }
   const components = persistedState.components.filter(isRecord);
   const withoutCanvas = version < 2 ? components.map(stripCanvasFields) : components;
-  return { components: withoutCanvas.map((component) => withPlannings(component, version < 6)) as unknown as ComponentData[] };
+  return { components: withoutCanvas.map((component) => withRoads(withPlannings(component, version < 6))) as unknown as ComponentData[] };
 }
 
 /**
