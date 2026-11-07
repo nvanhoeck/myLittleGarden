@@ -213,14 +213,25 @@ function keptChunks(chunks: readonly Chunk[], target: number): Chunk[] {
 
 /** Cost of a layer left empty while there are plantings enough for every layer */
 const EMPTY_LAYER_COST = 1e9;
+/** Cost of a planting sent to a layer whose space is too small for it: worse than an empty layer */
+const TOO_SMALL_COST = 1e12;
 
 /**
  * Splits the plantings (in neighbour order) into consecutive groups, one per
  * layer with free space, lowest layer first; an area lives on one layer and a
- * group fills its layer. The split whose shares stay closest to their targets
- * wins, and every layer gets a group when there are plantings enough.
+ * group fills its layer. A planting is not sent to a layer where its share is
+ * too small for it (its minimum side exceeds the layer's widest free rectangle,
+ * or its target is below a minimum square) unless no split avoids it. Of the
+ * rest, the split whose shares stay closest to their targets wins, and every
+ * layer gets a group when there are plantings enough.
  */
-function groupByLayer(order: readonly string[], ratioOf: (id: string) => number, capacities: readonly number[]): Map<string, number> {
+function groupByLayer(
+  order: readonly string[],
+  ratioOf: (id: string) => number,
+  minimumSideOf: (id: string) => number,
+  capacities: readonly number[],
+  widestSides: readonly number[],
+): Map<string, number> {
   const layers = capacities.map((_, index) => index).filter((index) => capacities[index] > EPSILON_CM);
   const result = new Map<string, number>();
   if (layers.length === 0) return result;
@@ -231,11 +242,14 @@ function groupByLayer(order: readonly string[], ratioOf: (id: string) => number,
   const k = layers.length;
   const groupCost = (layer: number, from: number, to: number): number => {
     if (from === to) return n >= k ? EMPTY_LAYER_COST : capacities[layer] / free;
-    const ratios = order.slice(from, to).map(ratioOf);
-    const groupRatio = sumOf(ratios);
-    return sumOf(ratios.map((ratio) => Math.abs(
-      (groupRatio > 0 ? (capacities[layer] * ratio) / groupRatio : 0) / free - (totalRatio > 0 ? ratio / totalRatio : 0),
-    )));
+    const group = order.slice(from, to);
+    const groupRatio = sumOf(group.map(ratioOf));
+    return sumOf(group.map((id) => {
+      const target = groupRatio > 0 ? (capacities[layer] * ratioOf(id)) / groupRatio : 0;
+      const side = minimumSideOf(id);
+      const tooSmall = side > widestSides[layer] + EPSILON_CM || target < side * side - EPSILON_CM;
+      return (tooSmall ? TOO_SMALL_COST : 0) + Math.abs(target / free - (totalRatio > 0 ? ratioOf(id) / totalRatio : 0));
+    }));
   };
 
   // cost[j][i]: the best split of the first i plantings over the first j layers; cut[j][i]: where layer j's group starts
@@ -386,7 +400,8 @@ export function layoutAreas(request: AreaLayoutRequest): AreaLayoutResult {
   const targetShareOf = (id: string) => (totalRatio > 0 ? ratioOf(id) / totalRatio : 0);
 
   const order = orderForNeighbours([...byId.keys()], (a, b) => request.relations(byId.get(a)!.plantId, byId.get(b)!.plantId));
-  const layerOf = groupByLayer(order, ratioOf, capacities);
+  const widestSides = freeByLayer.map((rectangles) => Math.max(0, ...rectangles.map((r) => Math.min(r.widthCm, r.lengthCm))));
+  const layerOf = groupByLayer(order, ratioOf, (id) => minimumSideOf(byId.get(id)!.traits), capacities, widestSides);
   const piecesOf = new Map<string, AreaPiece[]>();
 
   request.layers.forEach((layer, layerIndex) => {
@@ -408,7 +423,26 @@ export function layoutAreas(request: AreaLayoutRequest): AreaLayoutResult {
       }
     });
 
-    refillLeftovers({ layer, fixed: fixedOn(layerIndex), group, byId, targetOf, piecesOf });
+    // A round layer's pieces lie in its bounding square: an individual planting whose
+    // area holds no plant there gets none, and its space is re-poured to the others
+    const dropped = new Set<string>();
+    const refill = () => {
+      const open = group.filter((id) => !dropped.has(id));
+      if (open.length > 0) refillLeftovers({ layer, fixed: fixedOn(layerIndex), group: open, byId, targetOf, piecesOf });
+    };
+    const holdsNoPlant = (id: string) => (piecesOf.get(id)?.length ?? 0) > 0
+      && plantCountOf({ pieces: piecesOf.get(id)! }, byId.get(id)!.traits, layer) === 0;
+    refill();
+    if (layer.shape !== 'circle') return;
+    for (let round = 0; round < group.length; round++) {
+      const empty = group.filter((id) => !dropped.has(id) && holdsNoPlant(id));
+      if (empty.length === 0) return;
+      empty.forEach((id) => {
+        dropped.add(id);
+        piecesOf.delete(id);
+      });
+      refill();
+    }
   });
 
   const areas: LaidOutArea[] = order

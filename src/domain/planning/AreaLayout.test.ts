@@ -165,6 +165,30 @@ describe('layoutAreas', () => {
     assert.ok(used >= 0.9, `used ${used}`);
   });
 
+  test('given a tower and one large plant, it goes to a layer it fits on, whatever the input order', () => {
+    const layers = [rectangle(100, 100), rectangle(70, 70), rectangle(40, 40)];
+    for (const ids of [['a', 'b', 'z'], ['z', 'a', 'b'], ['a', 'z', 'b']]) {
+      const req = request({ layers, plantings: ids.map((id) => planting(id, 1, individual(id === 'z' ? 25 : 5))) });
+      const result = layoutAreas(req);
+      assertSound(req, result);
+      const z = shareOf(result, 'z');
+      assert.equal(z.fits, true, ids.join());
+      assert.ok((z.plantCount ?? 0) > 0, ids.join());
+      assert.notEqual(result.areas.find((area) => area.plantingId === 'z')?.layerIndex, 2, ids.join());
+    }
+  });
+
+  test('given a round pot, a planting whose area would hold no plant gets no area and does not fit', () => {
+    const req = request({ layers: [{ shape: 'circle', diameterCm: 60 }], plantings: ['a', 'b', 'c', 'd'].map((id) => planting(id)) });
+    const result = layoutAreas(req);
+    assertSound(req, result);
+    for (const share of result.shares) {
+      assert.equal(share.fits, (share.plantCount ?? 0) > 0, JSON.stringify(share));
+      assert.equal(result.areas.some((area) => area.plantingId === share.plantingId), share.fits, JSON.stringify(share));
+    }
+    assert.ok(result.shares.some((share) => share.fits));
+  });
+
   test('given one planting around a fixed piece in the middle, at least 90 % of the free area is used', () => {
     const fixed = [{ layerIndex: 0, piece: { xCm: 150, yCm: 150, widthCm: 100, lengthCm: 100 } }];
     const req = request({ layers: [rectangle(400, 400)], fixed, plantings: [planting('a', 1, individual(5))] });
