@@ -54,12 +54,6 @@ const SHARE_TOLERANCE = 0.1;
 /** A free rectangle is a strip field when its long side is at least this many times its short side */
 const STRIP_RATIO = 2;
 
-/** A free rectangle with the layer it lies on */
-interface FreeRectangle {
-  readonly layerIndex: number;
-  readonly piece: AreaPiece;
-}
-
 /** Part of a planting's target poured into one free rectangle */
 interface Chunk {
   readonly plantingId: string;
@@ -184,14 +178,14 @@ function partitionFitting(
 }
 
 /**
- * Pours each planting's target, in order, into the free rectangles, largest
- * (lowest layer) first: a planting that overflows the current rectangle
+ * Pours each planting's target, in order, into the free rectangles of a
+ * layer, largest first: a planting that overflows the current rectangle
  * continues in the next one.
  */
-function pour(order: readonly string[], targetOf: (id: string) => number, rectangles: readonly FreeRectangle[]): Chunk[] {
+function pour(order: readonly string[], targetOf: (id: string) => number, rectangles: readonly AreaPiece[]): Chunk[] {
   const chunks: Chunk[] = [];
   let current = 0;
-  let room = rectangles.length > 0 ? areaOf(rectangles[0].piece) : 0;
+  let room = rectangles.length > 0 ? areaOf(rectangles[0]) : 0;
   for (const plantingId of order) {
     let need = targetOf(plantingId);
     while (need > EPSILON_CM && current < rectangles.length) {
@@ -201,41 +195,177 @@ function pour(order: readonly string[], targetOf: (id: string) => number, rectan
       room -= volume;
       if (room <= EPSILON_CM) {
         current++;
-        room = current < rectangles.length ? areaOf(rectangles[current].piece) : 0;
+        room = current < rectangles.length ? areaOf(rectangles[current]) : 0;
       }
     }
   }
   return chunks;
 }
 
-/**
- * The chunks a planting keeps: all on one layer (the one holding most of
- * it), at most 3, and none below 10 % of its target unless it is the only one.
- */
-function keptChunks(chunks: readonly Chunk[], target: number, rectangles: readonly FreeRectangle[]): Chunk[] {
-  if (chunks.length === 0) return [];
-  const perLayer = new Map<number, number>();
-  for (const chunk of chunks) {
-    const layer = rectangles[chunk.rectangle].layerIndex;
-    perLayer.set(layer, (perLayer.get(layer) ?? 0) + chunk.volume);
-  }
-  const [layer] = [...perLayer.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
-  const largestFirst = chunks
-    .filter((chunk) => rectangles[chunk.rectangle].layerIndex === layer)
+/** The chunks a planting keeps: at most 3, none below 10 % of its target unless it is the only one */
+function keptChunks(chunks: readonly Chunk[], target: number): Chunk[] {
+  return [...chunks]
     .sort((a, b) => b.volume - a.volume || a.rectangle - b.rectangle)
-    .slice(0, MAX_PIECES);
-  return largestFirst
+    .slice(0, MAX_PIECES)
     .filter((chunk, index) => index === 0 || chunk.volume >= SHARE_TOLERANCE * target)
     .sort((a, b) => a.rectangle - b.rectangle);
+}
+
+/** Cost of a layer left empty while there are plantings enough for every layer */
+const EMPTY_LAYER_COST = 1e9;
+
+/**
+ * Splits the plantings (in neighbour order) into consecutive groups, one per
+ * layer with free space, lowest layer first; an area lives on one layer and a
+ * group fills its layer. The split whose shares stay closest to their targets
+ * wins, and every layer gets a group when there are plantings enough.
+ */
+function groupByLayer(order: readonly string[], ratioOf: (id: string) => number, capacities: readonly number[]): Map<string, number> {
+  const layers = capacities.map((_, index) => index).filter((index) => capacities[index] > EPSILON_CM);
+  const result = new Map<string, number>();
+  if (layers.length === 0) return result;
+
+  const free = sumOf(capacities);
+  const totalRatio = sumOf(order.map(ratioOf));
+  const n = order.length;
+  const k = layers.length;
+  const groupCost = (layer: number, from: number, to: number): number => {
+    if (from === to) return n >= k ? EMPTY_LAYER_COST : capacities[layer] / free;
+    const ratios = order.slice(from, to).map(ratioOf);
+    const groupRatio = sumOf(ratios);
+    return sumOf(ratios.map((ratio) => Math.abs(
+      (groupRatio > 0 ? (capacities[layer] * ratio) / groupRatio : 0) / free - (totalRatio > 0 ? ratio / totalRatio : 0),
+    )));
+  };
+
+  // cost[j][i]: the best split of the first i plantings over the first j layers; cut[j][i]: where layer j's group starts
+  const cost = Array.from({ length: k + 1 }, () => new Array<number>(n + 1).fill(Infinity));
+  const cut = Array.from({ length: k + 1 }, () => new Array<number>(n + 1).fill(0));
+  cost[0][0] = 0;
+  for (let j = 1; j <= k; j++) {
+    for (let i = 0; i <= n; i++) {
+      for (let s = 0; s <= i; s++) {
+        const candidate = cost[j - 1][s] + groupCost(layers[j - 1], s, i);
+        if (candidate < cost[j][i] - 1e-12) {
+          cost[j][i] = candidate;
+          cut[j][i] = s;
+        }
+      }
+    }
+  }
+  for (let j = k, i = n; j >= 1; j--) {
+    const start = cut[j][i];
+    for (let t = start; t < i; t++) result.set(order[t], layers[j - 1]);
+    i = start;
+  }
+  return result;
+}
+
+/** The piece grown into a free neighbour rectangle along their shared edge, when its whole side lies on that edge */
+function extendInto(piece: AreaPiece, leftover: AreaPiece): AreaPiece | null {
+  const near = (a: number, b: number) => Math.abs(a - b) <= EPSILON_CM;
+  const withinX = piece.xCm >= leftover.xCm - EPSILON_CM && piece.xCm + piece.widthCm <= leftover.xCm + leftover.widthCm + EPSILON_CM;
+  const withinY = piece.yCm >= leftover.yCm - EPSILON_CM && piece.yCm + piece.lengthCm <= leftover.yCm + leftover.lengthCm + EPSILON_CM;
+  if (withinX && near(piece.yCm + piece.lengthCm, leftover.yCm)) return { ...piece, lengthCm: piece.lengthCm + leftover.lengthCm };
+  if (withinX && near(leftover.yCm + leftover.lengthCm, piece.yCm)) return { ...piece, yCm: leftover.yCm, lengthCm: piece.lengthCm + leftover.lengthCm };
+  if (withinY && near(piece.xCm + piece.widthCm, leftover.xCm)) return { ...piece, widthCm: piece.widthCm + leftover.widthCm };
+  if (withinY && near(leftover.xCm + leftover.widthCm, piece.xCm)) return { ...piece, xCm: leftover.xCm, widthCm: piece.widthCm + leftover.widthCm };
+  return null;
+}
+
+/** The planting's piece that grows most into the leftover: its index and grown shape */
+function bestExtension(pieces: readonly AreaPiece[], leftover: AreaPiece): { index: number; piece: AreaPiece } | null {
+  let best: { index: number; piece: AreaPiece } | null = null;
+  let gain = EPSILON_CM;
+  pieces.forEach((piece, index) => {
+    const grown = extendInto(piece, leftover);
+    if (grown && areaOf(grown) - areaOf(piece) > gain) {
+      best = { index, piece: grown };
+      gain = areaOf(grown) - areaOf(piece);
+    }
+  });
+  return best;
+}
+
+/** At most this many passes re-pour the leftover space of a layer */
+const MAX_REFILL_ROUNDS = 20;
+
+/** What re-pouring a layer's leftover space needs */
+interface Refill {
+  readonly layer: PlantingArea;
+  readonly fixed: readonly AreaPiece[];
+  /** The plantings on this layer, in neighbour order */
+  readonly group: readonly string[];
+  readonly byId: ReadonlyMap<string, Planting>;
+  readonly targetOf: (id: string) => number;
+  readonly piecesOf: Map<string, AreaPiece[]>;
+}
+
+/**
+ * Free space must not vanish: every leftover rectangle of the layer (dropped
+ * by the piece cap, the 10 % rule, a too-small claim or snapping) goes to the
+ * plantings with the largest deficit (target − actual). Two or more of them
+ * with room for a piece share it; otherwise the first one that can take it
+ * grows a piece into it along a shared edge or, below the cap, gets a new piece.
+ */
+function refillLeftovers({ layer, fixed, group, byId, targetOf, piecesOf }: Refill): void {
+  const traitsOf = (id: string) => byId.get(id)!.traits;
+  const smallestSide = Math.min(...group.map((id) => minimumSideOf(traitsOf(id))));
+  const rank = new Map(group.map((id, index) => [id, index]));
+  const deficitOf = (id: string) => targetOf(id) - sumOf((piecesOf.get(id) ?? []).map(areaOf));
+  const add = (id: string, piece: AreaPiece) => piecesOf.set(id, [...(piecesOf.get(id) ?? []), piece]);
+
+  for (let round = 0; round < MAX_REFILL_ROUNDS; round++) {
+    const placed = group.flatMap((id) => piecesOf.get(id) ?? []);
+    const leftovers = freeRectangles(layer, [...fixed, ...placed], smallestSide)
+      .sort((a, b) => areaOf(b) - areaOf(a) || a.yCm - b.yCm || a.xCm - b.xCm);
+    let progress = false;
+
+    for (const leftover of leftovers) {
+      const takesNewPiece = (id: string) => (piecesOf.get(id)?.length ?? 0) < MAX_PIECES
+        && Math.min(leftover.widthCm, leftover.lengthCm) >= minimumSideOf(traitsOf(id)) - EPSILON_CM;
+      const byDeficit = [...group].sort((a, b) => deficitOf(b) - deficitOf(a) || rank.get(a)! - rank.get(b)!);
+      const withRoom = byDeficit.filter((id) => takesNewPiece(id) && deficitOf(id) > EPSILON_CM);
+
+      if (withRoom.length >= 2) {
+        const claims = [...withRoom]
+          .sort((a, b) => rank.get(a)! - rank.get(b)!)
+          .map((id) => ({ plantingId: id, weight: deficitOf(id) }));
+        for (const [id, piece] of partitionFitting(leftover, claims, byId)) {
+          add(id, piece);
+          progress = true;
+        }
+        continue;
+      }
+
+      for (const id of byDeficit) {
+        const extension = bestExtension(piecesOf.get(id) ?? [], leftover);
+        if (extension) {
+          piecesOf.set(id, (piecesOf.get(id) ?? []).map((piece, index) => (index === extension.index ? extension.piece : piece)));
+          progress = true;
+          break;
+        }
+        const piece = takesNewPiece(id) ? partitionFitting(leftover, [{ plantingId: id, weight: 1 }], byId).get(id) : undefined;
+        if (piece) {
+          add(id, piece);
+          progress = true;
+          break;
+        }
+      }
+    }
+    if (!progress) return;
+  }
 }
 
 /**
  * Lays out the plantings of a season as areas: the free space (layers minus
  * fixed pieces) is split into rectangles, plantings are ordered so companions
- * neighbour and combative plants stay apart, each gets a share of the free area
- * by ratio (in 1..3 pieces on one layer), and pieces snap to whole plant
- * spacings. A planting whose area would be smaller than its minimum side gets none.
- * The work depends on the number of plantings and fixed pieces, not on the number of plants.
+ * neighbour and combative plants stay apart, each layer gets a consecutive group
+ * of them, each gets a share of its layer by ratio (in 1..3 pieces), and pieces
+ * snap to whole plant spacings. Leftover space is re-poured to the plantings
+ * furthest below their target. A planting whose area would be smaller than its
+ * minimum side gets none. The work depends on the number of plantings and fixed
+ * pieces, not on the number of plants.
  */
 export function layoutAreas(request: AreaLayoutRequest): AreaLayoutResult {
   const byId = new Map<string, Planting>();
@@ -245,42 +375,45 @@ export function layoutAreas(request: AreaLayoutRequest): AreaLayoutResult {
   if (byId.size === 0) return { areas: [], shares: [] };
 
   const smallestSide = Math.min(...[...byId.values()].map((p) => minimumSideOf(p.traits)));
-  const rectangles: FreeRectangle[] = request.layers
-    .flatMap((layer, layerIndex) => freeRectangles(
-      layer,
-      request.fixed.filter((f) => f.layerIndex === layerIndex).map((f) => f.piece),
-      smallestSide,
-    ).map((piece) => ({ layerIndex, piece })))
-    .sort((a, b) => a.layerIndex - b.layerIndex || areaOf(b.piece) - areaOf(a.piece) || a.piece.yCm - b.piece.yCm || a.piece.xCm - b.piece.xCm);
-  const freeArea = sumOf(rectangles.map((r) => areaOf(r.piece)));
+  const fixedOn = (layerIndex: number) => request.fixed.filter((f) => f.layerIndex === layerIndex).map((f) => f.piece);
+  const freeByLayer = request.layers.map((layer, layerIndex) => freeRectangles(layer, fixedOn(layerIndex), smallestSide)
+    .sort((a, b) => areaOf(b) - areaOf(a) || a.yCm - b.yCm || a.xCm - b.xCm));
+  const capacities = freeByLayer.map((rectangles) => sumOf(rectangles.map(areaOf)));
+  const freeArea = sumOf(capacities);
 
   const ratioOf = (id: string) => Math.max(0, byId.get(id)!.ratio);
   const totalRatio = sumOf([...byId.keys()].map(ratioOf));
   const targetShareOf = (id: string) => (totalRatio > 0 ? ratioOf(id) / totalRatio : 0);
 
   const order = orderForNeighbours([...byId.keys()], (a, b) => request.relations(byId.get(a)!.plantId, byId.get(b)!.plantId));
-  const poured = pour(order, (id) => targetShareOf(id) * freeArea, rectangles);
-  const kept = order.flatMap((id) => keptChunks(
-    poured.filter((chunk) => chunk.plantingId === id),
-    targetShareOf(id) * freeArea,
-    rectangles,
-  ));
-
+  const layerOf = groupByLayer(order, ratioOf, capacities);
   const piecesOf = new Map<string, AreaPiece[]>();
-  rectangles.forEach((rectangle, index) => {
-    const claims = order.flatMap((id) => kept
-      .filter((chunk) => chunk.plantingId === id && chunk.rectangle === index)
-      .map((chunk) => ({ plantingId: id, weight: chunk.volume })));
-    if (claims.length === 0) return;
-    for (const [id, piece] of partitionFitting(rectangle.piece, claims, byId)) {
-      piecesOf.set(id, [...(piecesOf.get(id) ?? []), piece]);
-    }
+
+  request.layers.forEach((layer, layerIndex) => {
+    const group = order.filter((id) => layerOf.get(id) === layerIndex);
+    if (group.length === 0) return;
+    const rectangles = freeByLayer[layerIndex];
+    const groupRatio = sumOf(group.map(ratioOf));
+    const targetOf = (id: string) => (groupRatio > 0 ? (ratioOf(id) / groupRatio) * capacities[layerIndex] : 0);
+
+    const poured = pour(group, targetOf, rectangles);
+    const kept = group.flatMap((id) => keptChunks(poured.filter((chunk) => chunk.plantingId === id), targetOf(id)));
+    rectangles.forEach((rectangle, index) => {
+      const claims = kept
+        .filter((chunk) => chunk.rectangle === index)
+        .map((chunk) => ({ plantingId: chunk.plantingId, weight: chunk.volume }));
+      if (claims.length === 0) return;
+      for (const [id, piece] of partitionFitting(rectangle, claims, byId)) {
+        piecesOf.set(id, [...(piecesOf.get(id) ?? []), piece]);
+      }
+    });
+
+    refillLeftovers({ layer, fixed: fixedOn(layerIndex), group, byId, targetOf, piecesOf });
   });
 
-  const layerOf = (id: string) => rectangles[kept.find((chunk) => chunk.plantingId === id)!.rectangle].layerIndex;
   const areas: LaidOutArea[] = order
-    .filter((id) => piecesOf.has(id))
-    .map((id) => ({ plantingId: id, plantId: byId.get(id)!.plantId, layerIndex: layerOf(id), pieces: piecesOf.get(id)! }));
+    .filter((id) => (piecesOf.get(id)?.length ?? 0) > 0)
+    .map((id) => ({ plantingId: id, plantId: byId.get(id)!.plantId, layerIndex: layerOf.get(id)!, pieces: piecesOf.get(id)! }));
 
   const shares: AreaShare[] = order.map((id) => {
     const planting = byId.get(id)!;

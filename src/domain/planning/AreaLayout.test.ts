@@ -155,6 +155,36 @@ describe('layoutAreas', () => {
     assert.deepEqual([...layers].sort(), [0, 1]);
   });
 
+  test('given a tower with 2 plantings, both layers get an area and the free area is used', () => {
+    const req = request({ layers: [rectangle(200, 200), rectangle(100, 100)], plantings: [planting('a'), planting('b')] });
+    const result = layoutAreas(req);
+    assertSound(req, result);
+    // Layer capacities are 4:1, so 50/50 is impossible with one layer per area
+    assert.deepEqual([...new Set(result.areas.map((area) => area.layerIndex))].sort(), [0, 1]);
+    const used = result.shares.reduce((sum, s) => sum + s.actualShare, 0);
+    assert.ok(used >= 0.9, `used ${used}`);
+  });
+
+  test('given one planting around a fixed piece in the middle, at least 90 % of the free area is used', () => {
+    const fixed = [{ layerIndex: 0, piece: { xCm: 150, yCm: 150, widthCm: 100, lengthCm: 100 } }];
+    const req = request({ layers: [rectangle(400, 400)], fixed, plantings: [planting('a', 1, individual(5))] });
+    const result = layoutAreas(req);
+    assertSound(req, result);
+    assert.ok(shareOf(result, 'a').actualShare >= 0.9 - 1e-9, `used ${shareOf(result, 'a').actualShare}`);
+  });
+
+  test('given one planting and 3 fixed pieces, at least 85 % of the free area is used', () => {
+    const fixed = [
+      { layerIndex: 0, piece: { xCm: 0, yCm: 0, widthCm: 100, lengthCm: 100 } },
+      { layerIndex: 0, piece: { xCm: 0, yCm: 150, widthCm: 100, lengthCm: 100 } },
+      { layerIndex: 0, piece: { xCm: 300, yCm: 300, widthCm: 100, lengthCm: 100 } },
+    ];
+    const req = request({ layers: [rectangle(400, 400)], fixed, plantings: [planting('a', 1, individual(5))] });
+    const result = layoutAreas(req);
+    assertSound(req, result);
+    assert.ok(shareOf(result, 'a').actualShare >= 0.85, `used ${shareOf(result, 'a').actualShare}`);
+  });
+
   test('given reversed input, the result is the same', () => {
     const fixed = [
       { layerIndex: 0, piece: { xCm: 0, yCm: 0, widthCm: 40, lengthCm: 40 } },
