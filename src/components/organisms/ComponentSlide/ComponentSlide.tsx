@@ -6,9 +6,9 @@
 import React, { useMemo } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import type { AreaData, ComponentData, PlantData } from '@/types';
+import type { AreaData, AreaPiece, ComponentData, PlantData } from '@/types';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
-import { AreaShapes } from '@/components/molecules/AreaShapes';
+import { AreaShapes, RoadShapes } from '@/components/molecules/AreaShapes';
 import {
   getComponentColor,
   getComponentDimensionsLabel,
@@ -19,6 +19,7 @@ import { fitScale } from './slideGeometry';
 const DRAWING_MAX_PX = 280;
 const SLIDE_HORIZONTAL_PADDING = 32;
 const ICON_PX = 20;
+const NO_ROADS: readonly AreaPiece[] = [];
 
 interface ComponentSlideProps {
   component: ComponentData;
@@ -58,6 +59,8 @@ interface LayerDrawingProps {
   scale: number;
   isCircular: boolean;
   areas: readonly AreaData[];
+  /** Roads of a garden box, drawn under the areas */
+  roads: readonly AreaPiece[];
   getPlantById: (plantId: string) => PlantData | undefined;
 }
 
@@ -68,6 +71,7 @@ function LayerDrawing({
   scale,
   isCircular,
   areas,
+  roads,
   getPlantById,
 }: LayerDrawingProps): React.JSX.Element {
   const dims = getTowerLayerDimensions(baseInnerWidthCm, baseInnerHeightCm, layerIndex);
@@ -93,6 +97,7 @@ function LayerDrawing({
         backgroundColor: 'rgba(0, 0, 0, 0.15)',
       }}
     >
+      <RoadShapes roads={roads} scale={scale} />
       <AreaShapes areas={shapes} scale={scale} maxIconPx={ICON_PX} />
     </View>
   );
@@ -129,6 +134,12 @@ export function ComponentSlide({
   const layerIndexes = useMemo(
     () => Array.from({ length: numberOfLayers }, (_, i) => i),
     [numberOfLayers],
+  );
+
+  // Only garden boxes have roads; they lie in the inner area like the area pieces
+  const roads = useMemo(
+    (): readonly AreaPiece[] => (component.type === 'gardenBox' ? component.roads ?? NO_ROADS : NO_ROADS),
+    [component],
   );
 
   const areasByLayer = useMemo(() => {
@@ -176,6 +187,7 @@ export function ComponentSlide({
                 scale={scale}
                 isCircular={isCircular}
                 areas={areasByLayer.get(layerIndex) ?? []}
+                roads={layerIndex === 0 ? roads : NO_ROADS}
                 getPlantById={getPlantById}
               />
             ))}

@@ -99,8 +99,41 @@ export interface EdgeMarkerView {
   readonly yCm: number;
 }
 
+/** A road (path) of a garden box, drawn under the areas */
+export interface RoadView {
+  readonly id: string;
+  /** cm in the box's inner area */
+  readonly rect: AreaPiece;
+  readonly locked: boolean;
+}
+
+/** Where a road can go: a segment between two areas, or along the box edge (same shape as the roads domain Border) */
+export interface RoadBorder {
+  /** vertical = the line x = constant */
+  readonly orientation: 'vertical' | 'horizontal';
+  /** x for vertical, y for horizontal (cm) */
+  readonly lineCm: number;
+  readonly fromCm: number;
+  readonly toCm: number;
+  readonly kind: 'between' | 'edge';
+  /** edge only: which side of the line the box interior lies */
+  readonly inside?: 'before' | 'after';
+}
+
+/** A + button on a border without a road, at the border's midpoint (cm) */
+export interface RoadSlotView {
+  readonly key: string;
+  readonly border: RoadBorder;
+  readonly xCm: number;
+  readonly yCm: number;
+}
+
 export interface AreaCanvasView {
   /** Carried areas first, then the season's own */
   readonly areas: readonly AreaView[];
   readonly edgeMarkers: readonly EdgeMarkerView[];
+  /** Roads of a garden box; empty for pots and towers */
+  readonly roads: readonly RoadView[];
+  /** + buttons for new roads: garden box in edit mode only */
+  readonly roadSlots: readonly RoadSlotView[];
 }

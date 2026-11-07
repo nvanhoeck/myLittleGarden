@@ -6,26 +6,45 @@
  * 15 x 20 m component costs a few dozen elements. Carried areas are dimmed and
  * not interactive. In edit mode an area is dragged to move it, tapped to select
  * it, and the selected area's first piece has a corner handle to resize it.
+ * Roads of a garden box lie under the areas; in edit mode a road is tapped to
+ * edit it and every border without a road has a + to add one.
+ * Pan and zoom: zoom 1.0 is the scale-to-fit; zoomed in, the drawing scrolls in
+ * a vertical ScrollView with a nested horizontal one (only when it is larger
+ * than the view) and is centred on every zoom step. Area drags keep the touch
+ * (their responder blocks the scroll views in edit mode); dragging the
+ * background scrolls.
  * Purely presentational: every change goes out through a callback.
  *
  * BEM contract (src/styles/planning/season.css): .season-area-canvas, __drawing, __layer;
  * .season-area, --dimmed, --selected, --warning, __warning, __label, __label-text, __carried-label, __icon,
  * __resize-handle, __resize-preview, __edge-marker, --companion, --combative;
+ * .season-road, __lock; .season-road-add, __text;
+ * .season-area-zoom, __button, __button--disabled, __button-text, __button-text--disabled, __level;
  * .season-area-toolbar, __button, __button--active, __text
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { AreaPlantIcon, categoryTint } from '@/components/molecules/AreaShapes';
-import type { AreaCanvasView, AreaPiece, AreaView, EdgeMarkerView } from '@/types';
+import { AreaPlantIcon, categoryTint, ROAD_TINT } from '@/components/molecules/AreaShapes';
+import type { AreaCanvasView, AreaPiece, AreaView, EdgeMarkerView, RoadSlotView, RoadView } from '@/types';
 
 /** A drag shorter than this (px) is a tap */
 const TAP_SLOP_PX = 6;
 const HANDLE_PX = 28;
 const MARKER_PX = 12;
+const ROAD_ADD_PX = 28;
 /** After a released drag, how long the store has to redraw the area before a refused move snaps back */
 const REFUSED_MOVE_CHECK_MS = 150;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.25;
+/** Room around the drawing while it scrolls (px) */
+const SCROLL_PADDING_PX = 16;
+/** Room around the drawing at zoom 1.0 (px): half a + button or resize handle on the box edge stays visible */
+const FIT_MARGIN_PX = ROAD_ADD_PX / 2;
+/** Sizes within this (px) of the view still fit */
+const FIT_TOLERANCE_PX = 0.5;
 
 type LayerShape = { readonly shape: 'rectangle'; readonly widthCm: number; readonly lengthCm: number } | { readonly shape: 'circle'; readonly diameterCm: number };
 
@@ -53,6 +72,12 @@ interface SeasonAreaCanvasProps {
   onToggleEditMode: () => void;
   onLockAll: () => void;
   onUnlockAll: () => void;
+  /** Edit mode: a road was tapped (garden box only) */
+  onRoadPress?: (road: RoadView) => void;
+  /** Edit mode: the + on a border was tapped (garden box only) */
+  onRoadSlotPress?: (slot: RoadSlotView) => void;
+  /** Edit mode: "🛤 Paden" was tapped; the button is shown only when this is given (garden box only) */
+  onAutomaticRoads?: () => void;
 }
 
 function boundsOf(layer: LayerShape): { widthCm: number; lengthCm: number } {
@@ -174,7 +199,9 @@ const AreaItem = React.memo(function AreaItem({
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: () => !latest.current.area.dimmed,
+        // In edit mode the area keeps the touch: the scroll views may not take it over
         onPanResponderTerminationRequest: () => !latest.current.editable,
+        onShouldBlockNativeResponder: () => latest.current.editable,
         onPanResponderMove: (_, g) => {
           if (latest.current.editable) pan.setValue({ x: g.dx, y: g.dy });
         },
@@ -303,6 +330,120 @@ function ToolbarButton({ label, active = false, onPress, testID }: { label: stri
   );
 }
 
+/** A road under the areas: tappable in edit mode, 🔒 when locked */
+function RoadItem({
+  road,
+  index,
+  scale,
+  label,
+  onPress,
+}: {
+  road: RoadView;
+  index: number;
+  scale: number;
+  label: string;
+  onPress: ((road: RoadView) => void) | undefined;
+}): React.JSX.Element {
+  const width = road.rect.widthCm * scale;
+  const height = road.rect.lengthCm * scale;
+  return (
+    <Pressable
+      onPress={onPress ? () => onPress(road) : undefined}
+      disabled={onPress === undefined}
+      pointerEvents={onPress === undefined ? 'none' : 'auto'}
+      className="absolute items-center justify-center"
+      style={{ left: road.rect.xCm * scale, top: road.rect.yCm * scale, width, height, backgroundColor: ROAD_TINT }}
+      accessibilityRole={onPress === undefined ? undefined : 'button'}
+      accessibilityLabel={label}
+      testID={`season-road-${index}`}
+    >
+      {road.locked && Math.min(width, height) >= 8 && (
+        <Text className="text-[8px]" style={{ fontSize: Math.min(10, Math.min(width, height) - 2) }}>🔒</Text>
+      )}
+    </Pressable>
+  );
+}
+
+/** The round + on a border without a road */
+function RoadSlot({
+  slot,
+  index,
+  scale,
+  label,
+  onPress,
+}: {
+  slot: RoadSlotView;
+  index: number;
+  scale: number;
+  label: string;
+  onPress: (slot: RoadSlotView) => void;
+}): React.JSX.Element {
+  return (
+    <Pressable
+      onPress={() => onPress(slot)}
+      className="absolute w-7 h-7 rounded-full bg-amber-100 border border-amber-700 items-center justify-center"
+      style={{ left: slot.xCm * scale - ROAD_ADD_PX / 2, top: slot.yCm * scale - ROAD_ADD_PX / 2 }}
+      hitSlop={6}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      testID={`road-add-${index}`}
+    >
+      <Text className="text-amber-900 text-base font-bold">+</Text>
+    </Pressable>
+  );
+}
+
+/** + / % / − bottom-left of the canvas */
+function ZoomControls({
+  zoom,
+  onZoomIn,
+  onZoomOut,
+  zoomInLabel,
+  zoomOutLabel,
+  levelLabel,
+}: {
+  zoom: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  zoomInLabel: string;
+  zoomOutLabel: string;
+  levelLabel: string;
+}): React.JSX.Element {
+  const canZoomIn = zoom < MAX_ZOOM;
+  const canZoomOut = zoom > MIN_ZOOM;
+  return (
+    <View className="absolute bottom-4 left-4 items-center bg-black/60 rounded-lg p-1">
+      <Pressable
+        onPress={onZoomIn}
+        disabled={!canZoomIn}
+        className={`w-9 h-9 items-center justify-center rounded-md ${canZoomIn ? 'bg-gray-700' : 'bg-gray-800'}`}
+        hitSlop={4}
+        accessibilityRole="button"
+        accessibilityLabel={zoomInLabel}
+        accessibilityState={{ disabled: !canZoomIn }}
+        testID="canvas-zoom-in"
+      >
+        <Text className={`text-xl font-semibold ${canZoomIn ? 'text-white' : 'text-gray-500'}`}>+</Text>
+      </Pressable>
+      <Text className="text-gray-400 text-[10px] my-1" accessibilityLabel={levelLabel} testID="canvas-zoom-level">
+        {Math.round(zoom * 100)}%
+      </Text>
+      <Pressable
+        onPress={onZoomOut}
+        disabled={!canZoomOut}
+        className={`w-9 h-9 items-center justify-center rounded-md ${canZoomOut ? 'bg-gray-700' : 'bg-gray-800'}`}
+        hitSlop={4}
+        accessibilityRole="button"
+        accessibilityLabel={zoomOutLabel}
+        accessibilityState={{ disabled: !canZoomOut }}
+        testID="canvas-zoom-out"
+      >
+        <Text className={`text-xl font-semibold ${canZoomOut ? 'text-white' : 'text-gray-500'}`}>−</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export function SeasonAreaCanvas({
   layer,
   view,
@@ -318,63 +459,140 @@ export function SeasonAreaCanvas({
   onToggleEditMode,
   onLockAll,
   onUnlockAll,
+  onRoadPress,
+  onRoadSlotPress,
+  onAutomaticRoads,
 }: SeasonAreaCanvasProps): React.JSX.Element {
   const { t } = useTranslation();
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const [zoom, setZoom] = useState(1);
+  const verticalScroll = useRef<ScrollView>(null);
+  const horizontalScroll = useRef<ScrollView>(null);
   const bounds = boundsOf(layer);
-  const scale = bounds.widthCm > 0 && bounds.lengthCm > 0 && size.width > 0
-    ? Math.min(size.width / bounds.widthCm, size.height / bounds.lengthCm)
+  // Zoom 1.0 is the scale-to-fit, leaving room for the half of a + or handle that sticks out of the box edge
+  const fitScale = bounds.widthCm > 0 && bounds.lengthCm > 0 && size.width > 2 * FIT_MARGIN_PX && size.height > 2 * FIT_MARGIN_PX
+    ? Math.min((size.width - 2 * FIT_MARGIN_PX) / bounds.widthCm, (size.height - 2 * FIT_MARGIN_PX) / bounds.lengthCm)
     : 0;
+  const scale = fitScale * zoom;
   const widthPx = bounds.widthCm * scale;
   const heightPx = bounds.lengthCm * scale;
+  const needsScrolling = widthPx > size.width + FIT_TOLERANCE_PX || heightPx > size.height + FIT_TOLERANCE_PX;
+  // Centred while it fits, a small margin while it scrolls
+  const paddingX = needsScrolling ? SCROLL_PADDING_PX : Math.max(0, (size.width - widthPx) / 2);
+  const paddingY = needsScrolling ? SCROLL_PADDING_PX : Math.max(0, (size.height - heightPx) / 2);
 
   const handleLayout = (event: LayoutChangeEvent): void => {
     const { width, height } = event.nativeEvent.layout;
     if (width !== size.width || height !== size.height) setSize({ width, height });
   };
 
+  // Every zoom step shows the middle of the drawing
+  useEffect(() => {
+    if (!needsScrolling) return;
+    const x = Math.max(0, (widthPx + 2 * SCROLL_PADDING_PX - size.width) / 2);
+    const y = Math.max(0, (heightPx + 2 * SCROLL_PADDING_PX - size.height) / 2);
+    horizontalScroll.current?.scrollTo({ x, y: 0, animated: false });
+    verticalScroll.current?.scrollTo({ x: 0, y, animated: false });
+  }, [zoom, needsScrolling, widthPx, heightPx, size.width, size.height]);
+
+  const zoomIn = (): void => setZoom((previous) => Math.min(MAX_ZOOM, previous + ZOOM_STEP));
+  const zoomOut = (): void => setZoom((previous) => Math.max(MIN_ZOOM, previous - ZOOM_STEP));
+  const roadsEditable = isEditMode && onRoadPress !== undefined;
+
   return (
     <View className="flex-1">
-      <View className="flex-1 items-center justify-center" onLayout={handleLayout}>
+      <View className="flex-1" onLayout={handleLayout}>
         {scale > 0 && (
-          <Pressable
-            onPress={onBackgroundPress}
-            className="border border-green-700 bg-black/25"
-            // A circular layer clips its areas (pieces live in its bounding square) to the circle
-            style={{
-              width: widthPx,
-              height: heightPx,
-              borderRadius: layer.shape === 'circle' ? widthPx / 2 : 6,
-              overflow: layer.shape === 'circle' ? 'hidden' : 'visible',
-            }}
-            testID="season-area-canvas"
+          <ScrollView
+            ref={verticalScroll}
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1, paddingVertical: paddingY }}
+            scrollEnabled={needsScrolling}
+            showsVerticalScrollIndicator={needsScrolling}
+            nestedScrollEnabled
+            testID="season-area-scroll"
           >
-            {view.areas.map((area) => (
-              <AreaItem
-                key={area.id}
-                area={area}
-                scale={scale}
-                editable={isEditMode && !area.dimmed}
-                selected={area.id === selectedAreaId}
-                lockedLabel={t('componentDetail.areaLocked')}
-                resizeLabel={t('componentDetail.resizeArea')}
-                onPress={onAreaPress}
-                onMove={onAreaMove}
-                onResize={onAreaResize}
-                previewResize={previewResize}
-                handlePointOf={handlePointOf}
-                iconPxOf={iconPxOf}
-              />
-            ))}
-            {view.edgeMarkers.map((marker) => (
-              <EdgeMarker key={marker.key} marker={marker} scale={scale} />
-            ))}
-          </Pressable>
+            <ScrollView
+              ref={horizontalScroll}
+              horizontal
+              contentContainerStyle={{ flexGrow: 1, paddingHorizontal: paddingX, alignItems: 'center' }}
+              scrollEnabled={needsScrolling}
+              showsHorizontalScrollIndicator={needsScrolling}
+              nestedScrollEnabled
+            >
+              <Pressable
+                onPress={onBackgroundPress}
+                className="border border-green-700 bg-black/25"
+                // A circular layer clips its areas (pieces live in its bounding square) to the circle
+                style={{
+                  width: widthPx,
+                  height: heightPx,
+                  borderRadius: layer.shape === 'circle' ? widthPx / 2 : 6,
+                  overflow: layer.shape === 'circle' ? 'hidden' : 'visible',
+                }}
+                testID="season-area-canvas"
+              >
+                {view.roads.map((road, index) => (
+                  <RoadItem
+                    key={road.id}
+                    road={road}
+                    index={index}
+                    scale={scale}
+                    label={`${t('componentDetail.roadA11y', { width: Math.round(Math.min(road.rect.widthCm, road.rect.lengthCm)) })}${road.locked ? t('componentDetail.areaLocked') : ''}`}
+                    onPress={roadsEditable ? onRoadPress : undefined}
+                  />
+                ))}
+                {view.areas.map((area) => (
+                  <AreaItem
+                    key={area.id}
+                    area={area}
+                    scale={scale}
+                    editable={isEditMode && !area.dimmed}
+                    selected={area.id === selectedAreaId}
+                    lockedLabel={t('componentDetail.areaLocked')}
+                    resizeLabel={t('componentDetail.resizeArea')}
+                    onPress={onAreaPress}
+                    onMove={onAreaMove}
+                    onResize={onAreaResize}
+                    previewResize={previewResize}
+                    handlePointOf={handlePointOf}
+                    iconPxOf={iconPxOf}
+                  />
+                ))}
+                {view.edgeMarkers.map((marker) => (
+                  <EdgeMarker key={marker.key} marker={marker} scale={scale} />
+                ))}
+                {isEditMode && onRoadSlotPress !== undefined && view.roadSlots.map((slot, index) => (
+                  <RoadSlot
+                    key={slot.key}
+                    slot={slot}
+                    index={index}
+                    scale={scale}
+                    label={t('componentDetail.roadAdd')}
+                    onPress={onRoadSlotPress}
+                  />
+                ))}
+              </Pressable>
+            </ScrollView>
+          </ScrollView>
+        )}
+        {scale > 0 && (
+          <ZoomControls
+            zoom={zoom}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            zoomInLabel={t('componentDetail.zoomIn')}
+            zoomOutLabel={t('componentDetail.zoomOut')}
+            levelLabel={t('componentDetail.zoomLevel', { percent: Math.round(zoom * 100) })}
+          />
         )}
       </View>
       <View className="flex-row flex-wrap gap-2 mt-2">
         <ToolbarButton label={`🔒 ${t('componentDetail.lockAll')}`} onPress={onLockAll} testID="canvas-lock-all" />
         <ToolbarButton label={`🔓 ${t('componentDetail.unlockAll')}`} onPress={onUnlockAll} testID="canvas-unlock-all" />
+        {isEditMode && onAutomaticRoads !== undefined && (
+          <ToolbarButton label={`🛤 ${t('componentDetail.roadsAuto')}`} onPress={onAutomaticRoads} testID="canvas-roads-auto" />
+        )}
         <ToolbarButton
           label={isEditMode ? `💾 ${t('componentDetail.editDone')}` : `✏️ ${t('componentDetail.edit')}`}
           active={isEditMode}

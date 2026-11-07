@@ -32,9 +32,12 @@ export function innerSizeOf(box: GardenBoxData): BoxSize {
 
 const roadsOf = (box: GardenBoxData): readonly RoadData[] => box.roads ?? [];
 
+export const ROAD_MIN_WIDTH_CM = 10;
+export const ROAD_MAX_WIDTH_CM = 200;
+
 /** The widths the user can pick: whole cm from 10 to 200 */
-function isValidWidth(widthCm: number): boolean {
-  return Number.isInteger(widthCm) && widthCm >= 10 && widthCm <= 200;
+export function isValidRoadWidth(widthCm: number): boolean {
+  return Number.isInteger(widthCm) && widthCm >= ROAD_MIN_WIDTH_CM && widthCm <= ROAD_MAX_WIDTH_CM;
 }
 
 function sameRoads(a: readonly RoadData[], b: readonly RoadData[]): boolean {
@@ -65,7 +68,7 @@ function withRoads(box: GardenBoxData, roads: readonly RoadData[], context: Road
 
 /** A road on the border; the box stays as it is when the road does not fit */
 export function addRoadTo(box: GardenBoxData, input: RoadContext & { readonly border: Border; readonly widthCm: number }): GardenBoxData {
-  if (!isValidWidth(input.widthCm)) return box;
+  if (!isValidRoadWidth(input.widthCm)) return box;
   const piece = roadOnBorder(input.border, input.widthCm, innerSizeOf(box));
   if (piece === null) return box;
   return withRoads(box, [...roadsOf(box), { id: input.newId(), ...piece }], input);
@@ -91,7 +94,7 @@ function isEdgeRoad(road: RoadData, size: BoxSize): boolean {
  * unlocked edge roads go and come back as the ring. Roads are added on the borders that remain.
  */
 export function placeAutomaticRoadsIn(box: GardenBoxData, input: AutomaticRoadsRequest): GardenBoxData {
-  if (!isValidWidth(input.widthCm)) return box;
+  if (!isValidRoadWidth(input.widthCm)) return box;
   const size = innerSizeOf(box);
   const lockedRoads = roadsOf(box).filter((road) => road.locked === true);
   const keptRoads = roadsOf(box)
@@ -112,7 +115,7 @@ export function placeAutomaticRoadsIn(box: GardenBoxData, input: AutomaticRoadsR
 /** A road with a new width; a wider road cuts areas back. Unknown road: the box stays */
 export function setRoadWidthIn(box: GardenBoxData, roadId: string, input: RoadContext & { readonly widthCm: number }): GardenBoxData {
   const size = innerSizeOf(box);
-  if (!isValidWidth(input.widthCm) || !roadsOf(box).some((road) => road.id === roadId)) return box;
+  if (!isValidRoadWidth(input.widthCm) || !roadsOf(box).some((road) => road.id === roadId)) return box;
   return withRoads(box, roadsOf(box).map((road) => (road.id === roadId ? withWidth(road, input.widthCm, size) : road)), input);
 }
 

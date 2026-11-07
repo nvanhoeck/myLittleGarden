@@ -4,7 +4,10 @@ import type { FootprintTraits } from '../../domain/planning/PlantFootprint.ts';
 import type { PlantingArea } from '../../domain/planning/PlantingArea.ts';
 import type { PlantRelations } from '../../domain/planning/PlantRelations.ts';
 import type { AreaData, AreaPiece } from '../../types/planning.types.ts';
-import type { AreaCanvasView, AreaRelationView, AreaView, EdgeMarkerView } from '../../types/planningViews.types.ts';
+import { bordersOf } from '../../domain/roads/Borders.ts';
+import { isValidRoadWidth } from '../../domain/roads/GardenBoxRoads.ts';
+import type { RoadData } from '../../types/component.types.ts';
+import type { AreaCanvasView, AreaRelationView, AreaView, EdgeMarkerView, RoadSlotView, RoadView } from '../../types/planningViews.types.ts';
 import type { Translate } from '../shared/seasonLabels.ts';
 
 /** Above this many plants an area shows its count instead of one icon per plant */
@@ -37,6 +40,42 @@ export interface AreaCanvasInput {
   readonly relations: PlantRelations;
   readonly carriedLabelOf: (area: AreaData) => string;
   readonly t: Translate;
+  /** The roads of a garden box (empty when it has none); missing for pots and towers, which have no roads */
+  readonly gardenBoxRoads?: readonly RoadData[];
+  /** Edit mode shows a + on every border without a road */
+  readonly isEditMode?: boolean;
+}
+
+/** The road width typed in the dialog: whole cm from 10 to 200, else null (OK stays disabled) */
+export function roadWidthFrom(text: string): number | null {
+  const trimmed = text.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const widthCm = Number(trimmed);
+  return isValidRoadWidth(widthCm) ? widthCm : null;
+}
+
+function roadViewsOf(roads: readonly RoadData[]): RoadView[] {
+  return roads.map((road) => ({
+    id: road.id,
+    rect: { xCm: road.xCm, yCm: road.yCm, widthCm: road.widthCm, lengthCm: road.lengthCm },
+    locked: road.locked === true,
+  }));
+}
+
+/** A + at the middle of every border of the shown areas (carried ones included) that no road covers */
+function roadSlotsOf(areas: readonly AreaData[], layer: PlantingArea, roads: readonly RoadView[]): RoadSlotView[] {
+  const box = layer.shape === 'rectangle'
+    ? { widthCm: layer.widthCm, lengthCm: layer.lengthCm }
+    : { widthCm: layer.diameterCm, lengthCm: layer.diameterCm };
+  return bordersOf(areas, box, roads.map((road) => road.rect)).map((border) => {
+    const along = (border.fromCm + border.toCm) / 2;
+    return {
+      key: `${border.orientation}-${border.kind}-${border.lineCm}-${border.fromCm}-${border.toCm}`,
+      border,
+      xCm: border.orientation === 'vertical' ? border.lineCm : along,
+      yCm: border.orientation === 'vertical' ? along : border.lineCm,
+    };
+  });
 }
 
 function isSown(plant: AreaCanvasPlant): boolean {
@@ -188,7 +227,10 @@ export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
     };
   });
 
-  return { areas, edgeMarkers };
+  const roads = input.gardenBoxRoads === undefined ? [] : roadViewsOf(input.gardenBoxRoads);
+  const roadSlots = input.gardenBoxRoads !== undefined && input.isEditMode === true ? roadSlotsOf(all, layer, roads) : [];
+
+  return { areas, edgeMarkers, roads, roadSlots };
 }
 
 /**

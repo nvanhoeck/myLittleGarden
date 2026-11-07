@@ -12,7 +12,10 @@ export { cutBack } from './CutBack.ts';
 export {
   addRoadTo,
   innerSizeOf,
+  isValidRoadWidth,
   placeAutomaticRoadsIn,
+  ROAD_MAX_WIDTH_CM,
+  ROAD_MIN_WIDTH_CM,
   removeRoadFrom,
   setAllRoadsLockedIn,
   setRoadWidthIn,

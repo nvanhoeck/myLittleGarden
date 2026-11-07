@@ -186,3 +186,84 @@
 .season-area-toolbar__text {
   @apply text-white text-xs font-medium;
 }
+
+/* Roads of a garden box: flat light brown strips under the areas (ROAD_TINT #c8a27c), 🔒 when locked */
+.season-road {
+  @apply absolute items-center justify-center bg-[#c8a27c];
+}
+.season-road__lock {
+  @apply text-[8px];
+}
+/* Edit mode: a round + (28 px) at the middle of every border without a road */
+.season-road-add {
+  @apply absolute w-7 h-7 rounded-full bg-amber-100 border border-amber-700 items-center justify-center;
+}
+.season-road-add__text {
+  @apply text-amber-900 text-base font-bold;
+}
+/* Zoom + / % / − bottom-left of the canvas, also in edit mode (0.5x to 3x, step 0.25) */
+.season-area-zoom {
+  @apply absolute bottom-4 left-4 items-center bg-black/60 rounded-lg p-1;
+}
+.season-area-zoom__button {
+  @apply w-9 h-9 items-center justify-center rounded-md bg-gray-700;
+}
+.season-area-zoom__button--disabled {
+  @apply bg-gray-800;
+}
+.season-area-zoom__button-text {
+  @apply text-xl font-semibold text-white;
+}
+.season-area-zoom__button-text--disabled {
+  @apply text-gray-500;
+}
+.season-area-zoom__level {
+  @apply text-gray-400 text-[10px] my-1;
+}
+
+/* Road width dialog: width (cm), optional ook rondom / lock / Pad verwijderen, Annuleren + OK */
+.road-dialog__backdrop {
+  @apply flex-1 bg-black/60 items-center justify-center px-6;
+}
+.road-dialog__panel {
+  @apply w-full bg-gray-900 rounded-2xl p-4;
+}
+.road-dialog__title {
+  @apply text-white text-lg font-semibold mb-3;
+}
+.road-dialog__label {
+  @apply text-gray-300 text-sm mb-1;
+}
+.road-dialog__input {
+  @apply h-12 px-3 rounded-lg bg-gray-800 text-white text-base border border-gray-600;
+}
+.road-dialog__input--invalid {
+  @apply border-red-500;
+}
+.road-dialog__hint {
+  @apply text-xs mt-1 text-gray-500;
+}
+.road-dialog__row {
+  @apply flex-row items-center justify-between min-h-12 mt-3;
+}
+.road-dialog__row-label {
+  @apply flex-1 text-white text-base;
+}
+.road-dialog__remove {
+  @apply flex-row items-center h-12 mt-2;
+}
+.road-dialog__remove-text {
+  @apply text-red-400 text-base font-medium;
+}
+.road-dialog__actions {
+  @apply flex-row justify-end gap-2 mt-4;
+}
+.road-dialog__button {
+  @apply h-12 px-5 items-center justify-center rounded-lg bg-green-600;
+}
+.road-dialog__button--disabled {
+  @apply bg-gray-800 opacity-50;
+}
+.road-dialog__button-text {
+  @apply text-white font-semibold;
+}

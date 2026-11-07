@@ -61,6 +61,37 @@ interface AreaShapesProps {
   maxIconPx?: number;
 }
 
+/** Roads (paths) of a garden box: flat light brown, drawn under the areas (.season-road) */
+export const ROAD_TINT = '#c8a27c';
+
+interface RoadShapesProps {
+  roads: readonly AreaPiece[];
+  /** px per cm */
+  scale: number;
+}
+
+/** Read-only roads, one element per road */
+export function RoadShapes({ roads, scale }: RoadShapesProps): React.JSX.Element {
+  return (
+    <>
+      {roads.map((road, index) => (
+        <View
+          key={index}
+          pointerEvents="none"
+          className="absolute"
+          style={{
+            left: road.xCm * scale,
+            top: road.yCm * scale,
+            width: road.widthCm * scale,
+            height: road.lengthCm * scale,
+            backgroundColor: ROAD_TINT,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 export function AreaShapes({ areas, scale, maxIconPx = 16 }: AreaShapesProps): React.JSX.Element {
   return (
     <>
