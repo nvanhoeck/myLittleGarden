@@ -9,9 +9,9 @@
  * no Date instances in the output.
  */
 
-import type { SunDirection } from '@/types/environment.types';
-import type { ComponentData } from '@/types/component.types';
-import type { AreaData } from '@/types/planning.types';
+import type { SunDirection } from '../../types/environment.types.ts';
+import type { ComponentData } from '../../types/component.types.ts';
+import type { AreaData } from '../../types/planning.types.ts';
 import {
   GARDEN_SNAPSHOT_VERSION,
   type ComponentDimensionsSnapshot,
@@ -20,7 +20,7 @@ import {
   type PlacedPlantSnapshot,
   type PlantSpecSnapshot,
   type SnapshotSunDirection,
-} from './GardenSnapshot';
+} from './GardenSnapshot.ts';
 
 /**
  * Subset of the garden store state required to build a snapshot.
@@ -82,13 +82,12 @@ function buildDimensions(component: ComponentData): ComponentDimensionsSnapshot 
 }
 
 /**
- * Map an area to one snapshot plant: at the centre of its first piece, with
- * that piece's size as patch size.
+ * Map an area to snapshot plants: one per piece, at the centre of that piece,
+ * with the piece's size as patch size.
  */
-function mapArea(area: AreaData): PlacedPlantSnapshot {
-  const [piece] = area.pieces;
-  return {
-    id: area.id,
+export function snapshotPlantsOf(area: AreaData): PlacedPlantSnapshot[] {
+  return area.pieces.map((piece, index) => ({
+    id: `${area.id}-${index}`,
     plantId: area.plantId,
     positionXInCm: piece.xCm + piece.widthCm / 2,
     positionYInCm: piece.yCm + piece.lengthCm / 2,
@@ -97,7 +96,7 @@ function mapArea(area: AreaData): PlacedPlantSnapshot {
     patchWidthInCm: piece.widthCm,
     patchHeightInCm: piece.lengthCm,
     patchRotationDeg: null,
-  };
+  }));
 }
 
 /**
@@ -113,7 +112,7 @@ function mapComponent(
     type: component.type,
     sunDirection: (component.sunDirection ?? null) as SnapshotSunDirection | null,
     dimensions: buildDimensions(component),
-    plants: areasOf(component).filter((area) => area.pieces.length > 0).map(mapArea),
+    plants: areasOf(component).flatMap(snapshotPlantsOf),
     createdAt: component.createdAt,
   };
 }
