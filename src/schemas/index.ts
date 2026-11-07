@@ -40,7 +40,7 @@ export {
   validatePlantDatabase,
   safeValidatePlantDatabase,
 } from './plantSchema';
-export { placementDataSchema, plantingDataSchema, planningDataSchema, seasonSchema } from './planningSchema';
+export { areaDataSchema, plantingDataSchema, planningDataSchema, seasonSchema } from './planningSchema';
 export type {
   SunRequirementType,
   WaterRequirementType,

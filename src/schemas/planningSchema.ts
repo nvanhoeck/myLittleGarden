@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { PlacementData, PlantingData, PlanningData } from '../types/planning.types';
+import type { AreaData, AreaPiece, PlantingData, PlanningData } from '../types/planning.types';
 
 /**
  * Planning schemas: what a component's planning per year looks like in storage
@@ -7,18 +7,21 @@ import type { PlacementData, PlantingData, PlanningData } from '../types/plannin
 
 export const seasonSchema = z.enum(['spring', 'summer', 'autumn', 'winter']);
 
-export const placementDataSchema = z.object({
+const areaPieceSchema = z.object({
+  xCm: z.number(),
+  yCm: z.number(),
+  widthCm: z.number().positive(),
+  lengthCm: z.number().positive(),
+}) satisfies z.ZodType<AreaPiece>;
+
+export const areaDataSchema = z.object({
   id: z.string().min(1),
-  plantId: z.string().min(1),
   plantingId: z.string().min(1),
-  positionX: z.number(),
-  positionY: z.number(),
+  plantId: z.string().min(1),
   layerIndex: z.number().int().min(0).optional(),
+  pieces: z.array(areaPieceSchema).min(1).max(3),
   locked: z.boolean().optional(),
-  patchWidthInCm: z.number().positive().optional(),
-  patchHeightInCm: z.number().positive().optional(),
-  patchRotationDeg: z.number().min(0).max(359).optional(),
-}) satisfies z.ZodType<PlacementData>;
+}) satisfies z.ZodType<AreaData>;
 
 export const plantingDataSchema = z.object({
   id: z.string().min(1),
@@ -29,7 +32,7 @@ export const plantingDataSchema = z.object({
 
 const seasonPlanDataSchema = z.object({
   ratios: z.record(z.string(), z.number().int().min(1)),
-  placements: z.array(placementDataSchema),
+  areas: z.array(areaDataSchema),
   status: z.enum(['notPlanned', 'planned', 'outdated']),
 });
 
