@@ -55,8 +55,12 @@ export function buildSeasonTabs(planning: Planning, t: Translate): SeasonTabView
   });
 }
 
-/** "792 planten geplaatst · 1 zaaivlak · Tomaat past niet" */
+/**
+ * "792 planten geplaatst · 1 zaaivlak · Tomaat past niet"; with no shares (every
+ * planting locked, or none starts in the season) it says nothing new was placed.
+ */
 export function optimizeResultMessage(shares: readonly AreaShare[], nameOf: (plantId: string) => string, t: Translate): string {
+  if (shares.length === 0) return t('componentDetail.nothingToPlace');
   const placed = shares.filter((share) => share.fits);
   const plants = placed.reduce((sum, share) => sum + (share.plantCount ?? 0), 0);
   const sown = placed.filter((share) => share.plantCount === null).length;

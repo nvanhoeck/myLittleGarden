@@ -208,6 +208,7 @@
     "emptySeason": "Nog niets geplaatst in dit seizoen. Stel de planning in en tik op Optimaliseren.",
     "optimized_one": "{{count}} plant geplaatst",
     "optimized_other": "{{count}} planten geplaatst",
+    "nothingToPlace": "Alles is vergrendeld of er start niets in dit seizoen — niets nieuw geplaatst",
     "doesNotFit": "{{names}} past niet",
     "sownAreas_one": "{{count}} zaaivlak",
     "sownAreas_other": "{{count}} zaaivlakken",

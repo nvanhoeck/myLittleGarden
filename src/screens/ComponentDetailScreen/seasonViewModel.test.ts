@@ -61,4 +61,8 @@ describe('optimizeResultMessage', () => {
       'componentDetail.optimized {"count":12} · componentDetail.sownAreas {"count":1}',
     );
   });
+
+  test('says nothing new was placed when no planting was laid out (all locked, or none starts in the season)', () => {
+    assert.equal(optimizeResultMessage([], (id) => id, t), 'componentDetail.nothingToPlace');
+  });
 });
