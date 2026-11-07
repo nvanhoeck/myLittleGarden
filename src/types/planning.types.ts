@@ -29,6 +29,24 @@ export interface PlacementData {
   readonly patchRotationDeg?: number;
 }
 
+/** One rectangle of an area, cm from the top-left of the inner area (a circle's bounding square) */
+export interface AreaPiece {
+  readonly xCm: number;
+  readonly yCm: number;
+  readonly widthCm: number;
+  readonly lengthCm: number;
+}
+
+/** The space a planting gets in its start season: 1..3 pieces on one layer */
+export interface AreaData {
+  readonly id: string;
+  readonly plantingId: string;
+  readonly plantId: string;
+  readonly layerIndex?: number; // Tower layer (0 = bottom), undefined for components without layers
+  readonly pieces: readonly AreaPiece[];
+  readonly locked?: boolean; // Locked areas are never moved by the optimizer
+}
+
 /** Ratios and placements of the plants that start in one season */
 export interface SeasonPlanData {
   /** Relative share of the free area per planting id; a missing planting has ratio 1 */

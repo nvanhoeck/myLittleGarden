@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# planning domain benchmark build (scripts/build-domain-js.mjs)
+.bench-js/
