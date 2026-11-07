@@ -42,6 +42,7 @@ export type { LayerBounds } from './Planning';
 export { freeRectangles, layerBounds } from './FreeSpace';
 export { orderForNeighbours } from './AreaOrder';
 export { gridPositions, plantCountOf } from './AreaGrid';
+export { plantCountOfArea, plantCountOfAreas } from './AreaPlantCount';
 export { layoutAreas } from './AreaLayout';
 export type { AreaLayoutRequest, AreaLayoutResult, AreaShare, LaidOutArea } from './AreaLayout';
 

@@ -4,18 +4,17 @@
  * Purely presentational: all actions are callbacks.
  */
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import type { ComponentData, PlacedPlantData, PlantData } from '@/types';
-import { PLANT_CATEGORIES } from '@/types/plant.types';
-import { getPlantIcon, hasPlantIcon } from '@/assets';
+import type { AreaData, ComponentData, PlantData } from '@/types';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
+import { AreaShapes } from '@/components/molecules/AreaShapes';
 import {
   getComponentColor,
   getComponentDimensionsLabel,
   isTowerComponent,
 } from '@/utils/componentSummary';
-import { fitScale, clampIconPosition } from './slideGeometry';
+import { fitScale } from './slideGeometry';
 
 const DRAWING_MAX_PX = 280;
 const SLIDE_HORIZONTAL_PADDING = 32;
@@ -23,8 +22,10 @@ const ICON_PX = 20;
 
 interface ComponentSlideProps {
   component: ComponentData;
-  /** Plants growing in the component today */
-  plants: readonly PlacedPlantData[];
+  /** Areas growing in the component today */
+  areas: readonly AreaData[];
+  /** The plants of those areas together */
+  plantCount: number;
   getPlantById: (plantId: string) => PlantData | undefined;
   slideWidth: number;
   onOpen: (component: ComponentData) => void;
@@ -50,24 +51,13 @@ function getNumberOfLayers(component: ComponentData): number {
     : 1;
 }
 
-function PlantIcon({ plantData }: { plantData: PlantData | undefined }): React.JSX.Element {
-  if (plantData && hasPlantIcon(plantData.id)) {
-    const source = getPlantIcon(plantData.id);
-    if (source) {
-      return <Image source={source} style={{ width: ICON_PX, height: ICON_PX }} resizeMode="contain" />;
-    }
-  }
-  const category = plantData ? PLANT_CATEGORIES.find((c) => c.key === plantData.category) : undefined;
-  return <Text style={{ fontSize: 14 }}>{category?.icon ?? '🌱'}</Text>;
-}
-
 interface LayerDrawingProps {
   layerIndex: number;
   baseInnerWidthCm: number;
   baseInnerHeightCm: number;
   scale: number;
   isCircular: boolean;
-  plants: readonly PlacedPlantData[];
+  areas: readonly AreaData[];
   getPlantById: (plantId: string) => PlantData | undefined;
 }
 
@@ -77,12 +67,18 @@ function LayerDrawing({
   baseInnerHeightCm,
   scale,
   isCircular,
-  plants,
+  areas,
   getPlantById,
 }: LayerDrawingProps): React.JSX.Element {
   const dims = getTowerLayerDimensions(baseInnerWidthCm, baseInnerHeightCm, layerIndex);
   const widthPx = dims.width * scale;
   const heightPx = dims.height * scale;
+  const shapes = areas.map((area) => ({
+    id: area.id,
+    plantId: area.plantId,
+    category: getPlantById(area.plantId)?.category,
+    pieces: area.pieces,
+  }));
 
   return (
     <View
@@ -96,39 +92,15 @@ function LayerDrawing({
         backgroundColor: 'rgba(0, 0, 0, 0.15)',
       }}
     >
-      {plants.map((plant) => {
-        const pos = clampIconPosition(
-          plant.positionX,
-          plant.positionY,
-          dims.width,
-          dims.height,
-          scale,
-          ICON_PX,
-        );
-        return (
-          <View
-            key={plant.id}
-            style={{
-              position: 'absolute',
-              left: pos.left,
-              top: pos.top,
-              width: ICON_PX,
-              height: ICON_PX,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <PlantIcon plantData={getPlantById(plant.plantId)} />
-          </View>
-        );
-      })}
+      <AreaShapes areas={shapes} scale={scale} maxIconPx={ICON_PX} />
     </View>
   );
 }
 
 export function ComponentSlide({
   component,
-  plants,
+  areas,
+  plantCount,
   getPlantById,
   slideWidth,
   onOpen,
@@ -158,16 +130,16 @@ export function ComponentSlide({
     [numberOfLayers],
   );
 
-  const plantsByLayer = useMemo(() => {
-    const map = new Map<number, PlacedPlantData[]>();
-    for (const plant of plants) {
-      const index = isTower ? plant.layerIndex ?? 0 : 0;
+  const areasByLayer = useMemo(() => {
+    const map = new Map<number, AreaData[]>();
+    for (const area of areas) {
+      const index = isTower ? area.layerIndex ?? 0 : 0;
       const list = map.get(index) ?? [];
-      list.push(plant);
+      list.push(area);
       map.set(index, list);
     }
     return map;
-  }, [plants, isTower]);
+  }, [areas, isTower]);
 
   return (
     <View style={{ width: slideWidth }} className="items-center px-4" testID={slideTestID}>
@@ -202,7 +174,7 @@ export function ComponentSlide({
                 baseInnerHeightCm={inner.height}
                 scale={scale}
                 isCircular={isCircular}
-                plants={plantsByLayer.get(layerIndex) ?? []}
+                areas={areasByLayer.get(layerIndex) ?? []}
                 getPlantById={getPlantById}
               />
             ))}
@@ -236,7 +208,7 @@ export function ComponentSlide({
         {t(`components.${component.type}`)} • {getComponentDimensionsLabel(component)}
       </Text>
       <Text className="text-green-500 text-body-small mt-1">
-        ☀ {component.sunDirection} • {t('component.plantCount', { count: plants.length })}
+        ☀ {component.sunDirection} • {t('component.plantCount', { count: plantCount })}
         {isTower ? ` • ${t('component.layers', { count: numberOfLayers })}` : ''}
       </Text>
 

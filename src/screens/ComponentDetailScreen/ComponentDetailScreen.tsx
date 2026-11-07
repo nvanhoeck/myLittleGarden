@@ -1,6 +1,6 @@
 ﻿/**
  * ComponentDetailScreen
- * Zoomed view of a component: the plants of one season, the optimizer and the canvas
+ * Zoomed view of a component: the areas of one season, the optimizer and the canvas
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -13,23 +13,26 @@ import { useShallow } from 'zustand/react/shallow';
 import { usePlantStore } from '@/stores/plantStore';
 import { usePlanning } from '@/stores/planningContext';
 import { isGardenBox, isPot, isRectangularTower, isCircularTower } from '@/stores/componentStore';
-import { PlantPlacementCanvas, LayerOverviewModal } from '@/components/organisms';
+import { SeasonAreaCanvas, LayerOverviewModal } from '@/components/organisms';
 import { SeasonTabs, TowerLayerTabs, YearBar } from '@/components/molecules';
 import { PlanningButton, Snackbar } from '@/components/atoms';
-import { seasonContaining } from '@/domain/planning';
-import type { ComponentData, PlacedPlantData, Season } from '@/types';
+import { layerBounds, plantingAreaOf, relationsFromCatalog, seasonContaining } from '@/domain/planning';
+import type { PlantRelations } from '@/domain/planning';
+import type { AreaCanvasView, AreaData, AreaView, ComponentData, Season } from '@/types';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
 import { CanvasEditActions } from './CanvasEditActions';
+import { buildAreaCanvas, snappedResize } from './areaCanvasViewModel';
 import { buildSeasonTabs, defaultSeasonFor, optimizeResultMessage, planningYearRange } from './seasonViewModel';
 import { seasonLabel } from '../shared/seasonLabels';
 import type { Translate } from '../shared/seasonLabels';
-import { useSeasonCanvas } from './useSeasonCanvas';
 
 /** How long the result snackbar stays */
 const SNACKBAR_DURATION_MS = 4000;
 /** Lets the busy spinner render before the optimizer takes the JS thread */
 const OPTIMIZE_DEFER_MS = 50;
+const NO_AREAS: AreaCanvasView = { areas: [], edgeMarkers: [] };
+const NO_RELATIONS: PlantRelations = () => 'neutral';
 
 function getComponentDimensions(component: ComponentData): { width: number; height: number } {
   if (isGardenBox(component) || isRectangularTower(component)) {
@@ -56,11 +59,11 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   const actions = useComponentStore(
     useShallow((state) => ({
       optimizeSeason: state.optimizeSeason,
-      movePlacement: state.movePlacement,
-      removePlacement: state.removePlacement,
-      togglePlacementLock: state.togglePlacementLock,
-      setAllPlacementsLocked: state.setAllPlacementsLocked,
-      resizePatch: state.resizePatch,
+      moveArea: state.moveArea,
+      resizeArea: state.resizeArea,
+      removeArea: state.removeArea,
+      toggleAreaLock: state.toggleAreaLock,
+      setAllAreasLocked: state.setAllAreasLocked,
     })),
   );
 
@@ -70,13 +73,10 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showLayerOverview, setShowLayerOverview] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [canvasKey, setCanvasKey] = useState(0);
-  const [selectedPlantInstance, setSelectedPlantInstance] = useState<{ id: string; name: string } | null>(null);
+  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
   const [optimizing, setOptimizing] = useState(false);
   const optimizingRef = useRef(false);
   const optimizeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [patchEditPlantId, setPatchEditPlantId] = useState<string | null>(null);
-  const [patchEditOriginal, setPatchEditOriginal] = useState<{ widthInCm: number; heightInCm: number; rotationDeg: number } | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
   const snackbarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -85,16 +85,38 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   const planningLayer = isTower ? selectedLayer : undefined;
 
   const planning = usePlanning(component, year);
-  const canvas = useSeasonCanvas(component, planning, season, planningLayer);
-  // Every layer's plants of the season, for the tower layer overview
-  const seasonPlants = useMemo(
-    () => (planning ? [...planning.carriedPlacementsIn(season), ...planning.placementsIn(season)] : []),
+  const layer = useMemo(() => (component ? plantingAreaOf(component, planningLayer) : null), [component, planningLayer]);
+  const nameOf = useCallback((plantId: string) => getPlantById(plantId)?.nameNl ?? t('componentDetail.unknownPlant'), [getPlantById, t]);
+  const relations = useMemo(
+    () => (planning ? relationsFromCatalog(planning.plants.flatMap((plantId) => getPlantById(plantId) ?? [])) : NO_RELATIONS),
+    [planning, getPlantById],
+  );
+
+  const canvasView = useMemo((): AreaCanvasView => {
+    if (!planning || !layer) return NO_AREAS;
+    const onLayer = (area: AreaData): boolean => planningLayer === undefined || (area.layerIndex ?? 0) === planningLayer;
+    return buildAreaCanvas({
+      own: planning.areasIn(season).filter(onLayer),
+      carried: planning.carriedAreasIn(season).filter(onLayer),
+      layer,
+      plantOf: getPlantById,
+      nameOf,
+      relations,
+      carriedLabelOf: (area) => {
+        const start = planning.plantingById(area.plantingId)?.startSeason;
+        return start ? t('componentDetail.carriedFrom', { season: seasonLabel(start, translate).toLowerCase() }) : '';
+      },
+      t: translate,
+    });
+  }, [planning, layer, season, planningLayer, getPlantById, nameOf, relations, t, translate]);
+
+  // Every layer's areas of the season, for the tower layer overview
+  const seasonAreas = useMemo(
+    () => (planning ? [...planning.carriedAreasIn(season), ...planning.areasIn(season)] : []),
     [planning, season],
   );
   const tabs = useMemo(() => (planning ? buildSeasonTabs(planning, translate) : []), [planning, translate]);
   const status = planning?.statusOf(season) ?? 'notPlanned';
-  // A patch edit is confirmed or cancelled before the season, year or layer changes
-  const editingPatch = patchEditPlantId !== null;
   const canOptimize = (planning?.plantingsStartingIn(season).length ?? 0) > 0;
 
   const yearRange = useMemo(
@@ -108,15 +130,12 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
     [isTower, innerDimensions, selectedLayer],
   );
 
-  // A selection or patch edit of a plant that is no longer drawn is dropped
+  const selectedArea = canvasView.areas.find((area) => area.id === selectedAreaId && !area.dimmed);
+
+  // A selection of an area that is no longer drawn is dropped
   useEffect(() => {
-    const ids = new Set(canvas.ownPlants.map((plant) => plant.id));
-    if (selectedPlantInstance && !ids.has(selectedPlantInstance.id)) setSelectedPlantInstance(null);
-    if (patchEditPlantId && !ids.has(patchEditPlantId)) {
-      setPatchEditPlantId(null);
-      setPatchEditOriginal(null);
-    }
-  }, [canvas.ownPlants, selectedPlantInstance, patchEditPlantId]);
+    if (selectedAreaId !== null && selectedArea === undefined) setSelectedAreaId(null);
+  }, [selectedAreaId, selectedArea]);
 
   useEffect(() => () => {
     if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
@@ -131,9 +150,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
     [today],
   );
 
-  const nameOf = useCallback((plantId: string) => getPlantById(plantId)?.nameNl ?? t('componentDetail.unknownPlant'), [getPlantById, t]);
-
-  // The search runs on the JS thread for a second or more: show the spinner first, then run it
+  // Show the spinner first, then run the layout on the JS thread
   const handleOptimize = useCallback(() => {
     if (optimizingRef.current) return;
     optimizingRef.current = true;
@@ -142,7 +159,6 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
       try {
         const shares = actions.optimizeSeason(componentId, year, season);
         if (shares === null) return;
-        setCanvasKey((key) => key + 1);
         setResultMessage(optimizeResultMessage(shares, nameOf, translate));
         if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
         snackbarTimer.current = setTimeout(() => setResultMessage(null), SNACKBAR_DURATION_MS);
@@ -161,54 +177,64 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   }, [navigation]);
 
   const handleToggleEditMode = useCallback(() => {
-    if (isEditMode) setCanvasKey((key) => key + 1);
+    setSelectedAreaId(null);
     setIsEditMode((previous) => !previous);
-  }, [isEditMode]);
+  }, []);
 
-  const handleCanvasPlantTap = useCallback(
-    (plant: PlacedPlantData) => setSelectedPlantInstance({ id: plant.id, name: nameOf(plant.plantId) }),
-    [nameOf],
+  const handleAreaPress = useCallback(
+    (area: AreaView) => {
+      if (isEditMode) {
+        setSelectedAreaId((current) => (current === area.id ? null : area.id));
+      } else {
+        navigation.navigate('PlantDetails', { plantId: area.plantId });
+      }
+    },
+    [isEditMode, navigation],
   );
 
-  const handleDeleteSelectedPlant = useCallback(() => {
-    if (!selectedPlantInstance) return;
-    const { id, name } = selectedPlantInstance;
-    Alert.alert(t('common.delete'), `${name} verwijderen?`, [
+  const handleAreaMove = useCallback(
+    (areaId: string, dxCm: number, dyCm: number) => actions.moveArea(componentId, year, season, areaId, dxCm, dyCm),
+    [actions, componentId, year, season],
+  );
+
+  // The handle's raw size snapped to the plant spacing, inside the layer; null when nothing would change
+  const previewResize = useCallback(
+    (area: AreaView, pieceIndex: number, widthCm: number, lengthCm: number) => {
+      const piece = area.rects[pieceIndex];
+      return piece && layer ? snappedResize(piece, widthCm, lengthCm, area.resizeStepCm, layerBounds(layer)) : null;
+    },
+    [layer],
+  );
+
+  const handleAreaResize = useCallback(
+    (area: AreaView, pieceIndex: number, widthCm: number, lengthCm: number) => {
+      const size = previewResize(area, pieceIndex, widthCm, lengthCm);
+      if (size !== null) actions.resizeArea(componentId, year, season, area.id, pieceIndex, size.widthCm, size.lengthCm);
+    },
+    [previewResize, actions, componentId, year, season],
+  );
+
+  const handleDeleteSelectedArea = useCallback(() => {
+    if (!selectedArea) return;
+    const { id, plantId } = selectedArea;
+    Alert.alert(t('common.delete'), t('componentDetail.removeAreaMessage', { name: nameOf(plantId) }), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('common.delete'),
         style: 'destructive',
         onPress: () => {
-          actions.removePlacement(componentId, year, season, id);
-          setSelectedPlantInstance(null);
+          actions.removeArea(componentId, year, season, id);
+          setSelectedAreaId(null);
         },
       },
     ]);
-  }, [selectedPlantInstance, t, actions, componentId, year, season]);
+  }, [selectedArea, t, nameOf, actions, componentId, year, season]);
 
-  const handleEnterPatchEditMode = useCallback(
-    (plant: PlacedPlantData) => {
-      const plantData = getPlantById(plant.plantId);
-      const minCm = (plantData?.sowingSpacingCm ?? plantData?.spacingRadiusCm ?? 15) * 2;
-      setPatchEditOriginal({
-        widthInCm: plant.patchWidthInCm ?? minCm,
-        heightInCm: plant.patchHeightInCm ?? minCm,
-        rotationDeg: plant.patchRotationDeg ?? 0,
-      });
-      setPatchEditPlantId(plant.id);
-    },
-    [getPlantById],
-  );
+  const handleBackgroundPress = useCallback(() => setSelectedAreaId(null), []);
+  const handleLockAll = useCallback(() => actions.setAllAreasLocked(componentId, year, season, true), [actions, componentId, year, season]);
+  const handleUnlockAll = useCallback(() => actions.setAllAreasLocked(componentId, year, season, false), [actions, componentId, year, season]);
 
-  const handleCancelPatchEdit = useCallback(() => {
-    if (patchEditPlantId && patchEditOriginal) {
-      actions.resizePatch(componentId, year, season, patchEditPlantId, patchEditOriginal.widthInCm, patchEditOriginal.heightInCm, patchEditOriginal.rotationDeg);
-    }
-    setPatchEditPlantId(null);
-    setPatchEditOriginal(null);
-  }, [patchEditPlantId, patchEditOriginal, actions, componentId, year, season]);
-
-  if (!component || !planning) {
+  if (!component || !planning || !layer) {
     return (
       <SafeAreaView className="flex-1 bg-background items-center justify-center">
         <Text className="text-on-surface">{t('componentDetail.notFound')}</Text>
@@ -220,10 +246,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
   }
 
   const dimensions = getComponentDimensions(component);
-  const selectedPlant = selectedPlantInstance ? canvas.ownPlants.find((p) => p.id === selectedPlantInstance.id) : undefined;
-  const selectedPlantData = selectedPlant ? getPlantById(selectedPlant.plantId) : undefined;
-  const isSelectedPatch = selectedPlantData?.plantingStyle === 'patch' || selectedPlantData?.plantingStyle === 'thinning';
-  const hasPlants = canvas.ownPlants.length + canvas.carriedPlants.length > 0;
+  const hasAreas = canvasView.areas.length > 0;
 
   return (
     <SafeAreaView className="flex-1 bg-background" testID="component-detail-screen">
@@ -266,24 +289,24 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           year={year}
           onPrev={() => changeYear(year - 1)}
           onNext={() => changeYear(year + 1)}
-          canPrev={!editingPatch && year > yearRange.first}
-          canNext={!editingPatch && year < yearRange.last}
+          canPrev={year > yearRange.first}
+          canNext={year < yearRange.last}
           previousLabel={t('planning.year.previous')}
           nextLabel={t('planning.year.next')}
         />
       </View>
 
-      <SeasonTabs tabs={tabs} selected={season} onSelect={(next) => { if (!editingPatch) setSeason(next); }} />
+      <SeasonTabs tabs={tabs} selected={season} onSelect={setSeason} />
 
       {status === 'outdated' && (
         <View className="flex-row items-center px-4 py-2 bg-orange-900/40 border-b border-orange-700" testID="outdated-banner">
           <Text className="flex-1 text-white text-sm">{t('componentDetail.outdated')}</Text>
           <Pressable
             onPress={handleOptimize}
-            disabled={optimizing || editingPatch}
-            className={`h-12 px-3 items-center justify-center ${optimizing || editingPatch ? 'opacity-40' : ''}`}
+            disabled={optimizing}
+            className={`h-12 px-3 items-center justify-center ${optimizing ? 'opacity-40' : ''}`}
             accessibilityRole="button"
-            accessibilityState={{ disabled: optimizing || editingPatch, busy: optimizing }}
+            accessibilityState={{ disabled: optimizing, busy: optimizing }}
             testID="reoptimize-button"
           >
             <Text className="text-label-large text-primary-container">{t('componentDetail.reoptimize')}</Text>
@@ -297,12 +320,11 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
             <TowerLayerTabs
               numberOfLayers={numberOfLayers}
               selectedLayer={selectedLayer}
-              onLayerSelect={(layer) => {
-                if (editingPatch) return;
-                setSelectedLayer(layer);
+              onLayerSelect={(next) => {
+                setSelectedLayer(next);
                 setShowLayerOverview(false);
               }}
-              onOverviewPress={() => { if (!editingPatch) setShowLayerOverview(true); }}
+              onOverviewPress={() => setShowLayerOverview(true)}
             />
           </View>
           <Text className="text-gray-500 text-xs pr-4">
@@ -312,43 +334,26 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
       )}
 
       <View className="flex-1 p-2">
-        <PlantPlacementCanvas
-          key={canvasKey}
-          component={component}
-          plants={canvas.ownPlants}
-          carriedPlants={canvas.carriedPlants}
-          showEmptyState={false}
-          carriedLabelOf={(plant) => {
-            const start = planning.plantingById(plant.plantingId)?.startSeason;
-            return start ? t('componentDetail.carriedFrom', { season: seasonLabel(start, translate).toLowerCase() }) : '';
-          }}
-          layerDimensions={isTower ? layerDimensions : undefined}
-          footprints={canvas.footprints}
-          conflictIds={canvas.conflictIds}
-          outOfBoundsIds={canvas.outOfBoundsIds}
-          onPlantPositionChange={(id, x, y) => actions.movePlacement(componentId, year, season, id, x, y)}
-          onPlantPress={(plant) => navigation.navigate('PlantDetails', { plantId: plant.plantId })}
-          onPlantLongPress={handleCanvasPlantTap}
+        <SeasonAreaCanvas
+          layer={layer}
+          view={canvasView}
           isEditMode={isEditMode}
+          selectedAreaId={selectedArea?.id ?? null}
+          onAreaPress={handleAreaPress}
+          onAreaMove={handleAreaMove}
+          onAreaResize={handleAreaResize}
+          previewResize={previewResize}
+          onBackgroundPress={handleBackgroundPress}
           onToggleEditMode={handleToggleEditMode}
-          onBackgroundPress={() => setSelectedPlantInstance(null)}
-          onLockAll={() => actions.setAllPlacementsLocked(componentId, year, season, true)}
-          onUnlockAll={() => actions.setAllPlacementsLocked(componentId, year, season, false)}
-          onActionPress={() => setSelectedPlantInstance(null)}
-          onPatchDimensionsChange={(id, w, h, rotation) => actions.resizePatch(componentId, year, season, id, w, h, rotation)}
-          patchEditPlantId={patchEditPlantId}
-          onPatchEditConfirm={() => {
-            setPatchEditPlantId(null);
-            setPatchEditOriginal(null);
-          }}
-          onPatchEditCancel={handleCancelPatchEdit}
+          onLockAll={handleLockAll}
+          onUnlockAll={handleUnlockAll}
         />
-        {!hasPlants && (
+        {!hasAreas && (
           <View pointerEvents="none" className="absolute top-3 left-4 right-4 items-center">
             <Text className="text-gray-400 text-xs text-center bg-black/50 px-2 py-1 rounded">{t('componentDetail.emptySeason')}</Text>
           </View>
         )}
-        {hasPlants && (
+        {hasAreas && (
           <View pointerEvents="none" className="absolute top-3 left-0 right-0 items-center">
             <Text className="text-gray-400 text-xs text-center bg-black/50 px-2 py-0.5 rounded">
               {isEditMode ? t('planning.hint.edit') : t('planning.hint.view')}
@@ -357,19 +362,12 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
         )}
         {isEditMode && (
           <CanvasEditActions
-            hasSelection={selectedPlant != null}
-            canResize={selectedPlant != null && isSelectedPatch}
-            isLocked={selectedPlant?.locked ?? false}
-            onResize={() => {
-              if (!selectedPlant) return;
-              handleEnterPatchEditMode(selectedPlant);
-              setSelectedPlantInstance(null);
-            }}
-            onDelete={handleDeleteSelectedPlant}
+            hasSelection={selectedArea !== undefined}
+            isLocked={selectedArea?.locked ?? false}
+            onDelete={handleDeleteSelectedArea}
             onToggleLock={() => {
-              if (!selectedPlantInstance) return;
-              actions.togglePlacementLock(componentId, year, season, selectedPlantInstance.id);
-              setSelectedPlantInstance(null);
+              if (!selectedArea) return;
+              actions.toggleAreaLock(componentId, year, season, selectedArea.id);
             }}
           />
         )}
@@ -388,7 +386,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
         <PlanningButton
           label={t('componentDetail.optimize')}
           variant="tonal"
-          disabled={!canOptimize || editingPatch}
+          disabled={!canOptimize}
           loading={optimizing}
           onPress={handleOptimize}
           testID="optimize-button"
@@ -400,7 +398,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           visible={showLayerOverview}
           onClose={() => setShowLayerOverview(false)}
           component={component}
-          plants={seasonPlants}
+          areas={seasonAreas}
         />
       )}
     </SafeAreaView>

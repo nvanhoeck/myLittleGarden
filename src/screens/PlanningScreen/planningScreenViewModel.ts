@@ -1,7 +1,7 @@
 import type { Planning } from '../../domain/planning/Planning.ts';
 import { SEASONS } from '../../domain/planning/Season.ts';
-import type { PlantingShare } from '../../domain/planning/SeasonOptimization.ts';
-import type { PlantingData, Season } from '../../types/planning.types.ts';
+import type { AreaShare } from '../../domain/planning/AreaLayout.ts';
+import type { AreaData, PlantingData, Season } from '../../types/planning.types.ts';
 import type { CarriedRowView, PlantingMenuItemView, PlantingMenuView, RatioRowView, SeasonSectionView } from '../../types/planningViews.types.ts';
 import { seasonLabel, seasonMonthsLabel } from '../shared/seasonLabels.ts';
 import type { Translate } from '../shared/seasonLabels.ts';
@@ -71,10 +71,49 @@ function menuOf(planning: Planning, planting: PlantingData, t: Translate): Plant
   return { isPlaced, isLastPlanting: planning.plantingsOf(planting.plantId).length === 1, items };
 }
 
+/** "0,4" below 10 m², "13" above */
+export function formatSquareMetres(squareCm: number): string {
+  const m2 = squareCm / 10000;
+  return m2 < 10 ? String(Math.round(m2 * 10) / 10).replace('.', ',') : String(Math.round(m2));
+}
+
+function squareCmOf(area: AreaData): number {
+  return area.pieces.reduce((sum, piece) => sum + piece.widthCm * piece.lengthCm, 0);
+}
+
+/**
+ * A locked area was not laid out again, so it has no share: it says
+ * "vergrendeld" with what its area holds. Otherwise the last run's share,
+ * with the plants (or the sown m²) of the planting's current area.
+ */
+function resultLabelOf(
+  share: AreaShare | undefined,
+  area: AreaData | undefined,
+  plantCountOfArea: (area: AreaData) => number | null,
+  t: Translate,
+): string | null {
+  if (area?.locked === true) {
+    const count = plantCountOfArea(area);
+    return count === null
+      ? t('seasonPlanning.lockedSown', { m2: formatSquareMetres(squareCmOf(area)) })
+      : t('seasonPlanning.locked', { count });
+  }
+  if (share === undefined) return null;
+  if (!share.fits) return t('seasonPlanning.doesNotFit');
+  const count = area === undefined ? share.plantCount : plantCountOfArea(area);
+  if (count === null) return t('seasonPlanning.resultSown', { m2: formatSquareMetres(area === undefined ? 0 : squareCmOf(area)) });
+  return t('seasonPlanning.result', {
+    count,
+    actual: Math.round(share.actualShare * 100),
+    target: Math.round(share.targetShare * 100),
+  });
+}
+
 export function buildSeasonSections(
   planning: Planning,
   nameOf: (plantId: string) => string,
-  sharesOf: (season: Season) => readonly PlantingShare[] | undefined,
+  sharesOf: (season: Season) => readonly AreaShare[] | undefined,
+  plantCountOfArea: (area: AreaData) => number | null,
   t: Translate,
 ): SeasonSectionView[] {
   return SEASONS.map((season) => {
@@ -87,23 +126,15 @@ export function buildSeasonSections(
     const ratioRows = starting.map((planting): RatioRowView => {
       const ratio = planning.ratioOf(season, planting.id);
       const share = shares?.find((s) => s.plantingId === planting.id);
-      const fits = share === undefined || share.count > 0;
+      const area = planning.areaOf(planting.id);
+      const fits = area?.locked === true || share === undefined || share.fits;
       return {
         plantingId: planting.id,
         plantId: planting.plantId,
         name: plantingName(planning, planting.id, nameOf, t),
         ratio,
         targetLabel: t('seasonPlanning.target', { percent: Math.round((ratio / totalRatio) * 100) }),
-        resultLabel:
-          share === undefined
-            ? null
-            : fits
-              ? t('seasonPlanning.result', {
-                  count: share.count,
-                  actual: Math.round(share.actualShare * 100),
-                  target: Math.round(share.targetShare * 100),
-                })
-              : t('seasonPlanning.doesNotFit'),
+        resultLabel: resultLabelOf(share, area, plantCountOfArea, t),
         fits,
         menu: menuOf(planning, planting, t),
       };
