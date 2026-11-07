@@ -1,4 +1,4 @@
-import type { PlacedPlantData, PlantData } from '../../types/plant.types.ts';
+import type { PlantData } from '../../types/plant.types.ts';
 
 /** Axis-aligned rectangle in cm, measured from the top-left of the area */
 export interface Bounds {
@@ -24,12 +24,6 @@ export interface PositionedFootprint {
 
 /** The catalog fields that decide a plant's footprint */
 export type FootprintTraits = Pick<PlantData, 'spacingRadiusCm' | 'plantingStyle'> & Partial<Pick<PlantData, 'sowingSpacingCm'>>;
-
-/** Patch size fields of a placed plant */
-export type PatchFields = Pick<PlacedPlantData, 'patchWidthInCm' | 'patchHeightInCm' | 'patchRotationDeg'>;
-
-/** Spacing the canvas assumes for plants missing from the catalog */
-const DEFAULT_SPACING_RADIUS_CM = 15;
 
 /** Rounds away floating point noise such as cos(90deg) = 6e-17 */
 function roundCm(value: number): number {
@@ -131,21 +125,6 @@ export class PlantFootprint {
   }
 }
 
-/**
- * The footprint of a placed plant, from the catalog and its stored patch
- * fields. This is the one rule the canvas draws and the season placement uses. Plants missing from the catalog get the canvas default spacing.
- */
-export function footprintOf(plant: FootprintTraits | undefined, patchFields: PatchFields): PlantFootprint {
-  const known = plant !== undefined && plant.spacingRadiusCm > 0
-    ? plant
-    : { spacingRadiusCm: DEFAULT_SPACING_RADIUS_CM, plantingStyle: 'individual' as const };
-  return PlantFootprint.forPlant(known, {
-    widthCm: patchFields.patchWidthInCm,
-    heightCm: patchFields.patchHeightInCm,
-    rotationDeg: patchFields.patchRotationDeg,
-  });
-}
-
 /** True when the rectangles share a positive area; touching edges do not count */
 export function boundsOverlap(a: Bounds, b: Bounds): boolean {
   return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
@@ -154,31 +133,4 @@ export function boundsOverlap(a: Bounds, b: Bounds): boolean {
 /** Two plants conflict when their footprints overlap */
 export function footprintsConflict(a: PositionedFootprint, b: PositionedFootprint): boolean {
   return boundsOverlap(a.footprint.boundsAt(a.xCm, a.yCm), b.footprint.boundsAt(b.xCm, b.yCm));
-}
-
-/** What conflict detection needs of a placed plant */
-type PlantInPlace = Pick<PlacedPlantData, 'id' | 'positionX' | 'positionY'>;
-
-/** The ids of the plants whose footprint conflicts with another plant's */
-export function conflictingPlantIds<P extends PlantInPlace>(
-  plants: readonly P[],
-  footprintOfPlant: (plant: P) => PlantFootprint,
-): Set<string> {
-  const positioned = plants.map((plant) => ({
-    id: plant.id,
-    footprint: footprintOfPlant(plant),
-    xCm: plant.positionX,
-    yCm: plant.positionY,
-  }));
-
-  const ids = new Set<string>();
-  positioned.forEach((a, index) => {
-    for (const b of positioned.slice(index + 1)) {
-      if (footprintsConflict(a, b)) {
-        ids.add(a.id);
-        ids.add(b.id);
-      }
-    }
-  });
-  return ids;
 }

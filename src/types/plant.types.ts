@@ -4,8 +4,6 @@
  * companion relationships, and growing calendar data.
  */
 
-import type { PlacementData } from './planning.types';
-
 /**
  * Growth habit of the plant
  * - upright: grows vertically, compact footprint (most vegetables)
@@ -159,11 +157,6 @@ export interface PlantDatabase {
     readonly version: string;
     readonly plants: readonly PlantData[];
 }
-
-/**
- * Placed plant instance in a garden component (a placement of a season)
- */
-export type PlacedPlantData = PlacementData;
 
 /**
  * Category display information for UI

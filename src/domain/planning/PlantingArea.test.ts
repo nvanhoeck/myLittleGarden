@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fitsInArea, plantsOutsideArea } from './PlantingArea.ts';
+import { fitsInArea } from './PlantingArea.ts';
 import { PlantFootprint } from './PlantFootprint.ts';
 
 const rectangle = { shape: 'rectangle', widthCm: 100, lengthCm: 50 } as const;
@@ -30,15 +30,5 @@ describe('fitsInArea', () => {
     const rotated = patch(45);
     assert.ok(!fitsInArea(circle, PlantFootprint.of(rotated.widthCm, rotated.lengthCm), 38, 22));
     assert.ok(fitsInArea(circle, rotated, 38, 22));
-  });
-});
-
-describe('plantsOutsideArea', () => {
-  test('gives the plants whose footprint does not fit in the area', () => {
-    const plants = [
-      { id: 'in', positionX: 50, positionY: 25 },
-      { id: 'out', positionX: 5, positionY: 25 },
-    ];
-    assert.deepEqual([...plantsOutsideArea(plants, () => square20, rectangle)], ['out']);
   });
 });

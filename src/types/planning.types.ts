@@ -11,25 +11,6 @@ export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 /** Where a season stands: never placed, placed, or placed but its inputs changed since */
 export type SeasonStatus = 'notPlanned' | 'planned' | 'outdated';
 
-/**
- * One plant at a position in a component, cm from the top-left of the inner
- * area (border excluded). No longer stored in a planning (areas replaced
- * placements); kept for the footprint helpers and the screens until they move to areas.
- */
-export interface PlacementData {
-  readonly id: string;
-  readonly plantId: string;
-  readonly plantingId: string; // The planting this placement belongs to
-  readonly positionX: number;
-  readonly positionY: number;
-  readonly layerIndex?: number; // Tower layer (0 = bottom), undefined for components without layers
-  readonly locked?: boolean; // Locked placements are never moved by the optimizer
-  // Patch-only fields, undefined for individual plants
-  readonly patchWidthInCm?: number;
-  readonly patchHeightInCm?: number;
-  readonly patchRotationDeg?: number;
-}
-
 /** One rectangle of an area, cm from the top-left of the inner area (a circle's bounding square) */
 export interface AreaPiece {
   readonly xCm: number;

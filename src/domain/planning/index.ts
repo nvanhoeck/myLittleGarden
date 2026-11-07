@@ -20,15 +20,13 @@ export type { DateWindow, FrostDay, PlantTiming, PlantingCalendar, SowingDates }
 export {
   PlantFootprint,
   boundsOverlap,
-  conflictingPlantIds,
-  footprintOf,
   footprintsConflict,
   minimumPatchSideCm,
   plantDistanceCm,
 } from './PlantFootprint';
-export type { Bounds, FootprintTraits, PatchFields, PatchShape, PositionedFootprint } from './PlantFootprint';
+export type { Bounds, FootprintTraits, PatchShape, PositionedFootprint } from './PlantFootprint';
 
-export { fitsInArea, plantsOutsideArea } from './PlantingArea';
+export { fitsInArea } from './PlantingArea';
 export type { PlantingArea } from './PlantingArea';
 
 export { relationsFromCatalog } from './PlantRelations';

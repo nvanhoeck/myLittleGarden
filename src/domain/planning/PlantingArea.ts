@@ -1,4 +1,3 @@
-import type { PlacedPlantData } from '../../types/plant.types.ts';
 import type { PlantFootprint } from './PlantFootprint.ts';
 
 /** Inner dimensions of a component or tower layer (border already subtracted) */
@@ -22,17 +21,4 @@ export function fitsInArea(area: PlantingArea, footprint: PlantFootprint, xCm: n
   }
   const radius = area.diameterCm / 2;
   return corners.every(([x, y]) => Math.hypot(x - radius, y - radius) <= radius + EPSILON_CM);
-}
-
-/** The ids of the plants whose footprint does not lie inside the area */
-export function plantsOutsideArea<P extends Pick<PlacedPlantData, 'id' | 'positionX' | 'positionY'>>(
-  plants: readonly P[],
-  footprintOfPlant: (plant: P) => PlantFootprint,
-  area: PlantingArea,
-): Set<string> {
-  return new Set(
-    plants
-      .filter((plant) => !fitsInArea(area, footprintOfPlant(plant), plant.positionX, plant.positionY))
-      .map((plant) => plant.id),
-  );
 }

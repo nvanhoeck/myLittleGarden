@@ -1,7 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PlantFootprint, conflictingPlantIds, footprintOf, footprintsConflict, minimumPatchSideCm, plantDistanceCm } from './PlantFootprint.ts';
-import type { PlantData } from '../../types/plant.types.ts';
+import { PlantFootprint, footprintsConflict, minimumPatchSideCm, plantDistanceCm } from './PlantFootprint.ts';
 
 const square30 = PlantFootprint.of(30, 30);
 
@@ -112,37 +111,5 @@ describe('PlantFootprint', () => {
 
   test('gives the distance between two neighbouring plants: twice the spacing radius', () => {
     assert.equal(plantDistanceCm({ spacingRadiusCm: 17.5 }), 35);
-  });
-});
-
-describe('footprintOf', () => {
-  test('given a plant missing from the catalog, uses the default 15 cm spacing square', () => {
-    const footprint = footprintOf(undefined, {});
-    assert.deepEqual([footprint.widthCm, footprint.lengthCm], [30, 30]);
-  });
-
-  test('given a patch plant, uses the stored patch fields', () => {
-    const footprint = footprintOf(
-      { spacingRadiusCm: 5, plantingStyle: 'patch' } as PlantData,
-      { patchWidthInCm: 40, patchHeightInCm: 10, patchRotationDeg: 0 },
-    );
-    assert.deepEqual([footprint.widthCm, footprint.lengthCm], [40, 10]);
-  });
-});
-
-describe('conflictingPlantIds', () => {
-  const placed = (id: string, xCm: number) => ({
-    id,
-    positionX: xCm,
-    positionY: 15,
-  });
-
-  test('marks plants whose footprints overlap; touching ones do not count', () => {
-    const ids = conflictingPlantIds(
-      [placed('a', 15), placed('b', 40), placed('c', 70), placed('d', 15)],
-      () => square30,
-    );
-    // a, b and d overlap each other; c only touches b
-    assert.deepEqual([...ids].sort(), ['a', 'b', 'd']);
   });
 });
