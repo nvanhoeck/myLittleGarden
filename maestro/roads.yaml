@@ -1,0 +1,94 @@
+appId: com.mylittlegarden.app
+name: Season planning - roads on a garden box (add, automatic with ring, edit, zoom)
+---
+- runFlow: subflows/open_planning.yaml
+- runFlow: subflows/add_plants_to_planning.yaml
+# Optimize places Tomaat and Sla, then come back to the component detail screen.
+- runFlow: subflows/optimize_first_season.yaml
+- back
+- extendedWaitUntil:
+    visible:
+      id: "component-detail-screen"
+    timeout: 5000
+- assertVisible:
+    id: "season-area-(?!canvas|resize).*"
+
+# Edit mode shows the + buttons on the borders.
+- tapOn:
+    id: "canvas-edit-toggle"
+- extendedWaitUntil:
+    visible:
+      id: "road-add-0"
+    timeout: 5000
+
+# Add one road of 40 cm.
+- tapOn:
+    id: "road-add-0"
+- extendedWaitUntil:
+    visible:
+      id: "road-width-dialog"
+    timeout: 3000
+- assertVisible:
+    text: "Pad toevoegen"
+- tapOn:
+    id: "road-width-input"
+- eraseText: 5
+- inputText: "40"
+- hideKeyboard
+- tapOn:
+    id: "road-width-ok"
+- extendedWaitUntil:
+    visible:
+      id: "season-road-0"
+    timeout: 5000
+
+# Automatic roads with a ring: at least 5 roads. A road already exists, so
+# the replace confirmation shows first.
+- tapOn:
+    id: "canvas-roads-auto"
+- tapOn:
+    text: "Vervangen"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "road-width-dialog"
+    timeout: 3000
+- assertVisible:
+    text: "Paden automatisch plaatsen"
+- tapOn:
+    id: "road-ring-toggle"
+- tapOn:
+    id: "road-width-ok"
+- extendedWaitUntil:
+    visible:
+      id: "season-road-4"
+    timeout: 5000
+
+# Tap a road and change its width.
+- tapOn:
+    id: "season-road-0"
+- extendedWaitUntil:
+    visible:
+      id: "road-width-dialog"
+    timeout: 3000
+- assertVisible:
+    text: "Pad aanpassen"
+- tapOn:
+    id: "road-width-input"
+- eraseText: 5
+- inputText: "50"
+- hideKeyboard
+- tapOn:
+    id: "road-width-ok"
+- assertVisible:
+    id: "season-road-0"
+
+# Zoom in changes the zoom level.
+- assertVisible:
+    id: "canvas-zoom-level"
+    text: "100%"
+- tapOn:
+    id: "canvas-zoom-in"
+- assertVisible:
+    id: "canvas-zoom-level"
+    text: "125%"
