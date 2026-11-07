@@ -14,7 +14,8 @@ import { roadDataSchema } from '../../schemas/roadSchema.ts';
  * version 3 and before were dropped; version 4 plannings are converted in version 5.
  * Version 5: plants have plantings (one per start season); ratios and placements belong to plantings. v4 plannings are converted.
  * Version 6: plantings get areas instead of placements; placements are dropped and planned seasons become outdated.
- * Version 7: garden boxes have roads; invalid roads are dropped.
+ * Version 7: garden boxes have roads with an orientation; invalid roads are dropped,
+ * a road without orientation (early v7 data) gets it from its aspect ratio.
  */
 export const COMPONENT_STORE_VERSION = 7;
 
@@ -152,6 +153,14 @@ function withPlannings(component: Record<string, unknown>, legacy: boolean): Rec
   return { ...rest, plannings: validPlannings(plannings, legacy) };
 }
 
+/** A road stored before roads had an orientation (early v7 data) runs along its long side */
+function withOrientation(entry: unknown): unknown {
+  if (!isRecord(entry) || 'orientation' in entry) return entry;
+  const { widthCm, lengthCm } = entry;
+  if (typeof widthCm !== 'number' || typeof lengthCm !== 'number') return entry;
+  return { ...entry, orientation: widthCm <= lengthCm ? 'vertical' : 'horizontal' };
+}
+
 /** The valid roads of a garden box, one entry at a time, without duplicate ids; other components have none */
 function withRoads(component: Record<string, unknown>): Record<string, unknown> {
   const { roads, ...rest } = component;
@@ -160,7 +169,7 @@ function withRoads(component: Record<string, unknown>): Record<string, unknown> 
   }
   const seen = new Set<string>();
   const salvaged = (Array.isArray(roads) ? roads : []).flatMap((entry) => {
-    const parsed = roadDataSchema.safeParse(entry);
+    const parsed = roadDataSchema.safeParse(withOrientation(entry));
     if (!parsed.success || seen.has(parsed.data.id)) return [];
     seen.add(parsed.data.id);
     return [parsed.data];

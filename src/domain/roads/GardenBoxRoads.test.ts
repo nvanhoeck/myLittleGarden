@@ -5,6 +5,7 @@ import {
   innerSizeOf,
   placeAutomaticRoadsIn,
   removeRoadFrom,
+  ringFitsIn,
   setAllRoadsLockedIn,
   setRoadWidthIn,
   toggleRoadLockIn,
@@ -68,12 +69,20 @@ describe('innerSizeOf', () => {
   });
 });
 
+describe('ringFitsIn', () => {
+  test('a ring fits while twice its width stays below the short inner side', () => {
+    assert.equal(ringFitsIn(makeBox(), 45), true);
+    assert.equal(ringFitsIn(makeBox(), 50), false);
+    assert.equal(ringFitsIn(makeBox(), 60), false);
+  });
+});
+
 describe('addRoadTo', () => {
   test('adds the road on the border and cuts back areas in every year', () => {
     const border = { orientation: 'vertical' as const, lineCm: 50, fromCm: 0, toCm: 100, kind: 'between' as const };
     const box = addRoadTo(makeBox(), { ...context, border, widthCm: 20 });
     assert.equal(box.roads?.length, 1);
-    assert.deepEqual(box.roads?.[0], { id: 'road-1', xCm: 40, yCm: 0, widthCm: 20, lengthCm: 100 });
+    assert.deepEqual(box.roads?.[0], { id: 'road-1', xCm: 40, yCm: 0, widthCm: 20, lengthCm: 100, orientation: 'vertical' });
     const total2026 = areasOf(box, '2026').flatMap((a) => a.pieces).reduce((sum, p) => sum + p.widthCm * p.lengthCm, 0);
     assert.ok(total2026 <= 80 * 100 + 0.001);
     const pieces2027 = areasOf(box, '2027').flatMap((a) => a.pieces);
@@ -97,7 +106,7 @@ describe('placeAutomaticRoadsIn', () => {
   });
 
   const geometry = (box: GardenBoxData): string[] =>
-    (box.roads ?? []).map((r) => `${r.xCm},${r.yCm},${r.widthCm},${r.lengthCm},${r.locked === true}`).sort();
+    (box.roads ?? []).map((r) => `${r.xCm},${r.yCm},${r.widthCm},${r.lengthCm},${r.orientation},${r.locked === true}`).sort();
   const run = (box: GardenBoxData, widthCm: number, withRing = true): GardenBoxData =>
     placeAutomaticRoadsIn(box, { ...context, year: 2026, season: 'spring', widthCm, withRing });
 
@@ -107,6 +116,18 @@ describe('placeAutomaticRoadsIn', () => {
     assert.deepEqual(geometry(twice), geometry(once));
     assert.equal(once.roads?.length, 5);
     assert.equal(new Set(twice.roads?.map((r) => r.id)).size, twice.roads?.length);
+  });
+
+  test('a ring wider than its side roads are long is replaced on a re-run, leaving no stubs', () => {
+    // inner 100 x 120: a 45 cm ring leaves side roads of 45 x 30
+    const tall: GardenBoxData = { ...makeBox(), lengthInCm: 140 };
+    const once = run(tall, 45);
+    const sides = once.roads!.filter((r) => r.lengthCm === 30 && (r.xCm === 0 || r.xCm === 55));
+    assert.equal(sides.length, 2);
+    assert.ok(sides.every((r) => r.orientation === 'vertical' && r.widthCm === 45));
+    const twice = run(once, 45);
+    assert.deepEqual(geometry(twice), geometry(once));
+    assert.equal(twice.roads?.length, once.roads?.length);
   });
 
   test('running again with another width keeps the between road on its centre line', () => {
@@ -119,7 +140,7 @@ describe('placeAutomaticRoadsIn', () => {
   });
 
   test('with a locked road, running twice keeps it, the between roads and adds no duplicates', () => {
-    const locked = { id: 'keep', xCm: 0, yCm: 0, widthCm: 20, lengthCm: 100, locked: true };
+    const locked = { id: 'keep', xCm: 0, yCm: 0, widthCm: 20, lengthCm: 100, orientation: 'vertical' as const, locked: true };
     const start: GardenBoxData = { ...makeBox(), roads: [locked] };
     const once = run(start, 20, false);
     const twice = run(once, 20, false);
@@ -136,8 +157,8 @@ describe('placeAutomaticRoadsIn', () => {
   });
 
   test('a locked road survives and is not duplicated', () => {
-    const locked = { id: 'keep', xCm: 40, yCm: 0, widthCm: 20, lengthCm: 100, locked: true };
-    const start: GardenBoxData = { ...makeBox(), roads: [locked, { id: 'drop', xCm: 0, yCm: 0, widthCm: 10, lengthCm: 100 }] };
+    const locked = { id: 'keep', xCm: 40, yCm: 0, widthCm: 20, lengthCm: 100, orientation: 'vertical' as const, locked: true };
+    const start: GardenBoxData = { ...makeBox(), roads: [locked, { id: 'drop', xCm: 0, yCm: 0, widthCm: 10, lengthCm: 100, orientation: 'vertical' }] };
     const box = placeAutomaticRoadsIn(start, { ...context, year: 2026, season: 'spring', widthCm: 20, withRing: false });
     assert.ok(box.roads?.some((r) => r.id === 'keep' && r.locked === true));
     assert.equal(box.roads?.some((r) => r.id === 'drop'), false);
@@ -146,7 +167,13 @@ describe('placeAutomaticRoadsIn', () => {
 });
 
 describe('road edits', () => {
-  const withRoad = (): GardenBoxData => ({ ...makeBox(), roads: [{ id: 'r', xCm: 45, yCm: 0, widthCm: 10, lengthCm: 100 }] });
+  const withRoad = (): GardenBoxData => ({ ...makeBox(), roads: [{ id: 'r', xCm: 45, yCm: 0, widthCm: 10, lengthCm: 100, orientation: 'vertical' }] });
+
+  test('a road on a short edge stretch only gets wider across its border (scenario A)', () => {
+    const edgeRoad = { id: 'e', xCm: 0, yCm: 50, widthCm: 30, lengthCm: 20, orientation: 'vertical' as const };
+    const box = setRoadWidthIn({ ...makeBox(), roads: [edgeRoad] }, 'e', { ...context, widthCm: 40 });
+    assert.deepEqual(box.roads?.[0], { ...edgeRoad, widthCm: 40 });
+  });
 
   test('a wider road cuts areas back in every year', () => {
     const box = setRoadWidthIn(withRoad(), 'r', { ...context, widthCm: 40 });
@@ -163,7 +190,7 @@ describe('road edits', () => {
   });
 
   test('set all locked sets every road', () => {
-    const box = setAllRoadsLockedIn({ ...withRoad(), roads: [...withRoad().roads!, { id: 's', xCm: 0, yCm: 0, widthCm: 10, lengthCm: 100 }] }, true);
+    const box = setAllRoadsLockedIn({ ...withRoad(), roads: [...withRoad().roads!, { id: 's', xCm: 0, yCm: 0, widthCm: 10, lengthCm: 100, orientation: 'vertical' }] }, true);
     assert.deepEqual(box.roads?.map((r) => r.locked), [true, true]);
   });
 

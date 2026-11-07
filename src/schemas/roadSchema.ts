@@ -8,5 +8,6 @@ export const roadDataSchema = z.object({
   yCm: z.number().min(0),
   widthCm: z.number().positive(),
   lengthCm: z.number().positive(),
+  orientation: z.enum(['vertical', 'horizontal']),
   locked: z.boolean().optional(),
 }) satisfies z.ZodType<RoadData>;

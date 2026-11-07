@@ -4,7 +4,7 @@ import { plantingAreaOf } from '../planning/ComponentArea.ts';
 import { Planning } from '../planning/Planning.ts';
 import type { PlantingCalendar } from '../planning/PlantCalendar.ts';
 import type { Border } from './Borders.ts';
-import { automaticRoads, roadOnBorder, withWidth } from './RoadPlacement.ts';
+import { automaticRoads, ringFits, roadOnBorder, withWidth } from './RoadPlacement.ts';
 import { EPSILON_CM } from './Rectangles.ts';
 
 /**
@@ -43,7 +43,8 @@ export function isValidRoadWidth(widthCm: number): boolean {
 function sameRoads(a: readonly RoadData[], b: readonly RoadData[]): boolean {
   return a.length === b.length && a.every((road, i) => (
     road.id === b[i].id && road.xCm === b[i].xCm && road.yCm === b[i].yCm
-    && road.widthCm === b[i].widthCm && road.lengthCm === b[i].lengthCm && road.locked === b[i].locked
+    && road.widthCm === b[i].widthCm && road.lengthCm === b[i].lengthCm && road.orientation === b[i].orientation
+    && road.locked === b[i].locked
   ));
 }
 
@@ -81,9 +82,14 @@ export interface AutomaticRoadsRequest extends RoadContext {
   readonly withRing: boolean;
 }
 
-/** A road lying against the box edge along its long side (a ring road) */
+/** Whether a ring of roads this wide fits in the box (twice the width below the short inner side) */
+export function ringFitsIn(box: GardenBoxData, widthCm: number): boolean {
+  return ringFits(widthCm, innerSizeOf(box));
+}
+
+/** A road running along the box edge and lying against it (a ring road) */
 function isEdgeRoad(road: RoadData, size: BoxSize): boolean {
-  if (road.widthCm <= road.lengthCm) {
+  if (road.orientation === 'vertical') {
     return road.xCm <= EPSILON_CM || road.xCm + road.widthCm >= size.widthCm - EPSILON_CM;
   }
   return road.yCm <= EPSILON_CM || road.yCm + road.lengthCm >= size.lengthCm - EPSILON_CM;

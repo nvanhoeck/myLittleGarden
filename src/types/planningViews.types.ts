@@ -104,6 +104,8 @@ export interface RoadView {
   readonly id: string;
   /** cm in the box's inner area */
   readonly rect: AreaPiece;
+  /** The road width (cm, across the line it runs along) */
+  readonly widthCm: number;
   readonly locked: boolean;
 }
 

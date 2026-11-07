@@ -1,5 +1,5 @@
 import type { AreaData, AreaPiece } from '../../types/planning.types.ts';
-import type { RoadData } from '../../types/component.types.ts';
+import type { RoadData, RoadOrientation } from '../../types/component.types.ts';
 import { bordersOf } from './Borders.ts';
 import type { Border } from './Borders.ts';
 import { EPSILON_CM } from './Rectangles.ts';
@@ -17,6 +17,14 @@ export interface AutomaticRoadsInput {
   readonly lockedRoads: readonly AreaPiece[];
 }
 
+/** A road rectangle with the direction it runs in */
+export type RoadPiece = AreaPiece & { readonly orientation: RoadOrientation };
+
+/** The road width: across the line it runs along */
+export function roadWidthOf(road: Pick<RoadData, 'widthCm' | 'lengthCm' | 'orientation'>): number {
+  return road.orientation === 'vertical' ? road.widthCm : road.lengthCm;
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -30,26 +38,31 @@ function startAcross(border: Border, thicknessCm: number, boxAcrossCm: number): 
 }
 
 /** The road on a border, kept inside the box; null when the road does not fit across the box or the border has no length */
-export function roadOnBorder(border: Border, widthCm: number, box: BoxSize): AreaPiece | null {
+export function roadOnBorder(border: Border, widthCm: number, box: BoxSize): RoadPiece | null {
   const length = border.toCm - border.fromCm;
   if (length <= EPSILON_CM) return null;
   if (border.orientation === 'vertical') {
     if (widthCm > box.widthCm) return null;
-    return { xCm: startAcross(border, widthCm, box.widthCm), yCm: border.fromCm, widthCm, lengthCm: length };
+    return { xCm: startAcross(border, widthCm, box.widthCm), yCm: border.fromCm, widthCm, lengthCm: length, orientation: 'vertical' };
   }
   if (widthCm > box.lengthCm) return null;
-  return { xCm: border.fromCm, yCm: startAcross(border, widthCm, box.lengthCm), widthCm: length, lengthCm: widthCm };
+  return { xCm: border.fromCm, yCm: startAcross(border, widthCm, box.lengthCm), widthCm: length, lengthCm: widthCm, orientation: 'horizontal' };
+}
+
+/** Whether a ring of roads this wide fits in the box: twice the width must stay below its short side */
+export function ringFits(widthCm: number, box: BoxSize): boolean {
+  return widthCm > 0 && 2 * widthCm < Math.min(box.widthCm, box.lengthCm);
 }
 
 /** Four roads along the box edges: top and bottom over the full width, the sides between them */
-export function ringRoads(widthCm: number, box: BoxSize): AreaPiece[] {
-  if (!(widthCm > 0) || 2 * widthCm >= Math.min(box.widthCm, box.lengthCm)) return [];
+export function ringRoads(widthCm: number, box: BoxSize): RoadPiece[] {
+  if (!ringFits(widthCm, box)) return [];
   const sideLength = box.lengthCm - 2 * widthCm;
   return [
-    { xCm: 0, yCm: 0, widthCm: box.widthCm, lengthCm: widthCm },
-    { xCm: 0, yCm: box.lengthCm - widthCm, widthCm: box.widthCm, lengthCm: widthCm },
-    { xCm: 0, yCm: widthCm, widthCm, lengthCm: sideLength },
-    { xCm: box.widthCm - widthCm, yCm: widthCm, widthCm, lengthCm: sideLength },
+    { xCm: 0, yCm: 0, widthCm: box.widthCm, lengthCm: widthCm, orientation: 'horizontal' },
+    { xCm: 0, yCm: box.lengthCm - widthCm, widthCm: box.widthCm, lengthCm: widthCm, orientation: 'horizontal' },
+    { xCm: 0, yCm: widthCm, widthCm, lengthCm: sideLength, orientation: 'vertical' },
+    { xCm: box.widthCm - widthCm, yCm: widthCm, widthCm, lengthCm: sideLength, orientation: 'vertical' },
   ];
 }
 
@@ -57,12 +70,12 @@ export function ringRoads(widthCm: number, box: BoxSize): AreaPiece[] {
  * The roads to create: an optional ring, and a road on every border between two areas
  * that no ring or locked road covers. Locked roads are not part of the result.
  */
-export function automaticRoads(input: AutomaticRoadsInput): AreaPiece[] {
+export function automaticRoads(input: AutomaticRoadsInput): RoadPiece[] {
   const ring = input.withRing ? ringRoads(input.widthCm, input.box) : [];
   const borders = bordersOf(input.areas, input.box, [...ring, ...input.lockedRoads]).filter((border) => border.kind === 'between');
   const between = borders
     .map((border) => roadOnBorder(border, input.widthCm, input.box))
-    .filter((road): road is AreaPiece => road !== null);
+    .filter((road): road is RoadPiece => road !== null);
   return [...ring, ...between];
 }
 
@@ -73,9 +86,9 @@ function resizedAxis(start: number, thickness: number, newThickness: number, box
   return clamp(start + thickness / 2 - newThickness / 2, 0, boxSize - newThickness);
 }
 
-/** The road with a new width (its short side); a road wider than the box fills the box */
+/** The road with a new width (across the line it runs along); a road wider than the box fills the box */
 export function withWidth(road: RoadData, widthCm: number, box: BoxSize): RoadData {
-  if (road.widthCm <= road.lengthCm) {
+  if (road.orientation === 'vertical') {
     const width = Math.min(widthCm, box.widthCm);
     return { ...road, xCm: resizedAxis(road.xCm, road.widthCm, width, box.widthCm), widthCm: width };
   }

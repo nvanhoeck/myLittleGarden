@@ -6,6 +6,7 @@ import type { PlantRelations } from '../../domain/planning/PlantRelations.ts';
 import type { AreaData, AreaPiece } from '../../types/planning.types.ts';
 import { bordersOf } from '../../domain/roads/Borders.ts';
 import { isValidRoadWidth } from '../../domain/roads/GardenBoxRoads.ts';
+import { roadWidthOf } from '../../domain/roads/RoadPlacement.ts';
 import type { RoadData } from '../../types/component.types.ts';
 import type { AreaCanvasView, AreaRelationView, AreaView, EdgeMarkerView, RoadSlotView, RoadView } from '../../types/planningViews.types.ts';
 import type { Translate } from '../shared/seasonLabels.ts';
@@ -58,6 +59,7 @@ function roadViewsOf(roads: readonly RoadData[]): RoadView[] {
   return roads.map((road) => ({
     id: road.id,
     rect: { xCm: road.xCm, yCm: road.yCm, widthCm: road.widthCm, lengthCm: road.lengthCm },
+    widthCm: roadWidthOf(road),
     locked: road.locked === true,
   }));
 }

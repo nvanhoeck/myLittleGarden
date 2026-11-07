@@ -225,12 +225,13 @@ describe('resizeHandlePoint', () => {
 describe('buildAreaCanvas roads', () => {
   const left = (): AreaData => area('a', 'ui', [piece(0, 0, 100, 100)]);
   const right = (): AreaData => area('b', 'tomaat', [piece(100, 0, 100, 100)]);
-  const road = (id: string, xCm: number, yCm: number, widthCm: number, lengthCm: number, locked?: boolean): RoadData => ({
+  const road = (id: string, xCm: number, yCm: number, widthCm: number, lengthCm: number, locked?: boolean, orientation?: RoadData['orientation']): RoadData => ({
     id,
     xCm,
     yCm,
     widthCm,
     lengthCm,
+    orientation: orientation ?? (widthCm <= lengthCm ? 'vertical' : 'horizontal'),
     ...(locked === undefined ? {} : { locked }),
   });
 
@@ -254,16 +255,21 @@ describe('buildAreaCanvas roads', () => {
     });
   }
 
-  test('maps each road of a garden box to its rectangle and lock', () => {
+  test('maps each road of a garden box to its rectangle, width and lock', () => {
     const { roads } = roadCanvasOf({
       own: [left()],
       roads: [road('r1', 95, 0, 10, 100, true), road('r2', 0, 0, 200, 10)],
       isEditMode: false,
     });
     assert.deepEqual(roads, [
-      { id: 'r1', rect: piece(95, 0, 10, 100), locked: true },
-      { id: 'r2', rect: piece(0, 0, 200, 10), locked: false },
+      { id: 'r1', rect: piece(95, 0, 10, 100), widthCm: 10, locked: true },
+      { id: 'r2', rect: piece(0, 0, 200, 10), widthCm: 10, locked: false },
     ]);
+  });
+
+  test('the width of a road comes from its orientation, not from its short side', () => {
+    const { roads } = roadCanvasOf({ own: [left()], roads: [road('e', 0, 50, 30, 20, false, 'vertical')], isEditMode: false });
+    assert.equal(roads[0].widthCm, 30);
   });
 
   test('a component that is not a garden box has no roads and no slots', () => {

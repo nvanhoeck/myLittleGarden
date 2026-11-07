@@ -187,7 +187,7 @@ describe('migrating a v5 planning to areas', () => {
 });
 
 describe('migrateComponentState v6 to v7 (roads)', () => {
-  const road = { id: 'r1', xCm: 0, yCm: 0, widthCm: 20, lengthCm: 100 };
+  const road = { id: 'r1', xCm: 0, yCm: 0, widthCm: 20, lengthCm: 100, orientation: 'vertical' };
   const migrate = (components: unknown[]): ReturnType<typeof migrateComponentState> => migrateComponentState({ components }, 6);
 
   test('a garden box gets empty roads; a tower is untouched', () => {
@@ -204,6 +204,29 @@ describe('migrateComponentState v6 to v7 (roads)', () => {
   test('an invalid road is dropped among valid ones', () => {
     const migrated = migrate([{ id: 'b', type: 'gardenBox', roads: [road, { id: 'bad', xCm: 0, yCm: 0, widthCm: 0, lengthCm: 5 }, { ...road, id: 'r2', locked: true }, 7], plannings: {} }]);
     assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, [road, { ...road, id: 'r2', locked: true }]);
+  });
+
+  test('a road with an id already seen is dropped; the first one stays', () => {
+    const migrated = migrate([{ id: 'b', type: 'gardenBox', roads: [road, { ...road, xCm: 50 }, { ...road, id: 'r2' }], plannings: {} }]);
+    assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, [road, { ...road, id: 'r2' }]);
+  });
+
+  test('a road keeps its stored orientation, even against its aspect ratio', () => {
+    const short = { id: 's', xCm: 0, yCm: 50, widthCm: 30, lengthCm: 20, orientation: 'vertical' };
+    const migrated = migrate([{ id: 'b', type: 'gardenBox', roads: [short], plannings: {} }]);
+    assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, [short]);
+  });
+
+  test('a road without orientation (early v7 data) gets it from its aspect ratio', () => {
+    const { orientation: _o, ...bare } = road;
+    const flat = { id: 'h', xCm: 0, yCm: 40, widthCm: 100, lengthCm: 20 };
+    const migrated = migrateComponentState({ components: [{ id: 'b', type: 'gardenBox', roads: [bare, flat], plannings: {} }] }, 7);
+    assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, [road, { ...flat, orientation: 'horizontal' }]);
+  });
+
+  test('a road with an unknown orientation is dropped', () => {
+    const migrated = migrate([{ id: 'b', type: 'gardenBox', roads: [{ ...road, orientation: 'diagonal' }], plannings: {} }]);
+    assert.deepEqual((migrated.components[0] as { roads?: unknown }).roads, []);
   });
 
   test('roads on a component that is not a garden box are dropped', () => {
