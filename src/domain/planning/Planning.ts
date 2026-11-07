@@ -204,7 +204,9 @@ export class Planning {
 
   /**
    * The result of a layout run: unlocked areas are replaced, locked ones
-   * stay (a new area for a planting with a locked area is ignored). Placed
+   * stay. Only the first new area of each planting starting in the season
+   * counts; areas of other plantings, and of plantings with a locked area,
+   * are ignored. Placed
    * plantings starting here keep their growing seasons from now on; unplaced
    * ones follow the calendar again. Later seasons they grow in become outdated.
    */
@@ -212,8 +214,10 @@ export class Planning {
     const before = this.plantingsStartingIn(season);
     const placed = this.withSeason(season, (plan) => {
       const locked = plan.areas.filter((a) => a.locked === true);
-      const lockedPlantings = new Set(locked.map((a) => a.plantingId));
-      return { ...plan, areas: [...locked, ...areas.filter((a) => !lockedPlantings.has(a.plantingId))], status: 'planned' };
+      const open = new Set(before.map((p) => p.id));
+      locked.forEach((a) => open.delete(a.plantingId));
+      const accepted = areas.filter((a) => open.delete(a.plantingId));
+      return { ...plan, areas: [...locked, ...accepted], status: 'planned' };
     });
     const next = placed.with({
       plantings: placed.data.plantings.map((p) => (p.startSeason === season ? placed.withFrozenSeasons(p) : p)),
@@ -231,6 +235,9 @@ export class Planning {
    * the season or an area carried into it.
    */
   moveArea(season: Season, areaId: string, dxCm: number, dyCm: number, bounds: LayerBounds): Planning {
+    if (dxCm === 0 && dyCm === 0) {
+      return this;
+    }
     return this.changeArea(season, areaId, bounds, (area) => ({
       ...area,
       pieces: area.pieces.map((p) => ({ ...p, xCm: p.xCm + dxCm, yCm: p.yCm + dyCm })),
@@ -252,17 +259,22 @@ export class Planning {
         : area);
   }
 
-  /** Removes an area; its planting stays, unplaced */
+  /** Removes an area; its planting stays, unplaced, and follows the calendar again */
   removeArea(season: Season, areaId: string): Planning {
     const area = this.areasIn(season).find((a) => a.id === areaId);
     if (area === undefined) {
       return this;
     }
-    return this.withSeason(season, (plan) => ({ ...plan, areas: plan.areas.filter((a) => a.id !== areaId) }))
+    const removed = this.withSeason(season, (plan) => ({ ...plan, areas: plan.areas.filter((a) => a.id !== areaId) }));
+    return removed
+      .withPlantingChanged(area.plantingId, (p) => removed.withFrozenSeasons(p))
       .markedOutdated(this.laterSeasonsOf(area.plantingId));
   }
 
   toggleLock(season: Season, areaId: string): Planning {
+    if (!this.areasIn(season).some((a) => a.id === areaId)) {
+      return this;
+    }
     return this.withSeason(season, (plan) => ({
       ...plan,
       areas: plan.areas.map((a) => (a.id === areaId ? { ...a, locked: !(a.locked ?? false) } : a)),
@@ -270,6 +282,9 @@ export class Planning {
   }
 
   setAllLocked(season: Season, locked: boolean): Planning {
+    if (this.areasIn(season).every((a) => (a.locked ?? false) === locked)) {
+      return this;
+    }
     return this.withSeason(season, (plan) => ({ ...plan, areas: plan.areas.map((a) => ({ ...a, locked })) }));
   }
 
@@ -433,11 +448,17 @@ export class Planning {
     })).markedOutdated(this.laterSeasonsOf(area.plantingId));
   }
 
-  /** Whether the area lies inside its layer's bounding box, clear of its own other pieces and every other area in the season */
+  /**
+   * Whether the area lies inside its layer's bounding box, clear of its own
+   * other pieces and of every other area on its layer in the season and in
+   * the later seasons its planting grows in
+   */
   private fitsBeside(season: Season, area: AreaData, bounds: LayerBounds): boolean {
     const layerIndex = area.layerIndex ?? 0;
     const box = layerBounds(bounds(layerIndex));
-    const others = [...this.carriedAreasIn(season), ...this.areasIn(season)]
+    const seasons = [season, ...this.laterSeasonsOf(area.plantingId)];
+    const others = seasons
+      .flatMap((s) => [...this.carriedAreasIn(s), ...this.areasIn(s)])
       .filter((a) => a.id !== area.id && (a.layerIndex ?? 0) === layerIndex)
       .flatMap((a) => a.pieces);
     return area.pieces.every((piece, index) =>

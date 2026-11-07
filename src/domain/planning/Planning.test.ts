@@ -191,6 +191,17 @@ describe('applyAreas', () => {
       .applyAreas('spring', [area('new', 'tomaat-spring'), area('again', 'sla-spring')]);
     assert.deepEqual(planning.areasIn('spring').map((a) => a.id), ['locked', 'new']);
   });
+
+  test('ignores areas of unknown plantings and of plantings starting in another season', () => {
+    const planning = withPlants('sla', 'boerenkool')
+      .applyAreas('spring', [area('ghost', 'spook-spring'), area('kale', 'boerenkool-summer'), area('s1', 'sla-spring')]);
+    assert.deepEqual(planning.areasIn('spring').map((a) => a.id), ['s1']);
+  });
+
+  test('keeps only the first area of a planting', () => {
+    const planning = withPlants('sla').applyAreas('spring', [area('first', 'sla-spring'), area('second', 'sla-spring')]);
+    assert.deepEqual(planning.areasIn('spring').map((a) => a.id), ['first']);
+  });
 });
 
 describe('reconciling with a new calendar (frost-date change and every load)', () => {
@@ -279,7 +290,8 @@ describe('reconciling with a new calendar (frost-date change and every load)', (
   });
 
   test('an unplaced planting that still has fixed seasons loses them', () => {
-    const data = withPlants('tomaat').applyAreas('spring', [area('t1', 'tomaat-spring')]).removeArea('spring', 't1').toData();
+    const placed = withPlants('tomaat').applyAreas('spring', [area('t1', 'tomaat-spring')]).toData();
+    const data: PlanningData = { ...placed, seasons: { ...placed.seasons, spring: { ...placed.seasons.spring, areas: [] } } };
     assert.deepEqual(data.plantings[0].fixedSeasons, ['spring', 'summer']);
     assert.equal(Planning.from(data, calendar).plantingById('tomaat-spring')?.fixedSeasons, undefined);
   });
@@ -314,8 +326,8 @@ describe('changing one area', () => {
     .applyAreas('summer', [area('b1', 'boerenkool-summer', { pieces: [piece(50, 10), piece(50, 50)] })]);
 
   test('moving an area moves all its pieces and outdates the later seasons it grows in, not its own season', () => {
-    const moved = planned.moveArea('spring', 't1', 40, 5, bounds);
-    assert.deepEqual(moved.areaOf('tomaat-spring')?.pieces, [piece(50, 15)]);
+    const moved = planned.moveArea('spring', 't1', 5, -5, bounds);
+    assert.deepEqual(moved.areaOf('tomaat-spring')?.pieces, [piece(15, 5)]);
     assert.deepEqual([moved.statusOf('spring'), moved.statusOf('summer')], ['planned', 'outdated']);
     const kale = planned.moveArea('summer', 'b1', 10, 0, bounds).areaOf('boerenkool-summer');
     assert.deepEqual(kale?.pieces, [piece(60, 10), piece(60, 50)]);
@@ -327,6 +339,14 @@ describe('changing one area', () => {
     assert.equal(planned.moveArea('spring', 't1', 0, 30, bounds), planned); // onto the lettuce
     assert.equal(planned.moveArea('summer', 'b1', -30, 0, bounds), planned); // onto the carried tomato
     assert.notEqual(planned.moveArea('spring', 't1', 0, 20, bounds), planned); // touching the lettuce is fine
+  });
+
+  test('an area carried into a later season cannot be moved or resized over an area of that season', () => {
+    const lockedKale = planned.setAllLocked('summer', true);
+    assert.equal(lockedKale.moveArea('spring', 't1', 40, 0, bounds), lockedKale); // onto the summer kale
+    assert.equal(lockedKale.resizeArea('spring', 't1', 0, 45, 20, bounds), lockedKale);
+    assert.equal(planned.moveArea('spring', 't1', 40, 0, bounds), planned); // unlocked kale counts too
+    assert.equal(planned.moveArea('spring', 's1', 40, 0, bounds).areaOf('sla-spring')?.pieces[0].xCm, 50); // lettuce is not carried
   });
 
   test('a move is checked against the bounding box of the area\'s own layer', () => {
@@ -360,10 +380,19 @@ describe('changing one area', () => {
     assert.equal(planned.removeArea('spring', 'nope'), planned);
   });
 
-  test('removing an area leaves the planting unplaced and outdates its later seasons', () => {
+  test('changes that change nothing return the same planning', () => {
+    assert.equal(planned.moveArea('spring', 't1', 0, 0, bounds), planned);
+    assert.equal(planned.toggleLock('spring', 'nope'), planned);
+    assert.equal(planned.setAllLocked('spring', false), planned);
+    const locked = planned.setAllLocked('spring', true);
+    assert.equal(locked.setAllLocked('spring', true), locked);
+  });
+
+  test('removing an area leaves the planting unplaced, unfrozen, and outdates its later seasons', () => {
     const removed = planned.removeArea('spring', 't1');
     assert.equal(removed.isPlaced('tomaat-spring'), false);
     assert.notEqual(removed.plantingById('tomaat-spring'), undefined);
+    assert.equal(removed.plantingById('tomaat-spring')?.fixedSeasons, undefined);
     assert.equal(removed.statusOf('summer'), 'outdated');
   });
 
