@@ -6,7 +6,7 @@ import { useComponentStore } from '@/stores/componentStore';
 import { usePlantStore } from '@/stores/plantStore';
 import type { PlantSpecSnapshot } from '@/domain/ai/GardenSnapshot';
 import { buildGardenSnapshot } from '@/domain/ai/buildGardenSnapshot';
-import { placementsGrowingOn, plantDistanceCm } from '@/domain/planning';
+import { areasGrowingOn, plantDistanceCm } from '@/domain/planning';
 import { plantingCalendarOfYear } from '@/stores/planningContext';
 import type { ComponentData } from '@/types';
 import { chatService } from '@/services/ai/chatService';
@@ -67,9 +67,9 @@ export function useAiChat(): UseAiChatResult {
       const plantState = usePlantStore.getState();
 
       const today = new Date();
-      const placementsOf = (component: ComponentData) => placementsGrowingOn(component, today, plantingCalendarOfYear);
+      const areasOf = (component: ComponentData) => areasGrowingOn(component, today, plantingCalendarOfYear);
       const uniquePlantIds = new Set(
-        componentsState.components.flatMap((c) => placementsOf(c).map((p) => p.plantId)),
+        componentsState.components.flatMap((c) => areasOf(c).map((a) => a.plantId)),
       );
       const plantSpecs: PlantSpecSnapshot[] = [...uniquePlantIds].flatMap((id) => {
         const plant = plantState.getPlantById(id);
@@ -95,7 +95,7 @@ export function useAiChat(): UseAiChatResult {
           fallFrostDate: gardenState.fallFrostDate,
         },
         componentsState.components,
-        placementsOf,
+        areasOf,
         plantSpecs,
       );
 

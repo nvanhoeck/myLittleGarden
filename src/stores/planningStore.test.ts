@@ -2,7 +2,7 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { usePlanningStore } from './planningStore.ts';
 
-const shares = [{ plantingId: 'sla-spring', plantId: 'sla', count: 3, actualShare: 0.3, targetShare: 0.5 }];
+const shares = [{ plantingId: 'sla-spring', plantId: 'sla', plantCount: 3, actualShare: 0.3, targetShare: 0.5, fits: true }];
 
 describe('planningStore', () => {
   test('keeps the last shares per component, year and season', () => {

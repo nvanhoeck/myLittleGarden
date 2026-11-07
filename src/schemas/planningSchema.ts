@@ -7,7 +7,7 @@ import type { AreaData, AreaPiece, PlantingData, PlanningData } from '../types/p
 
 export const seasonSchema = z.enum(['spring', 'summer', 'autumn', 'winter']);
 
-const areaPieceSchema = z.object({
+export const areaPieceSchema = z.object({
   xCm: z.number(),
   yCm: z.number(),
   widthCm: z.number().positive(),

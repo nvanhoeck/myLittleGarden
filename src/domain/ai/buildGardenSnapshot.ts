@@ -11,7 +11,7 @@
 
 import type { SunDirection } from '@/types/environment.types';
 import type { ComponentData } from '@/types/component.types';
-import type { PlacedPlantData } from '@/types/plant.types';
+import type { AreaData } from '@/types/planning.types';
 import {
   GARDEN_SNAPSHOT_VERSION,
   type ComponentDimensionsSnapshot,
@@ -82,19 +82,21 @@ function buildDimensions(component: ComponentData): ComponentDimensionsSnapshot 
 }
 
 /**
- * Map a single placed plant to its snapshot representation.
+ * Map an area to one snapshot plant: at the centre of its first piece, with
+ * that piece's size as patch size.
  */
-function mapPlant(plant: PlacedPlantData): PlacedPlantSnapshot {
+function mapArea(area: AreaData): PlacedPlantSnapshot {
+  const [piece] = area.pieces;
   return {
-    id: plant.id,
-    plantId: plant.plantId,
-    positionXInCm: plant.positionX,
-    positionYInCm: plant.positionY,
-    layerIndex: plant.layerIndex ?? null,
-    locked: plant.locked ?? false,
-    patchWidthInCm: plant.patchWidthInCm ?? null,
-    patchHeightInCm: plant.patchHeightInCm ?? null,
-    patchRotationDeg: plant.patchRotationDeg ?? null,
+    id: area.id,
+    plantId: area.plantId,
+    positionXInCm: piece.xCm + piece.widthCm / 2,
+    positionYInCm: piece.yCm + piece.lengthCm / 2,
+    layerIndex: area.layerIndex ?? null,
+    locked: area.locked ?? false,
+    patchWidthInCm: piece.widthCm,
+    patchHeightInCm: piece.lengthCm,
+    patchRotationDeg: null,
   };
 }
 
@@ -103,7 +105,7 @@ function mapPlant(plant: PlacedPlantData): PlacedPlantSnapshot {
  */
 function mapComponent(
   component: ComponentData,
-  placementsOf: (component: ComponentData) => readonly PlacedPlantData[],
+  areasOf: (component: ComponentData) => readonly AreaData[],
 ): ComponentSnapshot {
   return {
     id: component.id,
@@ -111,7 +113,7 @@ function mapComponent(
     type: component.type,
     sunDirection: (component.sunDirection ?? null) as SnapshotSunDirection | null,
     dimensions: buildDimensions(component),
-    plants: placementsOf(component).map(mapPlant),
+    plants: areasOf(component).filter((area) => area.pieces.length > 0).map(mapArea),
     createdAt: component.createdAt,
   };
 }
@@ -124,8 +126,8 @@ function mapComponent(
 export function buildGardenSnapshot(
   garden: GardenStoreState,
   components: ComponentData[],
-  /** The plants growing in each component today */
-  placementsOf: (component: ComponentData) => readonly PlacedPlantData[],
+  /** The areas growing in each component today */
+  areasOf: (component: ComponentData) => readonly AreaData[],
   plantSpecs: PlantSpecSnapshot[] = [],
 ): GardenSnapshot {
   return {
@@ -135,7 +137,7 @@ export function buildGardenSnapshot(
       springFrostDate: toIsoStringOrNull(garden.springFrostDate),
       fallFrostDate: toIsoStringOrNull(garden.fallFrostDate),
     },
-    components: components.map((component) => mapComponent(component, placementsOf)),
+    components: components.map((component) => mapComponent(component, areasOf)),
     ...(plantSpecs.length > 0 && { plantCatalog: plantSpecs }),
   };
 }

@@ -2,12 +2,12 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { COMPONENT_STORE_VERSION, mergePersistedComponentState, migrateComponentState } from './componentStoreMigrations.ts';
 
-const emptySeason = { ratios: {}, placements: [], status: 'notPlanned' };
+const emptySeason = { ratios: {}, areas: [], status: 'notPlanned' };
 const planning = { plants: ['tomaat'], plantings: [{ id: 'tomaat-spring', plantId: 'tomaat', startSeason: 'spring' }], seasons: { spring: emptySeason, summer: emptySeason, autumn: emptySeason, winter: emptySeason } };
 
 describe('migrateComponentState', () => {
-  test('the current version is 5', () => {
-    assert.equal(COMPONENT_STORE_VERSION, 5);
+  test('the current version is 6', () => {
+    assert.equal(COMPONENT_STORE_VERSION, 6);
   });
 
   test('given version 1, canvas fields go and an empty planning map is added', () => {
@@ -31,62 +31,75 @@ describe('migrateComponentState', () => {
     assert.deepEqual(migrated.components, [{ id: 'c1', plannings: { '2026': planning } }]);
   });
 
-  describe('salvaging a planning entry by entry', () => {
-    const good = { id: 'a', plantId: 'tomaat', plantingId: 'tomaat-spring', positionX: 10, positionY: 20 };
-    const migratePlanning = (data: unknown): Record<string, unknown> => {
-      const migrated = migrateComponentState({ components: [{ id: 'c1', plannings: { '2026': data } }] }, 5);
-      return (migrated.components[0] as unknown as { plannings: Record<string, unknown> }).plannings;
+  describe('salvaging a v6 planning entry by entry', () => {
+    const piece = { xCm: 10, yCm: 20, widthCm: 30, lengthCm: 40 };
+    const good = { id: 'a', plantId: 'tomaat', plantingId: 'tomaat-spring', pieces: [piece] };
+    type Salvaged = Record<string, { plantings: unknown[]; seasons: Record<string, { areas: unknown[]; status: string; ratios: unknown }> }>;
+    const migratePlanning = (data: unknown): Salvaged => {
+      const migrated = migrateComponentState({ components: [{ id: 'c1', plannings: { '2026': data } }] }, 6);
+      return (migrated.components[0] as unknown as { plannings: Salvaged }).plannings;
     };
+    const withSpring = (season: unknown): unknown => ({ ...planning, seasons: { ...planning.seasons, spring: season } });
 
-    test('one bad placement keeps the year and the good placements, and marks the season outdated', () => {
-      const planned = { ratios: { 'tomaat-spring': 2 }, placements: [good, { id: 'b', plantId: 'tomaat', plantingId: 'tomaat-spring', positionX: 'x', positionY: 1 }, { ...good, id: 'c' }], status: 'planned' };
-      const plannings = migratePlanning({ ...planning, seasons: { ...planning.seasons, spring: planned } }) as Record<string, { seasons: Record<string, { placements: unknown[]; status: string; ratios: unknown }> }>;
-      const spring = plannings['2026'].seasons.spring;
-      assert.deepEqual(spring.placements, [good, { ...good, id: 'c' }]);
-      assert.equal(spring.status, 'outdated');
-      assert.deepEqual(spring.ratios, { 'tomaat-spring': 2 });
-      assert.equal(plannings['2026'].seasons.summer.status, 'notPlanned');
+    test('a clean planned season with an area stays planned', () => {
+      const season = { ratios: { 'tomaat-spring': 1 }, areas: [{ ...good, locked: true, layerIndex: 0 }], status: 'planned' };
+      assert.deepEqual(migratePlanning(withSpring(season))['2026'].seasons.spring, season);
     });
 
-    test('a bad ratio is dropped and the others stay', () => {
-      const season = { ratios: { 'tomaat-spring': 0, 'tomaat-summer': 1.5, ui: 3 }, placements: [good], status: 'planned' };
-      const plannings = migratePlanning({ ...planning, seasons: { ...planning.seasons, summer: season } }) as Record<string, { seasons: Record<string, { ratios: unknown; status: string }> }>;
-      assert.deepEqual(plannings['2026'].seasons.summer.ratios, {});
-      assert.equal(plannings['2026'].seasons.summer.status, 'outdated');
+    test('an invalid piece is dropped, the area stays and the season is outdated', () => {
+      const season = { ratios: {}, areas: [{ ...good, pieces: [piece, { ...piece, widthCm: -1 }, 'x'] }], status: 'planned' };
+      const spring = migratePlanning(withSpring(season))['2026'].seasons.spring;
+      assert.deepEqual(spring.areas, [good]);
+      assert.equal(spring.status, 'outdated');
+    });
+
+    test('an area without a valid piece is dropped', () => {
+      const season = { ratios: {}, areas: [{ ...good, pieces: [{ ...piece, lengthCm: 0 }] }, { ...good, id: 'b', pieces: 'x' }], status: 'planned' };
+      const spring = migratePlanning(withSpring(season))['2026'].seasons.spring;
+      assert.deepEqual(spring.areas, []);
+      assert.equal(spring.status, 'outdated');
+    });
+
+    test('an area of an unknown planting or with another plant than its planting is dropped', () => {
+      const season = { ratios: {}, areas: [{ ...good, plantingId: 'ghost' }, { ...good, id: 'z', plantId: 'sla' }, good], status: 'planned' };
+      const spring = migratePlanning(withSpring(season))['2026'].seasons.spring;
+      assert.deepEqual(spring.areas, [good]);
+      assert.equal(spring.status, 'outdated');
+    });
+
+    test('at most one area per planting: the first stays', () => {
+      const season = { ratios: {}, areas: [good, { ...good, id: 'second' }], status: 'planned' };
+      const spring = migratePlanning(withSpring(season))['2026'].seasons.spring;
+      assert.deepEqual(spring.areas, [good]);
+      assert.equal(spring.status, 'outdated');
+    });
+
+    test('garbage areas do not throw', () => {
+      for (const areas of ['x', 5, null, [null, 7, 'a', {}, { pieces: [] }, { id: 'a', plantingId: 'tomaat-spring', plantId: 'tomaat', pieces: [null] }]]) {
+        const spring = migratePlanning(withSpring({ ratios: {}, areas, status: 'planned' }))['2026'].seasons.spring;
+        assert.deepEqual(spring.areas, []);
+      }
     });
 
     test('a ratio of a known planting that is not whole or below 1 is dropped, valid ones stay', () => {
-      const withPlantings = { ...planning, plantings: [...planning.plantings, { id: 'tomaat-summer', plantId: 'tomaat', startSeason: 'summer' }, { id: 'tomaat-autumn', plantId: 'tomaat', startSeason: 'autumn' }, { id: 'tomaat-winter', plantId: 'tomaat', startSeason: 'winter' }] };
-      const season = { ratios: { 'tomaat-spring': 1.5, 'tomaat-summer': 0, 'tomaat-autumn': 3 }, placements: [], status: 'planned' };
-      const plannings = migratePlanning({ ...withPlantings, seasons: { ...withPlantings.seasons, spring: season } }) as Record<string, { seasons: Record<string, { ratios: unknown; status: string }> }>;
-      assert.deepEqual(plannings['2026'].seasons.spring.ratios, { 'tomaat-autumn': 3 });
-      assert.equal(plannings['2026'].seasons.spring.status, 'outdated');
-    });
-
-    test('a placement whose plant differs from that of its planting is dropped and the season outdated', () => {
-      const season = { ratios: {}, placements: [good, { ...good, id: 'z', plantId: 'sla' }], status: 'planned' };
-      const plannings = migratePlanning({ ...planning, seasons: { ...planning.seasons, spring: season } }) as Record<string, { seasons: Record<string, { placements: unknown[]; status: string }> }>;
-      assert.deepEqual(plannings['2026'].seasons.spring.placements, [good]);
-      assert.equal(plannings['2026'].seasons.spring.status, 'outdated');
+      const withPlantings = { ...planning, plantings: [...planning.plantings, { id: 'tomaat-summer', plantId: 'tomaat', startSeason: 'summer' }, { id: 'tomaat-autumn', plantId: 'tomaat', startSeason: 'autumn' }] };
+      const season = { ratios: { 'tomaat-spring': 1.5, 'tomaat-summer': 0, 'tomaat-autumn': 3, ui: 2 }, areas: [], status: 'planned' };
+      const spring = migratePlanning({ ...withPlantings, seasons: { ...withPlantings.seasons, spring: season } })['2026'].seasons.spring;
+      assert.deepEqual(spring.ratios, { 'tomaat-autumn': 3 });
+      assert.equal(spring.status, 'outdated');
     });
 
     test('a duplicate planting id keeps the first entry and outdates planned seasons', () => {
-      const duplicated = { ...planning, plantings: [...planning.plantings, { id: 'tomaat-spring', plantId: 'sla', startSeason: 'summer' }], seasons: { ...planning.seasons, spring: { ratios: { 'tomaat-spring': 1 }, placements: [good], status: 'planned' } } };
-      const plannings = migratePlanning(duplicated) as Record<string, { plantings: unknown[]; seasons: Record<string, { status: string }> }>;
-      assert.deepEqual(plannings['2026'].plantings, planning.plantings);
-      assert.equal(plannings['2026'].seasons.spring.status, 'outdated');
-    });
-
-    test('a clean planned season stays planned', () => {
-      const season = { ratios: { 'tomaat-spring': 1 }, placements: [good], status: 'planned' };
-      const plannings = migratePlanning({ ...planning, seasons: { ...planning.seasons, autumn: season } }) as Record<string, { seasons: Record<string, unknown> }>;
-      assert.deepEqual(plannings['2026'].seasons.autumn, season);
+      const duplicated = { ...planning, plantings: [...planning.plantings, { id: 'tomaat-spring', plantId: 'sla', startSeason: 'summer' }], seasons: { ...planning.seasons, spring: { ratios: { 'tomaat-spring': 1 }, areas: [good], status: 'planned' } } };
+      const planningOut = migratePlanning(duplicated)['2026'];
+      assert.deepEqual(planningOut.plantings, planning.plantings);
+      assert.equal(planningOut.seasons.spring.status, 'outdated');
     });
 
     test('a missing season is filled with the empty season and a bad status becomes notPlanned', () => {
-      const plannings = migratePlanning({ plants: ['tomaat', 7], plantings: [], seasons: { spring: { ratios: {}, placements: [], status: 'weird' } } }) as Record<string, { plants: string[]; seasons: Record<string, unknown> }>;
-      assert.deepEqual(plannings['2026'].plants, ['tomaat']);
-      assert.deepEqual(plannings['2026'].seasons, { spring: emptySeason, summer: emptySeason, autumn: emptySeason, winter: emptySeason });
+      const out = migratePlanning({ plants: ['tomaat', 7], plantings: [], seasons: { spring: { ratios: {}, areas: [], status: 'weird' } } }) as unknown as Record<string, { plants: string[]; seasons: Record<string, unknown> }>;
+      assert.deepEqual(out['2026'].plants, ['tomaat']);
+      assert.deepEqual(out['2026'].seasons, { spring: emptySeason, summer: emptySeason, autumn: emptySeason, winter: emptySeason });
     });
 
     test('a planning that is not an object is still dropped', () => {
@@ -124,9 +137,9 @@ describe('migrating a v4 planning to plantings', () => {
       { id: 'sla-summer', plantId: 'sla', startSeason: 'summer' },
     ]);
     assert.deepEqual(planning.seasons.spring.ratios, { 'sla-spring': 2 });
-    assert.deepEqual(planning.seasons.spring.placements.map((p) => p.plantingId), ['sla-spring', 'tomaat-spring']);
+    assert.deepEqual(planning.seasons.spring.areas, []);
     assert.deepEqual(planning.seasons.summer.ratios, { 'sla-summer': 1 });
-    assert.equal(planning.seasons.spring.status, 'planned');
+    assert.equal(planning.seasons.spring.status, 'outdated');
   });
 
   test('a ratio of a plant missing from the plant list still becomes a planting and the plant joins the list', () => {
@@ -137,37 +150,39 @@ describe('migrating a v4 planning to plantings', () => {
   });
 });
 
-describe('salvaging a v5 planning', () => {
+describe('migrating a v5 planning to areas', () => {
   const v5 = {
     plants: ['sla'],
-    plantings: [{ id: 'sla-spring', plantId: 'sla', startSeason: 'spring', fixedSeasons: ['spring'] }],
+    plantings: [{ id: 'sla-spring', plantId: 'sla', startSeason: 'spring', fixedSeasons: ['spring'] }, { id: 'x', plantId: 'sla', startSeason: 'lente' }],
     seasons: {
       spring: {
         ratios: { 'sla-spring': 2, ghost: 1 },
-        placements: [
-          { id: 'p1', plantId: 'sla', plantingId: 'sla-spring', positionX: 1, positionY: 1 },
-          { id: 'p2', plantId: 'sla', plantingId: 'ghost', positionX: 2, positionY: 2 },
-        ],
+        placements: [{ id: 'p1', plantId: 'sla', plantingId: 'sla-spring', positionX: 1, positionY: 1 }],
         status: 'planned',
       },
-      summer: emptySeason,
-      autumn: emptySeason,
-      winter: emptySeason,
+      summer: { ratios: { 'sla-spring': 1 }, placements: [], status: 'planned' },
+      autumn: { ratios: {}, placements: [], status: 'notPlanned' },
+      winter: { ratios: {}, placements: [], status: 'outdated' },
     },
   };
+  const migrated = (data: unknown): ReturnType<typeof migrateComponentState> => migrateComponentState({ components: [{ id: 'c1', plannings: { '2026': data } }] }, 5);
 
-  test('keeps valid plantings, drops ratios and placements of unknown plantings and outdates that season', () => {
-    const planning = migrateComponentState({ components: [{ id: 'c1', plannings: { '2026': v5 } }] }, 5).components[0].plannings['2026'];
-    assert.deepEqual(planning.plantings, v5.plantings);
+  test('keeps valid plantings and ratios, drops placements, planned becomes outdated', () => {
+    const planning = migrated(v5).components[0].plannings['2026'];
+    assert.deepEqual(planning.plantings, [v5.plantings[0]]);
     assert.deepEqual(planning.seasons.spring.ratios, { 'sla-spring': 2 });
-    assert.deepEqual(planning.seasons.spring.placements.map((p) => p.id), ['p1']);
+    assert.deepEqual(planning.seasons.spring.areas, []);
+    assert.equal('placements' in planning.seasons.spring, false);
     assert.equal(planning.seasons.spring.status, 'outdated');
+    assert.equal(planning.seasons.summer.status, 'outdated');
+    assert.equal(planning.seasons.autumn.status, 'notPlanned');
+    assert.equal(planning.seasons.winter.status, 'outdated');
   });
 
-  test('drops an invalid planting entry', () => {
-    const bad = { ...v5, plantings: [...v5.plantings, { id: 'x', plantId: 'sla', startSeason: 'lente' }] };
-    const planning = migrateComponentState({ components: [{ id: 'c1', plannings: { '2026': bad } }] }, 5).components[0].plannings['2026'];
-    assert.deepEqual(planning.plantings.map((p) => p.id), ['sla-spring']);
+  test('does not throw on any shape', () => {
+    for (const data of [null, 3, 'x', [], {}, { plants: [], plantings: 'x', seasons: [] }, { plants: ['a'], plantings: [], seasons: { spring: { ratios: 'x', placements: 5, areas: 'y', status: 3 } } }]) {
+      assert.doesNotThrow(() => migrated(data));
+    }
   });
 });
 
