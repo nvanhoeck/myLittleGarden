@@ -18,6 +18,7 @@ import { RoadWidthDialog, SeasonTabs, TowerLayerTabs, YearBar } from '@/componen
 import { PlanningButton, Snackbar } from '@/components/atoms';
 import { layerBounds, plantingAreaOf, relationsFromCatalog, seasonContaining } from '@/domain/planning';
 import type { PlantRelations } from '@/domain/planning';
+import { ringFitsIn } from '@/domain/roads';
 import type { AreaCanvasView, AreaData, AreaPiece, AreaView, ComponentData, RoadSlotView, RoadView, Season } from '@/types';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
@@ -38,10 +39,6 @@ const DEFAULT_ROAD_WIDTH_CM = 30;
 /** The open road dialog: a new road on a border, the automatic roads, or an existing road */
 type RoadDialog = { readonly kind: 'add'; readonly slot: RoadSlotView } | { readonly kind: 'automatic' } | { readonly kind: 'edit'; readonly roadId: string };
 
-/** The short side of a road: its width */
-function roadWidthOf(road: RoadView): number {
-  return Math.round(Math.min(road.rect.widthCm, road.rect.lengthCm));
-}
 const NO_RELATIONS: PlantRelations = () => 'neutral';
 
 function getComponentDimensions(component: ComponentData): { width: number; height: number } {
@@ -169,6 +166,13 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
     [today],
   );
 
+  /** Shows a message in the snackbar for a while */
+  const showMessage = useCallback((message: string) => {
+    setResultMessage(message);
+    if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
+    snackbarTimer.current = setTimeout(() => setResultMessage(null), SNACKBAR_DURATION_MS);
+  }, []);
+
   // Show the spinner first, then run the layout on the JS thread
   const handleOptimize = useCallback(() => {
     if (optimizingRef.current) return;
@@ -178,15 +182,13 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
       try {
         const shares = actions.optimizeSeason(componentId, year, season);
         if (shares === null) return;
-        setResultMessage(optimizeResultMessage(shares, nameOf, translate));
-        if (snackbarTimer.current) clearTimeout(snackbarTimer.current);
-        snackbarTimer.current = setTimeout(() => setResultMessage(null), SNACKBAR_DURATION_MS);
+        showMessage(optimizeResultMessage(shares, nameOf, translate));
       } finally {
         optimizingRef.current = false;
         setOptimizing(false);
       }
     }, OPTIMIZE_DEFER_MS);
-  }, [actions, componentId, year, season, nameOf, translate]);
+  }, [actions, componentId, year, season, nameOf, translate, showMessage]);
 
   const handleOpenChat = useCallback(() => {
     const store = useAiChatStore.getState();
@@ -268,7 +270,12 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
 
   const placeAutomaticRoads = useCallback(
     (widthCm: number, withRing: boolean) => {
-      const place = (): void => actions.placeAutomaticRoads(componentId, year, season, widthCm, withRing);
+      // A ring that does not fit is left out; the user is told so
+      const ringLeftOut = withRing && component !== undefined && isGardenBox(component) && !ringFitsIn(component, widthCm);
+      const place = (): void => {
+        actions.placeAutomaticRoads(componentId, year, season, widthCm, withRing);
+        if (ringLeftOut) showMessage(t('componentDetail.roadRingTooWide', { width: widthCm }));
+      };
       if (!canvasView.roads.some((road) => !road.locked)) {
         place();
         return;
@@ -278,7 +285,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
         { text: t('componentDetail.roadsReplaceConfirm'), style: 'destructive', onPress: place },
       ]);
     },
-    [actions, componentId, year, season, canvasView.roads, t],
+    [actions, component, componentId, year, season, canvasView.roads, t, showMessage],
   );
 
   const handleRoadDialogConfirm = useCallback(
@@ -289,7 +296,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
       if (dialog === null) return;
       if (dialog.kind === 'add') actions.addRoad(componentId, year, season, dialog.slot.border, widthCm);
       else if (dialog.kind === 'automatic') placeAutomaticRoads(widthCm, withRing);
-      else if (editedRoad !== undefined && widthCm !== roadWidthOf(editedRoad)) actions.setRoadWidth(componentId, editedRoad.id, widthCm);
+      else if (editedRoad !== undefined && widthCm !== Math.round(editedRoad.widthCm)) actions.setRoadWidth(componentId, editedRoad.id, widthCm);
     },
     [roadDialog, editedRoad, actions, componentId, year, season, placeAutomaticRoads],
   );
@@ -298,14 +305,21 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
     if (editedRoad !== undefined) actions.toggleRoadLock(componentId, editedRoad.id);
   }, [editedRoad, actions, componentId]);
 
+  // The road dialog closes for the confirmation and comes back when the user cancels
   const handleRemoveRoad = useCallback(() => {
     if (editedRoad === undefined) return;
     const roadId = editedRoad.id;
+    const reopen = (): void => setRoadDialog({ kind: 'edit', roadId });
     setRoadDialog(null);
-    Alert.alert(t('componentDetail.roadRemove'), t('componentDetail.roadRemoveMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.delete'), style: 'destructive', onPress: () => actions.removeRoad(componentId, roadId) },
-    ]);
+    Alert.alert(
+      t('componentDetail.roadRemove'),
+      t('componentDetail.roadRemoveMessage'),
+      [
+        { text: t('common.cancel'), style: 'cancel', onPress: reopen },
+        { text: t('common.delete'), style: 'destructive', onPress: () => actions.removeRoad(componentId, roadId) },
+      ],
+      { cancelable: true, onDismiss: reopen },
+    );
   }, [editedRoad, actions, componentId, t]);
 
   // A road that is gone (removed elsewhere) closes its dialog
@@ -485,7 +499,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
         <RoadWidthDialog
           visible={roadDialog !== null}
           title={roadDialogTitle}
-          initialWidthCm={editedRoad !== undefined ? roadWidthOf(editedRoad) : lastRoadWidthCm}
+          initialWidthCm={editedRoad !== undefined ? Math.round(editedRoad.widthCm) : lastRoadWidthCm}
           widthFrom={roadWidthFrom}
           showRingToggle={roadDialog?.kind === 'automatic'}
           locked={editedRoad?.locked ?? false}

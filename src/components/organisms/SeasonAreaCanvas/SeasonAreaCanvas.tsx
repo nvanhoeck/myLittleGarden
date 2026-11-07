@@ -39,8 +39,16 @@ const REFUSED_MOVE_CHECK_MS = 150;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.25;
-/** Room around the drawing while it scrolls (px) */
+/** Room around the drawing while it scrolls (px), top and right */
 const SCROLL_PADDING_PX = 16;
+/** The zoom panel sits this far (px) from the bottom-left corner (bottom-4 left-4) */
+const ZOOM_PANEL_INSET_PX = 16;
+/** The zoom panel's size (px): two 36 px buttons, the level text and 4 px padding */
+const ZOOM_PANEL_WIDTH_PX = 44;
+const ZOOM_PANEL_HEIGHT_PX = 106;
+/** Room (px) left and below the drawing while it scrolls: the drawing can be scrolled clear of the zoom panel */
+const SCROLL_PADDING_LEFT_PX = ZOOM_PANEL_INSET_PX + ZOOM_PANEL_WIDTH_PX + SCROLL_PADDING_PX / 2;
+const SCROLL_PADDING_BOTTOM_PX = ZOOM_PANEL_INSET_PX + ZOOM_PANEL_HEIGHT_PX + SCROLL_PADDING_PX / 2;
 /** Room around the drawing at zoom 1.0 (px): half a + button or resize handle on the box edge stays visible */
 const FIT_MARGIN_PX = ROAD_ADD_PX / 2;
 /** Sizes within this (px) of the view still fit */
@@ -477,9 +485,12 @@ export function SeasonAreaCanvas({
   const widthPx = bounds.widthCm * scale;
   const heightPx = bounds.lengthCm * scale;
   const needsScrolling = widthPx > size.width + FIT_TOLERANCE_PX || heightPx > size.height + FIT_TOLERANCE_PX;
-  // Centred while it fits, a small margin while it scrolls
-  const paddingX = needsScrolling ? SCROLL_PADDING_PX : Math.max(0, (size.width - widthPx) / 2);
-  const paddingY = needsScrolling ? SCROLL_PADDING_PX : Math.max(0, (size.height - heightPx) / 2);
+  // Centred while it fits; while it scrolls a small margin top and right, and room for the zoom panel left and below
+  const centredX = Math.max(0, (size.width - widthPx) / 2);
+  const centredY = Math.max(0, (size.height - heightPx) / 2);
+  const padding = needsScrolling
+    ? { left: SCROLL_PADDING_LEFT_PX, right: SCROLL_PADDING_PX, top: SCROLL_PADDING_PX, bottom: SCROLL_PADDING_BOTTOM_PX }
+    : { left: centredX, right: centredX, top: centredY, bottom: centredY };
 
   const handleLayout = (event: LayoutChangeEvent): void => {
     const { width, height } = event.nativeEvent.layout;
@@ -489,8 +500,8 @@ export function SeasonAreaCanvas({
   // Every zoom step shows the middle of the drawing
   useEffect(() => {
     if (!needsScrolling) return;
-    const x = Math.max(0, (widthPx + 2 * SCROLL_PADDING_PX - size.width) / 2);
-    const y = Math.max(0, (heightPx + 2 * SCROLL_PADDING_PX - size.height) / 2);
+    const x = Math.max(0, SCROLL_PADDING_LEFT_PX + widthPx / 2 - size.width / 2);
+    const y = Math.max(0, SCROLL_PADDING_PX + heightPx / 2 - size.height / 2);
     horizontalScroll.current?.scrollTo({ x, y: 0, animated: false });
     verticalScroll.current?.scrollTo({ x: 0, y, animated: false });
   }, [zoom, needsScrolling, widthPx, heightPx, size.width, size.height]);
@@ -506,7 +517,7 @@ export function SeasonAreaCanvas({
           <ScrollView
             ref={verticalScroll}
             className="flex-1"
-            contentContainerStyle={{ flexGrow: 1, paddingVertical: paddingY }}
+            contentContainerStyle={{ flexGrow: 1, paddingTop: padding.top, paddingBottom: padding.bottom }}
             scrollEnabled={needsScrolling}
             showsVerticalScrollIndicator={needsScrolling}
             nestedScrollEnabled
@@ -515,7 +526,7 @@ export function SeasonAreaCanvas({
             <ScrollView
               ref={horizontalScroll}
               horizontal
-              contentContainerStyle={{ flexGrow: 1, paddingHorizontal: paddingX, alignItems: 'center' }}
+              contentContainerStyle={{ flexGrow: 1, paddingLeft: padding.left, paddingRight: padding.right, alignItems: 'center' }}
               scrollEnabled={needsScrolling}
               showsHorizontalScrollIndicator={needsScrolling}
               nestedScrollEnabled
@@ -538,7 +549,7 @@ export function SeasonAreaCanvas({
                     road={road}
                     index={index}
                     scale={scale}
-                    label={`${t('componentDetail.roadA11y', { width: Math.round(Math.min(road.rect.widthCm, road.rect.lengthCm)) })}${road.locked ? t('componentDetail.areaLocked') : ''}`}
+                    label={`${t('componentDetail.roadA11y', { width: Math.round(road.widthCm) })}${road.locked ? t('componentDetail.areaLocked') : ''}`}
                     onPress={roadsEditable ? onRoadPress : undefined}
                   />
                 ))}
