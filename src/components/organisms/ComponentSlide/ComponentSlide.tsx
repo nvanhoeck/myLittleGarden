@@ -87,6 +87,7 @@ function LayerDrawing({
         width: widthPx,
         height: heightPx,
         borderRadius: isCircular ? widthPx / 2 : 4,
+        overflow: 'hidden',
         borderWidth: 1,
         borderColor: 'rgba(34, 197, 94, 0.6)',
         backgroundColor: 'rgba(0, 0, 0, 0.15)',

@@ -106,6 +106,7 @@ function LayerView({
               width: containerWidth,
               height: containerHeight,
               borderRadius: isCircular ? containerWidth / 2 : 8,
+              overflow: 'hidden',
             },
           ]}
         >
