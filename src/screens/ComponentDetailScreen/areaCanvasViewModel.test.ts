@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildAreaCanvas, snappedResize } from './areaCanvasViewModel.ts';
+import { buildAreaCanvas, iconPxFor, resizeHandlePoint, snappedResize } from './areaCanvasViewModel.ts';
 import type { AreaCanvasInput, AreaCanvasPlant } from './areaCanvasViewModel.ts';
 import type { AreaData, AreaPiece } from '../../types/planning.types.ts';
 import type { PlantRelations } from '../../domain/planning/PlantRelations.ts';
@@ -131,15 +131,59 @@ describe('buildAreaCanvas relations at edges', () => {
 describe('snappedResize', () => {
   const bounds = { widthCm: 300, lengthCm: 200 };
 
-  test('rounds the dragged size to whole steps, at least one step', () => {
-    assert.deepEqual(snappedResize(piece(0, 0, 100, 100), 174, 20, 50, bounds), { widthCm: 150, lengthCm: 50 });
+  test('adds the drag rounded to whole steps to the current size, at least one step', () => {
+    assert.deepEqual(snappedResize(piece(0, 0, 100, 100), 74, -80, 50, bounds), { widthCm: 150, lengthCm: 50 });
   });
 
   test('stays inside the layer', () => {
-    assert.deepEqual(snappedResize(piece(120, 0, 100, 100), 400, 400, 50, bounds), { widthCm: 150, lengthCm: 200 });
+    assert.deepEqual(snappedResize(piece(120, 0, 100, 100), 300, 300, 50, bounds), { widthCm: 150, lengthCm: 200 });
   });
 
-  test('is null when the snapped size is the current size', () => {
-    assert.equal(snappedResize(piece(0, 0, 100, 100), 110, 90, 50, bounds), null);
+  test('is null when the drag rounds to no step', () => {
+    assert.equal(snappedResize(piece(0, 0, 100, 100), 10, -10, 50, bounds), null);
+  });
+
+  test('a size that is not a whole number of steps is kept when the drag is zero', () => {
+    assert.equal(snappedResize(piece(0, 0, 130, 70), 0, 0, 50, bounds), null);
+  });
+
+  test('a drag of one step adds one step to a size that is not a whole number of steps', () => {
+    assert.deepEqual(snappedResize(piece(0, 0, 130, 70), 50, 0, 50, bounds), { widthCm: 180, lengthCm: 70 });
+  });
+});
+
+describe('icon cap and floor', () => {
+  test('at most 300 icons on the canvas; the areas with the most plants lose theirs first', () => {
+    // 7 areas of 50 ui (100 x 50 cm, spacing 10) and one of 25 tomaten
+    const own = Array.from({ length: 7 }, (_, i) => area(`u${i}`, 'ui', [piece(0, i * 60, 100, 50)]));
+    const { areas } = canvasOf([...own, area('t', 'tomaat', [piece(200, 0, 250, 250)])]);
+    const total = areas.reduce((sum, a) => sum + a.icons.length, 0);
+    assert.ok(total <= 300);
+    assert.equal(areas.find((a) => a.id === 't')?.icons.length, 25);
+    assert.equal(areas.filter((a) => a.plantId === 'ui' && a.icons.length === 50).length, 5);
+    assert.deepEqual(areas.filter((a) => a.plantId === 'ui' && a.icons.length === 0).map((a) => a.id), ['u5', 'u6']);
+  });
+
+  test('icons are drawn 0.8 of a plant square, at most 22 px, and not at all at the 6 px floor', () => {
+    assert.equal(iconPxFor(50, 0.5), 20);
+    assert.equal(iconPxFor(50, 2), 22);
+    assert.equal(iconPxFor(10, 0.75), null);
+    assert.equal(iconPxFor(10, 0.5), null);
+  });
+});
+
+describe('resizeHandlePoint', () => {
+  test('in a rectangle, the bottom-right corner of the piece', () => {
+    assert.deepEqual(resizeHandlePoint(piece(10, 20, 30, 40), { shape: 'rectangle', widthCm: 100, lengthCm: 100 }, 5), { xCm: 40, yCm: 60 });
+  });
+
+  test('in a circle, moves towards the piece centre when the corner is outside', () => {
+    const point = resizeHandlePoint(piece(50, 50, 50, 50), { shape: 'circle', diameterCm: 100 }, 5);
+    assert.ok(Math.hypot(point.xCm - 50, point.yCm - 50) <= 45 + 1e-6);
+    assert.ok(point.xCm > 50 && point.yCm > 50);
+  });
+
+  test('in a circle, the corner nearest the centre when the whole piece is outside', () => {
+    assert.deepEqual(resizeHandlePoint(piece(90, 90, 10, 10), { shape: 'circle', diameterCm: 100 }, 5), { xCm: 90, yCm: 90 });
   });
 });

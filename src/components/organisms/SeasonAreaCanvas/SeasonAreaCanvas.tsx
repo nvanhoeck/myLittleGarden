@@ -13,7 +13,7 @@
  * __resize-handle, __resize-preview, __edge-marker, --companion, --combative;
  * .season-area-toolbar, __button, __button--active, __text
  */
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +24,8 @@ import type { AreaCanvasView, AreaPiece, AreaView, EdgeMarkerView } from '@/type
 const TAP_SLOP_PX = 6;
 const HANDLE_PX = 28;
 const MARKER_PX = 12;
-const MAX_ICON_PX = 22;
+/** After a released drag, how long the store has to redraw the area before a refused move snaps back */
+const REFUSED_MOVE_CHECK_MS = 150;
 
 type LayerShape = { readonly shape: 'rectangle'; readonly widthCm: number; readonly lengthCm: number } | { readonly shape: 'circle'; readonly diameterCm: number };
 
@@ -38,12 +39,16 @@ interface SeasonAreaCanvasProps {
   /** Edit mode: an area was dragged by (dx, dy) cm */
   onAreaMove: (areaId: string, dxCm: number, dyCm: number) => void;
   /**
-   * Edit mode: a resize drag ended. The canvas passes the raw size (cm) the
-   * handle reached; the caller snaps it and decides whether anything changed.
+   * Edit mode: a resize drag (beyond the tap slop) ended. The canvas passes
+   * the drag in cm; the caller snaps it and decides whether anything changed.
    */
-  onAreaResize: (area: AreaView, pieceIndex: number, widthCm: number, lengthCm: number) => void;
+  onAreaResize: (area: AreaView, pieceIndex: number, deltaWidthCm: number, deltaLengthCm: number) => void;
   /** The snapped size a resize drag would give, for the preview; null = unchanged */
-  previewResize: (area: AreaView, pieceIndex: number, widthCm: number, lengthCm: number) => { widthCm: number; lengthCm: number } | null;
+  previewResize: (area: AreaView, pieceIndex: number, deltaWidthCm: number, deltaLengthCm: number) => { widthCm: number; lengthCm: number } | null;
+  /** Where a piece's resize handle sits (cm), at least marginCm inside the layer */
+  handlePointOf: (piece: AreaPiece, marginCm: number) => { xCm: number; yCm: number };
+  /** The icon size (px) for a plant square of iconSizeCm, or null when too small to draw */
+  iconPxOf: (iconSizeCm: number, pxPerCm: number) => number | null;
   onBackgroundPress: () => void;
   onToggleEditMode: () => void;
   onLockAll: () => void;
@@ -65,6 +70,8 @@ interface AreaItemProps {
   onMove: (areaId: string, dxCm: number, dyCm: number) => void;
   onResize: SeasonAreaCanvasProps['onAreaResize'];
   previewResize: SeasonAreaCanvasProps['previewResize'];
+  handlePointOf: SeasonAreaCanvasProps['handlePointOf'];
+  iconPxOf: SeasonAreaCanvasProps['iconPxOf'];
 }
 
 /** The resize handle on the corner of a piece, with a dashed preview of the snapped size while dragging */
@@ -75,6 +82,7 @@ function ResizeHandle({
   label,
   onResize,
   previewResize,
+  handlePointOf,
 }: {
   area: AreaView;
   piece: AreaPiece;
@@ -82,35 +90,33 @@ function ResizeHandle({
   label: string;
   onResize: SeasonAreaCanvasProps['onAreaResize'];
   previewResize: SeasonAreaCanvasProps['previewResize'];
+  handlePointOf: SeasonAreaCanvasProps['handlePointOf'];
 }): React.JSX.Element {
   const [preview, setPreview] = useState<{ widthCm: number; lengthCm: number } | null>(null);
-  const latest = useRef({ area, piece, scale, onResize, previewResize });
-  latest.current = { area, piece, scale, onResize, previewResize };
+  const latest = useRef({ area, scale, onResize, previewResize });
+  latest.current = { area, scale, onResize, previewResize };
 
   const responder = useMemo(() => {
-    const rawSize = (dx: number, dy: number): { widthCm: number; lengthCm: number } => {
-      const { piece: p, scale: s } = latest.current;
-      return { widthCm: p.widthCm + dx / s, lengthCm: p.lengthCm + dy / s };
-    };
+    // A tap or a jitter within the slop is no drag: nothing changes
+    const isTap = (dx: number, dy: number): boolean => Math.abs(dx) < TAP_SLOP_PX && Math.abs(dy) < TAP_SLOP_PX;
     return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderTerminationRequest: () => false,
       onPanResponderMove: (_, g) => {
-        const { widthCm, lengthCm } = rawSize(g.dx, g.dy);
-        const { area: a, previewResize: snap } = latest.current;
-        setPreview(snap(a, 0, widthCm, lengthCm));
+        const { area: a, scale: s, previewResize: snap } = latest.current;
+        setPreview(isTap(g.dx, g.dy) ? null : snap(a, 0, g.dx / s, g.dy / s));
       },
       onPanResponderRelease: (_, g) => {
         setPreview(null);
-        const { widthCm, lengthCm } = rawSize(g.dx, g.dy);
-        latest.current.onResize(latest.current.area, 0, widthCm, lengthCm);
+        if (isTap(g.dx, g.dy)) return;
+        const { area: a, scale: s, onResize: resize } = latest.current;
+        resize(a, 0, g.dx / s, g.dy / s);
       },
       onPanResponderTerminate: () => setPreview(null),
     });
   }, []);
 
-  const right = (piece.xCm + piece.widthCm) * scale;
-  const bottom = (piece.yCm + piece.lengthCm) * scale;
+  const handle = handlePointOf(piece, HANDLE_PX / 2 / scale);
   return (
     <>
       {preview !== null && (
@@ -123,7 +129,7 @@ function ResizeHandle({
       <View
         {...responder.panHandlers}
         className="absolute w-7 h-7 rounded-full bg-white items-center justify-center"
-        style={{ left: right - HANDLE_PX / 2, top: bottom - HANDLE_PX / 2 }}
+        style={{ left: handle.xCm * scale - HANDLE_PX / 2, top: handle.yCm * scale - HANDLE_PX / 2 }}
         hitSlop={8}
         accessibilityRole="adjustable"
         accessibilityLabel={label}
@@ -146,10 +152,22 @@ const AreaItem = React.memo(function AreaItem({
   onMove,
   onResize,
   previewResize,
+  handlePointOf,
+  iconPxOf,
 }: AreaItemProps): React.JSX.Element {
   const pan = useRef(new Animated.ValueXY()).current;
   const latest = useRef({ area, scale, editable, onPress, onMove });
   latest.current = { area, scale, editable, onPress, onMove };
+  const refusedCheck = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // A moved area keeps its drag offset until it is drawn at its new place: no flicker back
+  useEffect(() => {
+    pan.setValue({ x: 0, y: 0 });
+  }, [area.rects, pan]);
+
+  useEffect(() => () => {
+    if (refusedCheck.current) clearTimeout(refusedCheck.current);
+  }, []);
 
   const responder = useMemo(
     () =>
@@ -160,13 +178,23 @@ const AreaItem = React.memo(function AreaItem({
           if (latest.current.editable) pan.setValue({ x: g.dx, y: g.dy });
         },
         onPanResponderRelease: (_, g) => {
-          pan.setValue({ x: 0, y: 0 });
           const current = latest.current;
           if (Math.abs(g.dx) < TAP_SLOP_PX && Math.abs(g.dy) < TAP_SLOP_PX) {
+            pan.setValue({ x: 0, y: 0 });
             current.onPress(current.area);
-          } else if (current.editable) {
-            current.onMove(current.area.id, Math.round(g.dx / current.scale), Math.round(g.dy / current.scale));
+            return;
           }
+          if (!current.editable) {
+            pan.setValue({ x: 0, y: 0 });
+            return;
+          }
+          const rectsBefore = current.area.rects;
+          current.onMove(current.area.id, Math.round(g.dx / current.scale), Math.round(g.dy / current.scale));
+          // A refused move leaves the area where it was: snap back once the store had its say
+          if (refusedCheck.current) clearTimeout(refusedCheck.current);
+          refusedCheck.current = setTimeout(() => {
+            if (latest.current.area.rects === rectsBefore) pan.setValue({ x: 0, y: 0 });
+          }, REFUSED_MOVE_CHECK_MS);
         },
         onPanResponderTerminate: () => pan.setValue({ x: 0, y: 0 }),
       }),
@@ -174,7 +202,7 @@ const AreaItem = React.memo(function AreaItem({
   );
 
   const tint = categoryTint(area.category);
-  const iconPx = Math.max(6, Math.min(MAX_ICON_PX, area.iconSizeCm * scale * 0.8));
+  const iconPx = iconPxOf(area.iconSizeCm, scale);
   const testID = area.dimmed ? `carried-area-${area.plantId}` : `season-area-${area.plantId}`;
   const first = area.rects[0];
 
@@ -204,7 +232,7 @@ const AreaItem = React.memo(function AreaItem({
           {index === 0 && (
             <>
               <View className="flex-row items-center self-start m-0.5 px-1 rounded bg-black/50">
-                {area.icons.length === 0 && <AreaPlantIcon plantId={area.plantId} category={area.category} size={10} />}
+                {(area.icons.length === 0 || iconPx === null) && <AreaPlantIcon plantId={area.plantId} category={area.category} size={10} />}
                 <Text className="text-white text-[10px] font-medium" numberOfLines={1}>
                   {area.locked ? '🔒 ' : ''}
                   {area.label}
@@ -215,7 +243,7 @@ const AreaItem = React.memo(function AreaItem({
           )}
         </View>
       ))}
-      {area.icons.map((icon, index) => (
+      {iconPx !== null && area.icons.map((icon, index) => (
         <View
           key={index}
           pointerEvents="none"
@@ -226,7 +254,15 @@ const AreaItem = React.memo(function AreaItem({
         </View>
       ))}
       {editable && selected && first !== undefined && (
-        <ResizeHandle area={area} piece={first} scale={scale} label={resizeLabel} onResize={onResize} previewResize={previewResize} />
+        <ResizeHandle
+          area={area}
+          piece={first}
+          scale={scale}
+          label={resizeLabel}
+          onResize={onResize}
+          previewResize={previewResize}
+          handlePointOf={handlePointOf}
+        />
       )}
     </Animated.View>
   );
@@ -266,6 +302,8 @@ export function SeasonAreaCanvas({
   onAreaMove,
   onAreaResize,
   previewResize,
+  handlePointOf,
+  iconPxOf,
   onBackgroundPress,
   onToggleEditMode,
   onLockAll,
@@ -292,7 +330,13 @@ export function SeasonAreaCanvas({
           <Pressable
             onPress={onBackgroundPress}
             className="border border-green-700 bg-black/25"
-            style={{ width: widthPx, height: heightPx, borderRadius: layer.shape === 'circle' ? widthPx / 2 : 6 }}
+            // A circular layer clips its areas (pieces live in its bounding square) to the circle
+            style={{
+              width: widthPx,
+              height: heightPx,
+              borderRadius: layer.shape === 'circle' ? widthPx / 2 : 6,
+              overflow: layer.shape === 'circle' ? 'hidden' : 'visible',
+            }}
             testID="season-area-canvas"
           >
             {view.areas.map((area) => (
@@ -308,6 +352,8 @@ export function SeasonAreaCanvas({
                 onMove={onAreaMove}
                 onResize={onAreaResize}
                 previewResize={previewResize}
+                handlePointOf={handlePointOf}
+                iconPxOf={iconPxOf}
               />
             ))}
             {view.edgeMarkers.map((marker) => (

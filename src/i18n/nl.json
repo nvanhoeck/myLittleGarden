@@ -217,6 +217,9 @@
     "edit": "Bewerken",
     "editDone": "Klaar",
     "resizeArea": "Vlak vergroten of verkleinen",
+    "deleteArea": "Verwijderen",
+    "lockArea": "Vergrendelen",
+    "unlockArea": "Ontgrendelen",
     "removeAreaMessage": "Het vlak van {{name}} verwijderen? De teelt blijft in de planning, zonder plaats.",
     "tabA11y_one": "{{season}}, {{months}}, {{status}}, {{count}} plant om te plaatsen, {{carried}} doorlopend",
     "tabA11y_other": "{{season}}, {{months}}, {{status}}, {{count}} planten om te plaatsen, {{carried}} doorlopend"

@@ -9,6 +9,13 @@ import type { Translate } from '../shared/seasonLabels.ts';
 
 /** Above this many plants an area shows its count instead of one icon per plant */
 export const ICON_LIMIT = 50;
+/** At most this many plant icons on the whole canvas */
+export const ICON_TOTAL_LIMIT = 300;
+/** Icons smaller than this (px) are not drawn */
+const ICON_MIN_PX = 6;
+const ICON_MAX_PX = 22;
+/** An icon fills this part of a plant's square */
+const ICON_FILL = 0.8;
 /** Pieces whose edges are at most this far apart touch */
 const TOUCH_TOLERANCE_CM = 5;
 /** Tolerance for rounding of lengths (cm) */
@@ -104,8 +111,9 @@ function relationsAt(areaId: string, markers: readonly EdgeMarkerView[]): AreaRe
 
 /**
  * What the season canvas draws on one layer: each area with its label,
- * plant icons (only up to ICON_LIMIT plants, so a large area costs one
- * element), carried areas dimmed, and relation markers where areas touch.
+ * plant icons (only up to ICON_LIMIT plants per area and ICON_TOTAL_LIMIT on
+ * the canvas, so a large area costs one element), carried areas dimmed, and
+ * relation markers where areas touch.
  */
 export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
   const { layer, t } = input;
@@ -113,9 +121,13 @@ export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
   const carriedIds = new Set(input.carried.map((a) => a.id));
   const edgeMarkers = edgeMarkersOf(all, input.relations);
 
-  const areas = all.map((area): AreaView => {
-    const plant = knownPlant(input.plantOf(area.plantId));
-    const count = plantCountOf(area, plant, layer);
+  const plants = all.map((area) => knownPlant(input.plantOf(area.plantId)));
+  const counts = all.map((area, i) => plantCountOf(area, plants[i], layer));
+  const drawn = areasWithIcons(counts);
+
+  const areas = all.map((area, i): AreaView => {
+    const plant = plants[i];
+    const count = counts[i];
     const name = input.nameOf(area.plantId);
     const spacingCm = 2 * plant.spacingRadiusCm;
     const dimmed = carriedIds.has(area.id);
@@ -127,7 +139,7 @@ export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
       rects: area.pieces,
       label: count === null ? t('componentDetail.areaSown', { name }) : t('componentDetail.areaCount', { name, count }),
       count,
-      icons: count !== null && count <= ICON_LIMIT ? area.pieces.flatMap((p) => gridPositions(p, spacingCm, layer)) : [],
+      icons: drawn.has(i) ? area.pieces.flatMap((p) => gridPositions(p, spacingCm, layer)) : [],
       iconSizeCm: spacingCm,
       dimmed,
       carriedLabel: dimmed ? input.carriedLabelOf(area) : null,
@@ -141,26 +153,82 @@ export function buildAreaCanvas(input: AreaCanvasInput): AreaCanvasView {
 }
 
 /**
- * The size a resize drag ends at: whole steps of the plant spacing, at least
- * one step, inside the layer's bounding box. Null when that is the piece's
- * current size, so no change is stored (a stored change outdates later seasons).
+ * The indexes of the areas that get one icon per plant: at most ICON_LIMIT
+ * plants each and ICON_TOTAL_LIMIT together; the areas with the most plants
+ * lose their icons first.
+ */
+function areasWithIcons(counts: readonly (number | null)[]): Set<number> {
+  const candidates = counts
+    .map((count, index) => ({ count, index }))
+    .filter((c): c is { count: number; index: number } => c.count !== null && c.count > 0 && c.count <= ICON_LIMIT)
+    .sort((a, b) => a.count - b.count || a.index - b.index);
+  const drawn = new Set<number>();
+  let total = 0;
+  for (const { count, index } of candidates) {
+    if (total + count > ICON_TOTAL_LIMIT) break;
+    total += count;
+    drawn.add(index);
+  }
+  return drawn;
+}
+
+/** The size (px) a plant icon is drawn at, or null when it would be at the floor (too small to draw) */
+export function iconPxFor(iconSizeCm: number, pxPerCm: number): number | null {
+  const px = iconSizeCm * pxPerCm * ICON_FILL;
+  return px <= ICON_MIN_PX ? null : Math.min(ICON_MAX_PX, px);
+}
+
+/**
+ * The size a resize drag ends at: the current size plus whole steps of the
+ * plant spacing (the drag rounded to steps), never below one step and inside
+ * the layer's bounding box. Null when nothing changes, so no change is stored
+ * (a stored change outdates later seasons).
  */
 export function snappedResize(
   piece: AreaPiece,
-  widthCm: number,
-  lengthCm: number,
+  deltaWidthCm: number,
+  deltaLengthCm: number,
   stepCm: number,
   bounds: { readonly widthCm: number; readonly lengthCm: number },
 ): { widthCm: number; lengthCm: number } | null {
-  const snap = (size: number, room: number): number => {
-    const steps = Math.max(1, Math.round(size / stepCm));
-    const maxSteps = Math.max(1, Math.floor(room / stepCm + EPSILON_CM));
-    return Math.min(steps, maxSteps) * stepCm;
+  const snap = (current: number, delta: number, room: number): number => {
+    let steps = Math.round(delta / stepCm);
+    // Not past the layer's edge
+    if (steps > 0) steps = Math.min(steps, Math.max(0, Math.floor((room - current) / stepCm + EPSILON_CM)));
+    // Not below one step (a piece already smaller keeps its size)
+    if (steps < 0) steps = Math.max(steps, -Math.max(0, Math.floor((current - stepCm) / stepCm + EPSILON_CM)));
+    return current + steps * stepCm;
   };
   const snapped = {
-    widthCm: snap(widthCm, bounds.widthCm - piece.xCm),
-    lengthCm: snap(lengthCm, bounds.lengthCm - piece.yCm),
+    widthCm: snap(piece.widthCm, deltaWidthCm, bounds.widthCm - piece.xCm),
+    lengthCm: snap(piece.lengthCm, deltaLengthCm, bounds.lengthCm - piece.yCm),
   };
   const unchanged = Math.abs(snapped.widthCm - piece.widthCm) < EPSILON_CM && Math.abs(snapped.lengthCm - piece.lengthCm) < EPSILON_CM;
   return unchanged ? null : snapped;
+}
+
+/**
+ * Where the resize handle sits (cm in the layer box): the piece's
+ * bottom-right corner; in a circular layer, when that corner is outside the
+ * circle (less than marginCm inside), the first point on the way to the
+ * piece's centre that is inside, else the piece corner nearest the circle's centre.
+ */
+export function resizeHandlePoint(piece: AreaPiece, layer: PlantingArea, marginCm: number): { xCm: number; yCm: number } {
+  const corner = { xCm: piece.xCm + piece.widthCm, yCm: piece.yCm + piece.lengthCm };
+  if (layer.shape === 'rectangle') return corner;
+  const radius = layer.diameterCm / 2;
+  const inside = (p: { xCm: number; yCm: number }): boolean => Math.hypot(p.xCm - radius, p.yCm - radius) <= radius - marginCm + EPSILON_CM;
+  const centre = { xCm: piece.xCm + piece.widthCm / 2, yCm: piece.yCm + piece.lengthCm / 2 };
+  for (const f of [0, 0.25, 0.5, 0.75, 1]) {
+    const point = { xCm: corner.xCm + (centre.xCm - corner.xCm) * f, yCm: corner.yCm + (centre.yCm - corner.yCm) * f };
+    if (inside(point)) return point;
+  }
+  const corners = [
+    { xCm: piece.xCm, yCm: piece.yCm },
+    { xCm: piece.xCm + piece.widthCm, yCm: piece.yCm },
+    { xCm: piece.xCm, yCm: piece.yCm + piece.lengthCm },
+    corner,
+  ];
+  const distance = (p: { xCm: number; yCm: number }): number => Math.hypot(p.xCm - radius, p.yCm - radius);
+  return corners.reduce((best, p) => (distance(p) < distance(best) ? p : best));
 }

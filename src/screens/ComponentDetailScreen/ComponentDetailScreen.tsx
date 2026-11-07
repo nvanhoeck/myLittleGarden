@@ -18,11 +18,11 @@ import { SeasonTabs, TowerLayerTabs, YearBar } from '@/components/molecules';
 import { PlanningButton, Snackbar } from '@/components/atoms';
 import { layerBounds, plantingAreaOf, relationsFromCatalog, seasonContaining } from '@/domain/planning';
 import type { PlantRelations } from '@/domain/planning';
-import type { AreaCanvasView, AreaData, AreaView, ComponentData, Season } from '@/types';
+import type { AreaCanvasView, AreaData, AreaPiece, AreaView, ComponentData, Season } from '@/types';
 import { getTowerLayerDimensions } from '@/domain/component/towerLayerGeometry';
 import { useAiChatStore } from '@/stores/ai/aiChatStore';
 import { CanvasEditActions } from './CanvasEditActions';
-import { buildAreaCanvas, snappedResize } from './areaCanvasViewModel';
+import { buildAreaCanvas, iconPxFor, resizeHandlePoint, snappedResize } from './areaCanvasViewModel';
 import { buildSeasonTabs, defaultSeasonFor, optimizeResultMessage, planningYearRange } from './seasonViewModel';
 import { seasonLabel } from '../shared/seasonLabels';
 import type { Translate } from '../shared/seasonLabels';
@@ -197,18 +197,24 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
     [actions, componentId, year, season],
   );
 
-  // The handle's raw size snapped to the plant spacing, inside the layer; null when nothing would change
+  // The handle's drag snapped to whole plant spacings on top of the current size, inside the layer; null when nothing would change
   const previewResize = useCallback(
-    (area: AreaView, pieceIndex: number, widthCm: number, lengthCm: number) => {
+    (area: AreaView, pieceIndex: number, deltaWidthCm: number, deltaLengthCm: number) => {
       const piece = area.rects[pieceIndex];
-      return piece && layer ? snappedResize(piece, widthCm, lengthCm, area.resizeStepCm, layerBounds(layer)) : null;
+      return piece && layer ? snappedResize(piece, deltaWidthCm, deltaLengthCm, area.resizeStepCm, layerBounds(layer)) : null;
     },
     [layer],
   );
 
+  const handlePointOf = useCallback(
+    (piece: AreaPiece, marginCm: number) =>
+      layer ? resizeHandlePoint(piece, layer, marginCm) : { xCm: piece.xCm + piece.widthCm, yCm: piece.yCm + piece.lengthCm },
+    [layer],
+  );
+
   const handleAreaResize = useCallback(
-    (area: AreaView, pieceIndex: number, widthCm: number, lengthCm: number) => {
-      const size = previewResize(area, pieceIndex, widthCm, lengthCm);
+    (area: AreaView, pieceIndex: number, deltaWidthCm: number, deltaLengthCm: number) => {
+      const size = previewResize(area, pieceIndex, deltaWidthCm, deltaLengthCm);
       if (size !== null) actions.resizeArea(componentId, year, season, area.id, pieceIndex, size.widthCm, size.lengthCm);
     },
     [previewResize, actions, componentId, year, season],
@@ -343,6 +349,8 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           onAreaMove={handleAreaMove}
           onAreaResize={handleAreaResize}
           previewResize={previewResize}
+          handlePointOf={handlePointOf}
+          iconPxOf={iconPxFor}
           onBackgroundPress={handleBackgroundPress}
           onToggleEditMode={handleToggleEditMode}
           onLockAll={handleLockAll}
