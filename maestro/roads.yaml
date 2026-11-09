@@ -1,5 +1,5 @@
 appId: com.mylittlegarden.app
-name: Season planning - roads on a garden box (add, automatic with ring, edit, zoom)
+name: Season planning - roads on a garden box (add, automatic with ring, edit, zoom, remove all)
 ---
 - runFlow: subflows/open_planning.yaml
 - runFlow: subflows/add_plants_to_planning.yaml
@@ -95,3 +95,21 @@ name: Season planning - roads on a garden box (add, automatic with ring, edit, z
 - assertVisible:
     id: "canvas-zoom-level"
     text: "100%"
+
+# Remove all roads: cancel keeps them, confirming removes every road and the button.
+- tapOn:
+    id: "canvas-roads-remove-all"
+- tapOn:
+    text: "Annuleren"
+- assertVisible:
+    id: "season-road-0"
+- tapOn:
+    id: "canvas-roads-remove-all"
+- tapOn:
+    text: "Verwijderen"
+- extendedWaitUntil:
+    notVisible:
+      id: "season-road-0"
+    timeout: 5000
+- assertNotVisible:
+    id: "canvas-roads-remove-all"

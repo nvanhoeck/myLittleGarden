@@ -22,7 +22,7 @@ import {
 } from '@/domain/component';
 import { Planning, frostDayOf, minimumAreaSideOf, optimizeSeason as optimizeSeasonOf, plantingAreasOf, plantingCalendarFor } from '@/domain/planning';
 import type { AreaShare, LayerBounds, PlantingCalendar, Season } from '@/domain/planning';
-import { addRoadTo, placeAutomaticRoadsIn, removeRoadFrom, setAllRoadsLockedIn, setRoadWidthIn, toggleRoadLockIn } from '@/domain/roads';
+import { addRoadTo, placeAutomaticRoadsIn, removeAllRoadsFrom, removeRoadFrom,setAllRoadsLockedIn, setRoadWidthIn, toggleRoadLockIn } from '@/domain/roads';
 import type { Border, RoadContext } from '@/domain/roads';
 import { generateId } from '@/utils/idGenerator';
 import {
@@ -106,6 +106,8 @@ interface ComponentState {
   setRoadWidth: (componentId: string, roadId: string, widthCm: number) => void;
   toggleRoadLock: (componentId: string, roadId: string) => void;
   removeRoad: (componentId: string, roadId: string) => void;
+  /** Removes every road of the box, locked ones too */
+  removeAllRoads: (componentId: string) => void;
   /**
    * After a new frost date: placed plantings are frozen with the calendar of the
    * previous frost date, then ratios move to the plants' new start seasons
@@ -391,6 +393,10 @@ export const useComponentStore = create<ComponentState>()(
         set((state) => ({ components: withBoxChange(state.components, componentId, (box) => removeRoadFrom(box, roadId)) }));
       },
 
+      removeAllRoads: (componentId) => {
+        set((state) => ({ components: withBoxChange(state.components, componentId, removeAllRoadsFrom) }));
+      },
+
       reconcilePlannings: (previousFrost) => {
         set((state) => ({
           components: state.components.map((comp) => {
@@ -495,6 +501,7 @@ export function useComponentActions() {
       setRoadWidth: state.setRoadWidth,
       toggleRoadLock: state.toggleRoadLock,
       removeRoad: state.removeRoad,
+      removeAllRoads: state.removeAllRoads,
     }))
   );
 }

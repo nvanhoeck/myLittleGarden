@@ -4,6 +4,7 @@ import {
   addRoadTo,
   innerSizeOf,
   placeAutomaticRoadsIn,
+  removeAllRoadsFrom,
   removeRoadFrom,
   ringFitsIn,
   setAllRoadsLockedIn,
@@ -187,6 +188,18 @@ describe('road edits', () => {
     assert.equal(locked.roads?.[0].locked, true);
     assert.equal(toggleRoadLockIn(locked, 'r').roads?.[0].locked, false);
     assert.deepEqual(removeRoadFrom(locked, 'r').roads, []);
+  });
+
+  test('remove all removes every road, locked ones too, and keeps the areas', () => {
+    const box = { ...withRoad(), roads: [...withRoad().roads!, { id: 's', xCm: 0, yCm: 0, widthCm: 10, lengthCm: 100, orientation: 'vertical' as const, locked: true }] };
+    const cleared = removeAllRoadsFrom(box);
+    assert.deepEqual(cleared.roads, []);
+    assert.equal(cleared.plannings, box.plannings);
+  });
+
+  test('remove all on a box without roads keeps the same box', () => {
+    const box = makeBox();
+    assert.equal(removeAllRoadsFrom(box), box);
   });
 
   test('set all locked sets every road', () => {

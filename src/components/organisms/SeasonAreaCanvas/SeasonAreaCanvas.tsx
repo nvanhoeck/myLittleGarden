@@ -86,6 +86,8 @@ interface SeasonAreaCanvasProps {
   onRoadSlotPress?: (slot: RoadSlotView) => void;
   /** Edit mode: "🛤 Paden" was tapped; the button is shown only when this is given (garden box only) */
   onAutomaticRoads?: () => void;
+  /** Edit mode: "Alle paden weg" was tapped; the button is shown only when this is given and there are roads (garden box only) */
+  onRemoveAllRoads?: () => void;
 }
 
 function boundsOf(layer: LayerShape): { widthCm: number; lengthCm: number } {
@@ -470,6 +472,7 @@ export function SeasonAreaCanvas({
   onRoadPress,
   onRoadSlotPress,
   onAutomaticRoads,
+  onRemoveAllRoads,
 }: SeasonAreaCanvasProps): React.JSX.Element {
   const { t } = useTranslation();
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -603,6 +606,9 @@ export function SeasonAreaCanvas({
         <ToolbarButton label={`🔓 ${t('componentDetail.unlockAll')}`} onPress={onUnlockAll} testID="canvas-unlock-all" />
         {isEditMode && onAutomaticRoads !== undefined && (
           <ToolbarButton label={`🛤 ${t('componentDetail.roadsAuto')}`} onPress={onAutomaticRoads} testID="canvas-roads-auto" />
+        )}
+        {isEditMode && onRemoveAllRoads !== undefined && view.roads.length > 0 && (
+          <ToolbarButton label={`🗑 ${t('componentDetail.roadsRemoveAll')}`} onPress={onRemoveAllRoads} testID="canvas-roads-remove-all" />
         )}
         <ToolbarButton
           label={isEditMode ? `💾 ${t('componentDetail.editDone')}` : `✏️ ${t('componentDetail.edit')}`}
