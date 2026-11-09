@@ -16,6 +16,7 @@ export {
   placeAutomaticRoadsIn,
   ROAD_MAX_WIDTH_CM,
   ROAD_MIN_WIDTH_CM,
+  removeAllRoadsFrom,
   removeRoadFrom,
   ringFitsIn,
   setAllRoadsLockedIn,

@@ -135,6 +135,12 @@ export function removeRoadFrom(box: GardenBoxData, roadId: string): GardenBoxDat
   return { ...box, roads: roadsOf(box).filter((road) => road.id !== roadId) };
 }
 
+/** Removes every road, locked ones too; the areas do not grow back by themselves */
+export function removeAllRoadsFrom(box: GardenBoxData): GardenBoxData {
+  if (roadsOf(box).length === 0) return box;
+  return { ...box, roads: [] };
+}
+
 /** Locks or unlocks every road of the box */
 export function setAllRoadsLockedIn(box: GardenBoxData, locked: boolean): GardenBoxData {
   if (roadsOf(box).length === 0) return box;

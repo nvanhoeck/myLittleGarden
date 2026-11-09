@@ -76,6 +76,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
       setRoadWidth: state.setRoadWidth,
       toggleRoadLock: state.toggleRoadLock,
       removeRoad: state.removeRoad,
+      removeAllRoads: state.removeAllRoads,
     })),
   );
 
@@ -322,6 +323,13 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
     );
   }, [editedRoad, actions, componentId, t]);
 
+  const handleRemoveAllRoads = useCallback(() => {
+    Alert.alert(t('componentDetail.roadsRemoveAllTitle'), t('componentDetail.roadsRemoveAllMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => actions.removeAllRoads(componentId) },
+    ]);
+  }, [actions, componentId, t]);
+
   // A road that is gone (removed elsewhere) closes its dialog
   useEffect(() => {
     if (roadDialog?.kind === 'edit' && editedRoad === undefined) setRoadDialog(null);
@@ -449,6 +457,7 @@ export function ComponentDetailScreen({ navigation, route }: ComponentDetailScre
           onRoadPress={hasRoads ? handleRoadPress : undefined}
           onRoadSlotPress={hasRoads ? handleRoadSlotPress : undefined}
           onAutomaticRoads={hasRoads ? handleAutomaticRoads : undefined}
+          onRemoveAllRoads={hasRoads ? handleRemoveAllRoads : undefined}
         />
         {!hasAreas && (
           <View pointerEvents="none" className="absolute top-3 left-4 right-4 items-center">
